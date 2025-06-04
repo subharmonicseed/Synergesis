@@ -12,7 +12,7 @@ This bundle is a **clean, minimal set** of files you can drop in place of `syndu
 ## quick start
 
 ```bash
-pip install numpy pandas qiskit spacy fastapi uvicorn
+pip install -r requirements.txt
 python SynergesisCore_DeepSeek_Pro_Complete.py
 ```
 
