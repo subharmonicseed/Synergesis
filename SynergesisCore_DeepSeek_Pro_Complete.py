@@ -15,6 +15,7 @@ import spacy
 from fastapi import FastAPI, HTTPException
 import requests
 from typing import Dict, Any
+import uvicorn
 
 # Chargement du modèle NLP avancé
 try:
@@ -131,3 +132,42 @@ class SynergesisAPI:
                 "clusters": self.core.memory.clusterer.performance_log[-1],
                 "patterns_count": len(self.core.memory.patterns)
             }
+
+
+# --- Minimal runnable stub -------------------------------------------------
+class _Memory:
+    """Lightweight memory structure used by the demo core."""
+
+    def __init__(self):
+        self.patterns = []
+        self.clusterer = AutoTuningQuantumClustererPro()
+
+
+class _Core:
+    """Very small placeholder core to make the API runnable."""
+
+    def __init__(self):
+        self.memory = _Memory()
+        self.validator = AdvancedContextValidator()
+
+    def process_input(self, quantum_state, context):
+        self.validator.analyze_context(context)
+        pattern_id = str(uuid.uuid4())
+        self.memory.patterns.append(pattern_id)
+        if not self.memory.clusterer.performance_log:
+            self.memory.clusterer.performance_log.append({"timestamp": datetime.utcnow().isoformat()})
+        return pattern_id
+
+
+def create_app():
+    """Instantiate the stub core and expose the FastAPI app."""
+    core = _Core()
+    api = SynergesisAPI(core)
+    return api.app
+
+
+app = create_app()
+
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)
