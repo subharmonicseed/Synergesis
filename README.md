@@ -13,10 +13,10 @@ This bundle is a **clean, minimal set** of files you can drop in place of `syndu
 
 ```bash
 pip install -r requirements.txt
-python SynergesisCore_DeepSeek_Pro_Complete.py
+uvicorn SynergesisCore_DeepSeek_Pro_Complete:SynergesisAPI(your_core).app
 ```
 
-Once it says *"Uvicorn running..."* you can query `http://127.0.0.1:8000/docs` to test.
+When Uvicorn starts you can browse to `http://127.0.0.1:8000/docs` to test the API.
 
 ---
 Need the full dashboard or glyph modules? Just ask and I'll package a heavier archive.
