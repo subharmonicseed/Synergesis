@@ -12,7 +12,7 @@ import uuid
 from scipy.stats import entropy
 import spacy
 from fastapi import FastAPI, HTTPException
-from typing import Dict, Any
+from typing import Any, Dict
 import uvicorn
 
 # Chargement du modèle NLP avancé
@@ -44,7 +44,7 @@ class AdvancedContextValidator:
         return {
             "semantic_embedding": semantic_vector,
             "ethical_score": ethical_score,
-            "energy_impact": self.energy_model.calculate(text)
+            "energy_impact": self.energy_model.calculate(doc.vector),
         }
 
     def _calculate_ethical_score(self, doc) -> float:
@@ -56,26 +56,26 @@ class AdvancedContextValidator:
 
 # Nouveau système de métriques énergétiques
 class QuantumEnergyCalculator:
-    def __init__(self):
-        self.base_consumption = 1.0  # kWh par opération
-        
-    def calculate(self, state: np.ndarray) -> float:
+    def __init__(self) -> None:
+        self.base_consumption = 1.0  # kWh per op
+
+    def calculate(self, state: np.ndarray | Statevector) -> float:
         if isinstance(state, Statevector):
-            complexity = np.linalg.norm(state.data)
+            vec = state.data
         else:
-            complexity = np.sqrt(np.sum(np.abs(state)**2))
-            
-        return self.base_consumption * complexity * (1 + entropy(np.abs(state)))
+            vec = state
+        complexity = np.linalg.norm(vec)
+        return self.base_consumption * complexity * (1 + entropy(np.abs(vec)))
 
 # Clustering Auto-Adaptatif Pro
 class AutoTuningQuantumClustererPro:
-    def __init__(self, min_clusters=3, max_clusters=20, eval_interval=100):
+    def __init__(self, min_clusters: int = 3, max_clusters: int = 20, eval_interval: int = 100) -> None:
         self.min_clusters = min_clusters
         self.max_clusters = max_clusters
         self.eval_interval = eval_interval
         self.kmeans = MiniBatchKMeans(n_clusters=min_clusters)
         self.pca = IncrementalPCA(n_components=3)
-        self.performance_log = []
+        self.performance_log: list[dict[str, Any]] = []
         
     def update_clusters(self, patterns):
         if len(patterns) < self.min_clusters * 5:
@@ -137,18 +137,18 @@ class _Memory:
     """Lightweight memory structure used by the demo core."""
 
     def __init__(self):
-        self.patterns = []
+        self.patterns: list[str] = []
         self.clusterer = AutoTuningQuantumClustererPro()
 
 
 class _Core:
     """Very small placeholder core to make the API runnable."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.memory = _Memory()
         self.validator = AdvancedContextValidator()
 
-    def process_input(self, quantum_state, context):
+    def process_input(self, quantum_state: np.ndarray, context: str = "") -> str:
         self.validator.analyze_context(context)
         pattern_id = str(uuid.uuid4())
         self.memory.patterns.append(pattern_id)
