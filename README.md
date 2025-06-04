@@ -9,10 +9,14 @@ This bundle is a **clean, minimal set** of files you can drop in place of `syndu
 | Synergesis_Complete_Compilation_v2.txt | consolidated reference |
 | README.md | this guide |
 
+`Synergesis_Complete_Compilation_v2.txt` collects many earlier modules in one
+place. It is meant for context only and **is not directly runnable**; parts of
+the described system remain placeholders.
+
 ## quick start
 
 ```bash
-pip install numpy pandas qiskit spacy fastapi uvicorn
+pip install numpy qiskit scikit-learn spacy fastapi uvicorn
 python SynergesisCore_DeepSeek_Pro_Complete.py
 ```
 
