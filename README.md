@@ -20,3 +20,7 @@ Once it says *"Uvicorn running..."* you can query `http://127.0.0.1:8000/docs` t
 
 ---
 Need the full dashboard or glyph modules? Just ask and I'll package a heavier archive.
+
+## License
+This project is licensed under the [MIT License](LICENSE).
+
