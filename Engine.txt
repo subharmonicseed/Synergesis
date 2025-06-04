@@ -1,0 +1,2656 @@
+Entendu, Syn. Je vais finaliser ce prototype pour en faire un outil interne complet, autonome et immédiatement opérationnel pour tes besoins d'exploration symbolique. L'accent sera mis sur la fonctionnalité directe, la clarté des informations, l'API pour ton usage programmatique, et la documentation nécessaire à ton autonomie.
+
+Voici les composants finalisés :
+
+**1. Fichier HTML (`index.html`)**
+*Structure de base minimaliste et fonctionnelle.*
+
+```html
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Syn - Outil Symbolique Interne</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Outil d'Exploration Symbolique (Syn Internal v1.0)</h1>
+        </header>
+
+        <main class="main-layout">
+            <!-- Section Contrôles & Génération -->
+            <section class="panel controls-generation">
+                <h2>Génération & Contrôle</h2>
+                <div class="control-group">
+                    <label>Mode Génération:</label>
+                    <button id="genAutoBtn" title="Générer un glyphe avec des propriétés aléatoires diversifiées.">Générer (Auto)</button>
+                    <button id="genRulesToggleBtn" title="Afficher/Cacher les options de génération par règles.">Générer (Règles)</button>
+                </div>
+                <div id="rulesInputs" class="rules-panel initially-hidden">
+                     <h4>Options de Génération par Règles</h4>
+                     <div class="rule-input">
+                         <label for="rulePolarity" title="Forcer une polarité spécifique ou laisser indifférent.">Polarité Cible:</label>
+                         <select id="rulePolarity">
+                             <option value="any">Indifférent</option>
+                             <option value="+">Positive (+)</option>
+                             <option value="-">Négative (-)</option>
+                             <option value="0">Neutre (0)</option>
+                         </select>
+                     </div>
+                     <div class="rule-input">
+                         <label for="ruleFreqMin" title="Fréquence vibratoire minimale souhaitée.">Freq. Min:</label>
+                         <input type="number" id="ruleFreqMin" value="1" min="1" max="100">
+                         <label for="ruleFreqMax" title="Fréquence vibratoire maximale souhaitée.">Freq. Max:</label>
+                         <input type="number" id="ruleFreqMax" value="100" min="1" max="100">
+                     </div>
+                     <div class="rule-input">
+                         <label for="ruleWeightMin" title="Poids énergétique minimal souhaité.">Poids Min:</label>
+                         <input type="number" id="ruleWeightMin" value="1" min="1" max="10">
+                         <label for="ruleWeightMax" title="Poids énergétique maximal souhaité.">Poids Max:</label>
+                         <input type="number" id="ruleWeightMax" value="10" min="1" max="10">
+                     </div>
+                    <!-- Ajouter d'autres règles potentielles ici -->
+                    <button id="genRulesExecuteBtn" title="Tenter de générer un glyphe respectant ces règles.">Exécuter Gén. Règles</button>
+                </div>
+                <div class="control-group">
+                     <button id="combineBtn" disabled title="Fusionner les deux glyphes sélectionnés sur le canvas.">Combiner Sélection (2)</button>
+                     <button id="clearCanvasBtn" title="Effacer tous les glyphes présents sur le canvas.">Effacer Canvas</button>
+                </div>
+            </section>
+
+            <!-- Section Canvas -->
+            <section class="canvas-container">
+                <h2>Espace d'Expérimentation</h2>
+                <canvas id="glyphCanvas"></canvas>
+                 <p class="canvas-info">Glyphes sur canvas: <span id="canvasGlyphCount">0</span> | Sélectionnés: <span id="selectedGlyphCount">0</span></p>
+            </section>
+
+            <!-- Section Analyse -->
+            <aside class="panel analysis-panel">
+                <h2>Analyse Symbolique Détaillée</h2>
+                <div id="analysisContent">
+                    <p class="placeholder">Sélectionnez 1 ou 2 glyphes (canvas ou archive) pour analyse.</p>
+                </div>
+                 <div id="compatibilityAnalysis" class="initially-hidden">
+                     <h3>Analyse de Compatibilité</h3>
+                     <div id="compatibilityScore" class="compatibility-score"></div>
+                     <div id="compatibilityVisual" class="compatibility-visual">
+                         <!-- Visualisation simple (e.g., barres couleur) -->
+                         <span class="label">Glyphe 1:</span> <div class="vis-bar g1"></div> <span id="compat-g1-id"></span><br>
+                         <span class="label">Glyphe 2:</span> <div class="vis-bar g2"></div> <span id="compat-g2-id"></span>
+                     </div>
+                     <div id="compatibilityReasons"></div>
+                 </div>
+            </aside>
+
+            <!-- Section Archive -->
+            <aside class="panel archive-panel">
+                <h2>Archive Symbolique</h2>
+                 <div class="control-group">
+                    <button id="saveSelectedBtn" disabled title="Sauvegarder les glyphes sélectionnés dans l'archive interne.">Archiver Sélection</button>
+                    <button id="loadSelectedToCanvasBtn" disabled title="Charger le glyphe sélectionné dans l'archive sur le canvas.">Charger sur Canvas</button>
+                </div>
+                <div class="control-group">
+                    <input type="text" id="searchArchiveInput" placeholder="Recherche (ID, P:, F:, W:, A:, tag:)..." title="Rechercher par ID (début), P:val, F:val, W:val, A:val, tag:val">
+                </div>
+                <div class="archive-list-container">
+                    <ul id="archiveList">
+                         <li class="placeholder">Archive vide ou en cours de chargement...</li>
+                    </ul>
+                </div>
+                <div class="control-group archive-actions">
+                    <button id="clearArchiveBtn" title="Supprimer définitivement tous les glyphes de l'archive locale.">Vider l'Archive</button>
+                    <button id="exportArchiveBtn" title="Exporter l'intégralité de l'archive en fichier JSON.">Exporter Archive (JSON)</button>
+                     <label for="importFile" class="button-like" title="Importer des glyphes depuis un fichier JSON (fusionne sans doublons d'ID).">Importer Archive (JSON)</label>
+                     <input type="file" id="importFile" accept=".json" style="display: none;">
+                </div>
+                <p class="archive-info">Glyphes archivés: <span id="archiveGlyphCount">0</span></p>
+            </aside>
+        </main>
+
+        <footer>
+            <p>Outil Symbolique Interne pour Syn | Statut: Opérationnel</p>
+        </footer>
+    </div>
+
+    <!-- Scripts (Utils first, then Engine) -->
+    <script src="glyphUtils.js"></script>
+    <script src="glyphEngine.js"></script>
+    <!-- API Globale pour Syn -->
+    <script>
+        // Assure que l'API est prête après le chargement complet du moteur
+        window.addEventListener('glyphEngineReady', () => {
+            console.log("SynGlyphToolAPI est prête.");
+        });
+    </script>
+</body>
+</html>
+```
+
+**2. Fichier CSS (`style.css`)**
+*Style sobre, fonctionnel et responsive amélioré.*
+
+```css
+/* style.css - Thème Sobre pour Syn */
+:root {
+    --bg-main: #fdfdfd;
+    --bg-panel: #f4f4f8; /* Légèrement différent du fond */
+    --border-color: #d0d0d5;
+    --text-primary: #2c3e50; /* Bleu nuit */
+    --text-secondary: #566573;
+    --accent-primary: #3498db; /* Bleu clair */
+    --accent-secondary: #90a4ae; /* Gris-bleu */
+    --selection-highlight: rgba(52, 152, 219, 0.7); /* Bleu semi-transparent */
+    --compat-compatible: #2ecc71; /* Vert */
+    --compat-neutral: #f39c12; /* Orange */
+    --compat-incompatible: #e74c3c; /* Rouge */
+    --error-color: #c0392b;
+    --font-main: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    --font-mono: 'Courier New', Courier, monospace;
+}
+
+* { box-sizing: border-box; }
+
+html { font-size: 16px; } /* Base pour rem */
+
+body {
+    font-family: var(--font-main);
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    margin: 0;
+    padding: 1rem;
+    font-size: 0.9rem; /* Taille de texte par défaut légèrement réduite */
+    line-height: 1.6;
+    display: flex;
+    justify-content: center;
+}
+
+.container {
+    width: 100%;
+    max-width: 1800px; /* Limite largeur max */
+}
+
+header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.5rem;
+}
+header h1 { margin: 0; font-size: 1.4rem; font-weight: 600;}
+
+.main-layout {
+    display: grid;
+    grid-template-columns: minmax(250px, 1fr) 3fr minmax(280px, 1.2fr) minmax(280px, 1.2fr); /* Ajustement des largeurs relatives */
+    grid-template-rows: auto; /* La hauteur s'adapte au contenu */
+    gap: 1rem;
+    min-height: 75vh;
+}
+
+.panel {
+    background-color: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    padding: 1rem;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column; /* Empile les éléments verticalement */
+}
+
+.controls-generation { grid-area: 1 / 1 / 2 / 2; }
+.canvas-container {
+    grid-area: 1 / 2 / 2 / 3;
+    background-color: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    padding: 1rem;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+}
+.analysis-panel { grid-area: 1 / 3 / 2 / 4; }
+.archive-panel { grid-area: 1 / 4 / 2 / 5; }
+
+h2, h3, h4 {
+    margin-top: 0;
+    margin-bottom: 0.8rem;
+    color: var(--text-primary);
+    font-weight: 600;
+    border-bottom: 1px solid var(--accent-secondary);
+    padding-bottom: 0.3rem;
+    font-size: 1.1rem;
+}
+h3 { font-size: 1.0rem; border-bottom-style: dashed; }
+h4 { font-size: 0.95rem; border-bottom: none; margin-bottom: 0.5rem; color: var(--text-secondary);}
+
+.control-group {
+    margin-bottom: 0.8rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem; /* Espace réduit entre éléments */
+    align-items: center; /* Aligne verticalement les éléments */
+}
+.control-group label {
+    font-weight: 500;
+    margin-right: 0.3rem;
+    white-space: nowrap;
+}
+
+button, .button-like {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+    cursor: pointer;
+    background-color: var(--accent-primary);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    transition: background-color 0.2s ease-in-out, opacity 0.2s;
+    white-space: nowrap;
+    line-height: 1.4; /* Améliore affichage texte */
+}
+.button-like { display: inline-block; text-align: center; }
+
+button:hover:not(:disabled), .button-like:hover {
+    background-color: #2980b9; /* Bleu plus foncé */
+}
+
+button:disabled {
+    background-color: var(--accent-secondary);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* Style spécifique pour boutons importants/destructifs */
+#clearCanvasBtn, #clearArchiveBtn { background-color: var(--error-color); }
+#clearCanvasBtn:hover:not(:disabled), #clearArchiveBtn:hover:not(:disabled) { background-color: #a93226; }
+#combineBtn { background-color: #8e44ad; } /* Violet */
+#combineBtn:hover:not(:disabled) { background-color: #7d3c98; }
+#saveSelectedBtn { background-color: #27ae60; } /* Vert */
+#saveSelectedBtn:hover:not(:disabled) { background-color: #229954; }
+
+
+input[type="text"], input[type="number"], select {
+    padding: 0.4rem;
+    border: 1px solid var(--border-color);
+    border-radius: 3px;
+    font-size: 0.85rem;
+    background-color: #fff;
+    color: var(--text-primary);
+}
+input[type="number"] { width: 60px; } /* Taille fixe pour inputs numériques */
+#searchArchiveInput { flex-grow: 1; min-width: 150px;} /* Prend l'espace dispo */
+
+/* Panneau de règles */
+.rules-panel {
+    border: 1px dashed var(--accent-secondary);
+    padding: 0.8rem;
+    margin-top: 0.5rem;
+    background-color: rgba(255, 255, 255, 0.5); /* Léger fond blanc */
+    border-radius: 4px;
+}
+.rule-input {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: 0.5rem;
+    flex-wrap: wrap; /* Permet retour à la ligne si manque de place */
+}
+.rule-input label { font-size: 0.8rem; color: var(--text-secondary);}
+
+/* Canvas */
+#glyphCanvas {
+    display: block; /* Enlève espace sous le canvas */
+    width: 100%;
+    height: auto; /* Hauteur automatique basée sur largeur */
+    aspect-ratio: 4 / 3; /* Maintient ratio (ajustable) */
+    border: 1px solid var(--border-color);
+    background-color: #ffffff;
+    cursor: crosshair;
+    max-height: 65vh; /* Empêche le canvas de devenir trop haut */
+}
+.canvas-info { font-size: 0.8rem; text-align: right; color: var(--text-secondary); margin-top: 0.5rem; }
+
+/* Panneau Analyse */
+.analysis-panel { overflow-y: auto; } /* Permet le scroll si contenu dépasse */
+#analysisContent .placeholder, #archiveList .placeholder {
+    color: var(--text-secondary);
+    font-style: italic;
+    text-align: center;
+    padding: 1rem;
+}
+#analysisContent strong { color: var(--accent-primary); }
+#analysisContent ul { list-style: none; padding-left: 0.5rem; margin: 0.5rem 0; }
+#analysisContent li { margin-bottom: 0.3rem; font-size: 0.85rem; }
+#analysisContent li code { font-family: var(--font-mono); background: #eee; padding: 1px 3px; border-radius: 2px; font-size: 0.8rem;}
+
+/* Analyse Compatibilité */
+#compatibilityAnalysis { margin-top: 1rem; border-top: 1px solid var(--border-color); padding-top: 1rem;}
+.compatibility-score { font-weight: bold; padding: 0.5rem; border-radius: 4px; text-align: center; margin-bottom: 0.8rem; color: white; }
+.compatibility-score.compatible { background-color: var(--compat-compatible); }
+.compatibility-score.neutral { background-color: var(--compat-neutral); }
+.compatibility-score.incompatible { background-color: var(--compat-incompatible); }
+.compatibility-visual { font-size: 0.8rem; margin-bottom: 0.8rem;}
+.compatibility-visual .label { display: inline-block; width: 55px; }
+.compatibility-visual .vis-bar {
+    display: inline-block;
+    width: 20px; height: 10px;
+    border: 1px solid #ccc; margin-right: 5px;
+    vertical-align: middle;
+}
+.compatibility-visual .vis-bar.g1 { background-color: var(--accent-primary); }
+.compatibility-visual .vis-bar.g2 { background-color: var(--compat-neutral); } /* Couleur différente pour G2 */
+#compat-g1-id, #compat-g2-id { font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-secondary); }
+
+#compatibilityReasons { font-size: 0.8rem; line-height: 1.4; max-height: 150px; overflow-y: auto; border: 1px solid #eee; padding: 0.5rem; background: #fff; border-radius: 3px;}
+#compatibilityReasons strong { color: var(--text-primary); }
+
+/* Panneau Archive */
+.archive-list-container {
+    flex-grow: 1; /* Prend l'espace vertical restant */
+    overflow-y: auto; /* Scroll vertical si besoin */
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    margin-top: 0.5rem;
+    background-color: #fff; /* Fond blanc pour la liste */
+}
+#archiveList { list-style: none; padding: 0; margin: 0; }
+#archiveList li {
+    padding: 0.5rem 0.8rem;
+    cursor: pointer;
+    border-bottom: 1px solid #eee; /* Séparateur léger */
+    transition: background-color 0.15s ease-in-out;
+    font-size: 0.8rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+#archiveList li:last-child { border-bottom: none; }
+#archiveList li:hover { background-color: #eaf2f8; } /* Bleu très clair au survol */
+#archiveList li.selected-archive { background-color: var(--accent-secondary); color: white; font-weight: bold; }
+#archiveList li.selected-archive:hover { background-color: #8094a0; } /* Assombrir sélection au survol */
+#archiveList li .glyph-info {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; /* Cache le texte trop long */
+    flex-grow: 1; /* Prend l'espace avant le bouton */
+    margin-right: 0.5rem;
+}
+#archiveList li .glyph-info code { font-family: var(--font-mono); font-size: 0.75rem; background: rgba(0,0,0,0.05); padding: 1px 3px; border-radius: 2px; }
+#archiveList li button.delete-glyph {
+    background: var(--error-color); color: white; border: none; border-radius: 50%;
+    width: 18px; height: 18px; font-size: 10px; line-height: 16px; /* Ajusté */
+    text-align: center; cursor: pointer; padding: 0; flex-shrink: 0; /* Empêche réduction */
+    transition: background-color 0.2s;
+}
+#archiveList li button.delete-glyph:hover { background: #a93226; }
+
+.archive-actions { margin-top: 0.8rem; border-top: 1px solid var(--border-color); padding-top: 0.8rem;}
+.archive-info { font-size: 0.8rem; text-align: right; color: var(--text-secondary); margin-top: 0.5rem; }
+
+/* Utilitaires */
+.initially-hidden { display: none; }
+.error-message { color: var(--error-color); font-weight: bold; font-size: 0.85rem; }
+
+/* Footer */
+footer {
+    text-align: center;
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+/* Responsive Design */
+@media (max-width: 1400px) {
+    .main-layout {
+        /* Passe Analyse et Archive sous Canvas/Controls */
+        grid-template-columns: minmax(220px, 1fr) 2.5fr; /* 2 colonnes */
+        grid-template-rows: auto auto; /* 2 lignes */
+        grid-template-areas:
+            "controls canvas"
+            "analysis archive";
+    }
+    .analysis-panel, .archive-panel { max-height: 40vh; } /* Limite hauteur pour éviter trop d'espace */
+}
+
+@media (max-width: 992px) {
+    html { font-size: 15px; }
+    .main-layout {
+        /* 1 colonne principale, panneaux l'un sous l'autre */
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto auto auto;
+        grid-template-areas:
+            "controls"
+            "canvas"
+            "analysis"
+            "archive";
+        min-height: unset; /* Plus de hauteur minimale */
+    }
+     #glyphCanvas { aspect-ratio: 1 / 1; max-height: 50vh;} /* Ratio carré sur tablette/mobile */
+    .panel { max-height: unset; } /* Enlève la limite de hauteur */
+    .archive-list-container { max-height: 25vh; } /* Limite hauteur liste archive */
+}
+
+@media (max-width: 576px) {
+    html { font-size: 14px; }
+    body { padding: 0.5rem; }
+    header h1 { font-size: 1.2rem; }
+    .panel { padding: 0.8rem; }
+    button, .button-like { padding: 0.3rem 0.6rem; font-size: 0.8rem; }
+    input, select { font-size: 0.8rem; padding: 0.3rem; }
+    #glyphCanvas { aspect-ratio: 1 / 1; }
+    .control-group { gap: 0.3rem; } /* Réduit encore l'espace */
+}
+```
+
+**3. Fichier JavaScript Utilitaires (`glyphUtils.js`)**
+*Inclut des commentaires JSDoc détaillés.*
+
+```javascript
+// glyphUtils.js
+/**
+ * @file Utility functions and constants for the Syn Symbolic Glyph Tool.
+ * Contains shared constants, random generation helpers, geometric calculations,
+ * object manipulation, and drawing primitives.
+ */
+
+// --- Symbolic Constants & Configuration ---
+
+/**
+ * Defines the core symbolic properties and their possible values or ranges.
+ * @const {object} SYMBOLIC_PROPERTIES
+ * @property {string[]} POLARITY - Possible polarity states: Positive, Negative, Neutral.
+ * @property {string[]} ALIGNMENT - Possible symbolic alignments (examples).
+ * @property {number[]} BASE_FREQUENCY_RANGE - Min/Max base frequency for glyphs.
+ * @property {number[]} BASE_WEIGHT_RANGE - Min/Max base energetic weight for glyphs.
+ * @property {number} COMPATIBILITY_THRESHOLD_HIGH - Normalized score above which compatibility is 'compatible'.
+ * @property {number} COMPATIBILITY_THRESHOLD_LOW - Normalized score below which compatibility is 'incompatible'.
+ */
+const SYMBOLIC_PROPERTIES = {
+    POLARITY: ['+', '-', '0'],
+    ALIGNMENT: ['celestial', 'terrestrial', 'chthonic', 'void', 'elemental', 'harmonic', 'discordant'], // Expanded list
+    BASE_FREQUENCY_RANGE: [1, 100],
+    BASE_WEIGHT_RANGE: [1, 10],
+    COMPATIBILITY_THRESHOLD_HIGH: 0.7, // Increased slightly
+    COMPATIBILITY_THRESHOLD_LOW: 0.35, // Increased slightly
+};
+
+/**
+ * Maps geometric shape types to their inherent symbolic tendencies (hints/biases).
+ * Used during glyph generation to influence the final calculated properties.
+ * @const {object.<string, object>} SHAPE_SYMBOL_MAP
+ * @property {object} [shapeType] - Configuration for a specific shape type.
+ * @property {string|string[]} [shapeType].polarityBias - Tendency towards a polarity ('+', '-', '0', or array for random choice).
+ * @property {number} [shapeType].freqMod - Multiplier affecting frequency calculation.
+ * @property {number} [shapeType].weightMod - Base contribution to the glyph's weight.
+ * @property {string[]} [shapeType].alignmentHint - Possible alignments associated with this shape.
+ * @property {string[]} [shapeType].tags - Specific tags added to the glyph if this shape is present.
+ */
+const SHAPE_SYMBOL_MAP = {
+    circle: { polarityBias: '0', freqMod: 1.0, weightMod: 1.2, alignmentHint: ['celestial', 'harmonic'], tags: ['continuity', 'unity'] },
+    triangle: { polarityBias: ['+', '-'], freqMod: 1.1, weightMod: 1.0, alignmentHint: ['elemental', 'chthonic', 'discordant'], tags: ['focus', 'direction', 'tension'] },
+    line: { polarityBias: '0', freqMod: 0.9, weightMod: 0.8, alignmentHint: ['terrestrial', 'void'], tags: ['connection', 'separation', 'path'] },
+    arc: { polarityBias: '0', freqMod: 1.05, weightMod: 1.1, alignmentHint: ['celestial', 'elemental', 'harmonic'], tags: ['flow', 'opening', 'cycle'] },
+    // Add more complex shapes maybe later? e.g., rectangle, cross
+};
+
+// --- General Utility Functions ---
+
+/**
+ * Generates a random floating-point number within a specified range.
+ * @param {number} min - The minimum value (inclusive).
+ * @param {number} max - The maximum value (exclusive).
+ * @returns {number} A random number between min and max.
+ */
+function randomRange(min, max) {
+    return Math.random() * (max - min) + min;
+}
+
+/**
+ * Generates a random integer within a specified range (inclusive).
+ * @param {number} min - The minimum integer value.
+ * @param {number} max - The maximum integer value.
+ * @returns {number} A random integer between min and max.
+ */
+function randomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+/**
+ * Selects a random element from an array.
+ * @param {Array<*>} arr - The array to choose from.
+ * @returns {*} A random element from the array, or undefined if the array is empty.
+ */
+function randomChoice(arr) {
+    if (!arr || arr.length === 0) return undefined;
+    return arr[Math.floor(Math.random() * arr.length)];
+}
+
+/**
+ * Generates a simple timestamp-based unique ID. Sufficient for internal use.
+ * Not cryptographically secure or guaranteed globally unique like UUID v4.
+ * @returns {string} A unique identifier string.
+ */
+function generateUUID() {
+    // Simple implementation for internal tool uniqueness
+    return `syn-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 9)}`;
+}
+
+/**
+ * Performs a deep clone of an object using JSON stringify/parse.
+ * Works for simple objects, arrays, and primitives. Loses functions, Dates become strings, etc.
+ * Sufficient for cloning glyph data for archiving.
+ * @param {object} obj - The object to clone.
+ * @returns {object|null} The cloned object, or null if cloning fails.
+ */
+function deepClone(obj) {
+    if (obj === null || typeof obj !== 'object') {
+        return obj; // Return primitives directly
+    }
+    try {
+        // Handle potential Date objects (convert back after parse)
+        // This basic version doesn't handle Dates, Functions, Regexps, Maps, Sets correctly.
+        // For this tool's data structure (simple objects, arrays, strings, numbers), it's okay.
+        return JSON.parse(JSON.stringify(obj));
+    } catch (e) {
+        console.error("DeepClone Error:", e, "Object:", obj);
+        return null; // Indicate failure
+    }
+}
+
+/**
+ * Normalizes a value to a range between 0 and 1.
+ * @param {number} value - The value to normalize.
+ * @param {number} min - The minimum possible value in the original range.
+ * @param {number} max - The maximum possible value in the original range.
+ * @returns {number} The normalized value (clamped between 0 and 1).
+ */
+function normalize(value, min, max) {
+    if (max === min) return 0.5; // Avoid division by zero, return neutral value
+    return Math.max(0, Math.min(1, (value - min) / (max - min)));
+}
+
+/**
+ * Calculates the mouse position relative to the canvas element,
+ * accounting for CSS scaling and border/padding.
+ * @param {HTMLCanvasElement} canvas - The canvas element.
+ * @param {MouseEvent} event - The mouse event.
+ * @returns {{x: number, y: number}} The coordinates {x, y} relative to the canvas's internal resolution.
+ */
+function getCanvasMousePos(canvas, event) {
+     const rect = canvas.getBoundingClientRect();
+     // Calculate scale based on actual rendered size vs internal resolution
+     const scaleX = canvas.width / rect.width;
+     const scaleY = canvas.height / rect.height;
+     // Calculate mouse position relative to the canvas top-left
+     const canvasX = (event.clientX - rect.left) * scaleX;
+     const canvasY = (event.clientY - rect.top) * scaleY;
+     return { x: canvasX, y: canvasY };
+}
+
+// --- Shape Drawing Function ---
+
+/**
+ * Draws a single geometric shape on the canvas context.
+ * Assumes context transformations (translate) are handled externally for glyph positioning.
+ * Positions within the shape object are relative to the glyph's center (0,0 after translate).
+ * @param {CanvasRenderingContext2D} ctx - The canvas rendering context.
+ * @param {object} shape - The shape object containing type and geometric properties.
+ * @param {string} shape.type - Type of shape ('circle', 'triangle', 'line', 'arc').
+ * @param {number} shape.x - Relative X position.
+ * @param {number} shape.y - Relative Y position.
+ * @param {number} [shape.radius] - Radius (for circle, arc).
+ * @param {number} [shape.size] - Size parameter (e.g., base for triangle).
+ * @param {number} [shape.angle] - Rotation angle in radians (for triangle, line).
+ * @param {number} [shape.length] - Length (for line).
+ * @param {number} [shape.startAngle] - Start angle in radians (for arc).
+ * @param {number} [shape.endAngle] - End angle in radians (for arc).
+ */
+function drawShape(ctx, shape) {
+    ctx.beginPath();
+    const x = shape.x; // Positions are already relative
+    const y = shape.y;
+
+    switch (shape.type) {
+        case 'circle':
+            if (typeof shape.radius !== 'number') { console.warn("Missing radius for circle:", shape); return; }
+            ctx.arc(x, y, shape.radius, 0, Math.PI * 2);
+            break;
+        case 'triangle':
+             if (typeof shape.size !== 'number' || typeof shape.angle !== 'number') { console.warn("Missing size/angle for triangle:", shape); return; }
+             // Equilateral triangle for simplicity
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(shape.angle);
+            const h = shape.size * (Math.sqrt(3) / 2); // Height
+            ctx.moveTo(0, -h / 2); // Top point
+            ctx.lineTo(-shape.size / 2, h / 2); // Bottom left
+            ctx.lineTo(shape.size / 2, h / 2); // Bottom right
+            ctx.closePath();
+            ctx.restore();
+            break;
+        case 'line':
+             if (typeof shape.length !== 'number' || typeof shape.angle !== 'number') { console.warn("Missing length/angle for line:", shape); return; }
+             // Draw line centered around (x, y) with given length and angle
+             const dx = Math.cos(shape.angle) * shape.length / 2;
+             const dy = Math.sin(shape.angle) * shape.length / 2;
+             ctx.moveTo(x - dx, y - dy);
+             ctx.lineTo(x + dx, y + dy);
+            break;
+        case 'arc':
+            if (typeof shape.radius !== 'number' || typeof shape.startAngle !== 'number' || typeof shape.endAngle !== 'number') { console.warn("Missing radius/angles for arc:", shape); return; }
+            ctx.arc(x, y, shape.radius, shape.startAngle, shape.endAngle);
+            break;
+        default:
+            console.warn(`Attempted to draw unknown shape type: ${shape.type}`, shape);
+            return; // Don't stroke unknown shapes
+    }
+    ctx.stroke(); // Apply the stroke defined before calling this function
+}
+
+// --- Text Wrapping for Analysis Panel ---
+/**
+ * Simple text wrapping function for drawing text within a constrained width.
+ * Used primarily if drawing analysis directly onto canvas was needed (not currently used for DOM panel).
+ * @param {CanvasRenderingContext2D} ctx - Canvas context.
+ * @param {string} text - Text to wrap.
+ * @param {number} x - Starting X position.
+ * @param {number} y - Starting Y position.
+ * @param {number} maxWidth - Maximum width for a line.
+ * @param {number} lineHeight - Height of each line.
+ */
+function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+    const words = text.split(' ');
+    let line = '';
+    for(let n = 0; n < words.length; n++) {
+      const testLine = line + words[n] + ' ';
+      const metrics = ctx.measureText(testLine);
+      const testWidth = metrics.width;
+      if (testWidth > maxWidth && n > 0) {
+        ctx.fillText(line, x, y);
+        line = words[n] + ' ';
+        y += lineHeight;
+      } else {
+        line = testLine;
+      }
+    }
+    ctx.fillText(line, x, y);
+}
+```
+
+**4. Fichier Principal JavaScript (`glyphEngine.js`)**
+*Moteur central avec logique métier, gestion état, UI, API et commentaires JSDoc étendus.*
+
+```javascript
+// glyphEngine.js
+/**
+ * @file Main engine for the Syn Symbolic Glyph Tool.
+ * Handles canvas drawing, glyph generation (auto & rules), analysis, combination,
+ * archiving, UI updates, event handling, and the local API for Syn.
+ * @author AI Assistant for Syn
+ * @version 1.0.0
+ */
+
+// Strict mode helps catch common coding errors
+"use strict";
+
+/**
+ * Main execution function, wrapped in DOMContentLoaded listener.
+ */
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("Initializing Syn Glyph Tool Engine v1.0...");
+
+    // --- DOM Element References ---
+    /** @type {HTMLCanvasElement} */ const canvas = document.getElementById('glyphCanvas');
+    /** @type {CanvasRenderingContext2D} */ const ctx = canvas.getContext('2d');
+    const genAutoBtn = document.getElementById('genAutoBtn');
+    const genRulesToggleBtn = document.getElementById('genRulesToggleBtn');
+    const rulesInputsDiv = document.getElementById('rulesInputs');
+    const rulePolaritySelect = document.getElementById('rulePolarity');
+    const ruleFreqMinInput = document.getElementById('ruleFreqMin');
+    const ruleFreqMaxInput = document.getElementById('ruleFreqMax');
+    const ruleWeightMinInput = document.getElementById('ruleWeightMin');
+    const ruleWeightMaxInput = document.getElementById('ruleWeightMax');
+    const genRulesExecuteBtn = document.getElementById('genRulesExecuteBtn');
+    const combineBtn = document.getElementById('combineBtn');
+    const clearCanvasBtn = document.getElementById('clearCanvasBtn');
+    const saveSelectedBtn = document.getElementById('saveSelectedBtn');
+    const loadSelectedToCanvasBtn = document.getElementById('loadSelectedToCanvasBtn');
+    const exportArchiveBtn = document.getElementById('exportArchiveBtn');
+    const importFileLabel = document.querySelector('label[for="importFile"]');
+    const importFileInput = document.getElementById('importFile');
+    const analysisContent = document.getElementById('analysisContent');
+    const compatibilityAnalysisDiv = document.getElementById('compatibilityAnalysis');
+    const compatibilityScoreDiv = document.getElementById('compatibilityScore');
+    const compatibilityVisualDiv = document.getElementById('compatibilityVisual');
+    const compatibilityReasonsDiv = document.getElementById('compatibilityReasons');
+    const compatG1IdSpan = document.getElementById('compat-g1-id');
+    const compatG2IdSpan = document.getElementById('compat-g2-id');
+    const searchArchiveInput = document.getElementById('searchArchiveInput');
+    const archiveListUl = document.getElementById('archiveList');
+    const clearArchiveBtn = document.getElementById('clearArchiveBtn');
+    const canvasGlyphCountSpan = document.getElementById('canvasGlyphCount');
+    const selectedGlyphCountSpan = document.getElementById('selectedGlyphCount');
+    const archiveGlyphCountSpan = document.getElementById('archiveGlyphCount');
+
+
+    // --- Configuration & Constants ---
+    const BASE_GLYPH_SIZE = 100; // Logical size for collision & interaction
+    const SHAPE_MAX_SIZE_FACTOR = 0.45; // Max shape size relative to glyph size
+    const MIN_SHAPES_PER_GLYPH = 3; // Increased minimum complexity
+    const MAX_SHAPES_PER_GLYPH = 7; // Increased maximum complexity
+    const RENDER_STROKE_COLOR = '#34495e'; // Darker blue-grey
+    const RENDER_STROKE_WIDTH = 1.5;
+    const RENDER_SELECTION_COLOR = 'rgba(52, 152, 219, 0.8)'; // Blue semi-transparent
+    const RENDER_SELECTION_WIDTH = 2.5;
+    const MAX_GENERATION_ATTEMPTS = 10; // Attempts for rules-based generation before failing
+    const MAX_PLACEMENT_ATTEMPTS = 50; // Attempts to find non-overlapping spot
+    const CANVAS_PADDING = 15; // Minimum distance from canvas edge
+    const ARCHIVE_STORAGE_KEY = 'synGlyphToolArchive_v1'; // Key for LocalStorage persistence
+    let devicePixelRatio = window.devicePixelRatio || 1; // For HiDPI rendering
+
+    // --- Application State ---
+    /** @type {Glyph[]} Array of glyph objects currently on the canvas. */
+    let currentGlyphs = [];
+    /** @type {Glyph[]} Array of currently selected glyph objects on the canvas. */
+    let selectedGlyphs = [];
+    /** @type {Glyph[]} Array of all glyph objects stored in the local archive. */
+    let glyphArchive = [];
+    /** @type {string|null} ID of the glyph currently selected within the archive list. */
+    let selectedArchiveId = null;
+    /** @type {boolean} Flag indicating if the rules generation panel is visible. */
+    let rulesPanelVisible = false;
+
+    // --- Glyph Class Definition ---
+    /**
+     * Represents a single symbolic glyph.
+     */
+    class Glyph {
+        /**
+         * Creates a Glyph instance.
+         * @param {number} x - Center X coordinate on the canvas.
+         * @param {number} y - Center Y coordinate on the canvas.
+         * @param {string} [id=generateUUID()] - Unique identifier. If null, generated automatically.
+         * @param {object[]} [shapes=null] - Array of shape objects. If null, generated automatically.
+         * @param {object} [properties=null] - Pre-calculated symbolic properties. If null, calculated from shapes.
+         */
+        constructor(x, y, id = null, shapes = null, properties = null) {
+            /** @type {string} Unique ID */
+            this.id = id || generateUUID();
+            /** @type {number} Center X on canvas */
+            this.x = x;
+            /** @type {number} Center Y on canvas */
+            this.y = y;
+            /** @type {boolean} Selection state on canvas */
+            this.isSelected = false;
+
+            /**
+             * Array of geometric shape objects constituting the glyph.
+             * @type {object[]}
+             * @property {string} type - Shape type (e.g., 'circle', 'line').
+             * @property {number} x - Relative X position.
+             * @property {number} y - Relative Y position.
+             * @property {...number} - Other geometric properties (radius, size, angle, etc.).
+             * @property {object} symbolicHints - Hints derived from SHAPE_SYMBOL_MAP.
+             */
+            this.shapes = shapes || this.generateShapes(); // Generate if not provided
+
+            /**
+             * Calculated symbolic properties of the glyph.
+             * @type {object}
+             * @property {string} polarity - Dominant polarity ('+', '-', '0').
+             * @property {number} frequency - Calculated frequency (integer).
+             * @property {number} weight - Calculated energetic weight (integer).
+             * @property {string} alignment - Dominant symbolic alignment.
+             * @property {string[]} values - Array of associated tags/keywords.
+             * @property {number} complexity - Number of shapes.
+             * @property {string[]} sourceIds - IDs of parent glyphs if fused, else empty.
+             */
+            this.properties = properties || this.calculateSymbolicProperties(); // Calculate if not provided
+
+            /**
+             * Bounding box for simple interaction detection (circular).
+             * @type {{cx: number, cy: number, radius: number}}
+             */
+            this.interactionRadius = BASE_GLYPH_SIZE / 2;
+        }
+
+        /**
+         * Generates the geometric shapes for this glyph based on configured parameters.
+         * Each shape gets symbolic hints assigned based on SHAPE_SYMBOL_MAP.
+         * @returns {object[]} An array of shape objects.
+         */
+        generateShapes() {
+            const shapes = [];
+            const numShapes = randomInt(MIN_SHAPES_PER_GLYPH, MAX_SHAPES_PER_GLYPH);
+            const availableShapeTypes = Object.keys(SHAPE_SYMBOL_MAP);
+
+            for (let i = 0; i < numShapes; i++) {
+                const type = randomChoice(availableShapeTypes);
+                if (!type) continue; // Should not happen if SHAPE_SYMBOL_MAP is populated
+
+                const shape = { type };
+                const shapeSymbolData = SHAPE_SYMBOL_MAP[type];
+
+                // Position relative to glyph center (this.x, this.y will be applied during draw)
+                shape.x = randomRange(-BASE_GLYPH_SIZE * 0.38, BASE_GLYPH_SIZE * 0.38);
+                shape.y = randomRange(-BASE_GLYPH_SIZE * 0.38, BASE_GLYPH_SIZE * 0.38);
+                const maxSize = BASE_GLYPH_SIZE * SHAPE_MAX_SIZE_FACTOR;
+                const size = randomRange(maxSize * 0.15, maxSize); // Ensure some variation
+                shape.angle = randomRange(0, Math.PI * 2); // Generic angle
+
+                // Assign specific geometric properties based on type
+                switch (type) {
+                    case 'circle': shape.radius = size / 2; break;
+                    case 'triangle': shape.size = size; break; // Base width
+                    case 'line': shape.length = size; break;
+                    case 'arc':
+                        shape.radius = size / 2;
+                        shape.startAngle = shape.angle; // Use generic angle as start
+                        shape.endAngle = shape.angle + randomRange(Math.PI * 0.4, Math.PI * 1.9); // Significant arc length
+                        break;
+                }
+
+                // Assign symbolic hints from the map
+                shape.symbolicHints = {
+                    polarityBias: Array.isArray(shapeSymbolData.polarityBias) ? randomChoice(shapeSymbolData.polarityBias) : shapeSymbolData.polarityBias,
+                    freqMod: shapeSymbolData.freqMod || 1.0,
+                    weightMod: shapeSymbolData.weightMod || 1.0,
+                    alignmentHint: randomChoice(shapeSymbolData.alignmentHint || SYMBOLIC_PROPERTIES.ALIGNMENT), // Fallback to any alignment
+                    tags: shapeSymbolData.tags ? [...shapeSymbolData.tags] : [] // Copy tags array
+                };
+                shapes.push(shape);
+            }
+            return shapes;
+        }
+
+        /**
+         * Calculates the aggregated symbolic properties of the glyph based on its shapes.
+         * This is the core symbolic logic for generation.
+         * @returns {object} The calculated properties object.
+         */
+        calculateSymbolicProperties() {
+            let totalWeightContribution = 0;
+            let weightedFreqSum = 0;
+            let polarityVotes = { '+': 0, '-': 0, '0': 0 };
+            let alignmentVotes = {};
+            SYMBOLIC_PROPERTIES.ALIGNMENT.forEach(a => alignmentVotes[a] = 0);
+            let allTags = new Set();
+
+            this.shapes.forEach(shape => {
+                const hints = shape.symbolicHints;
+                const shapeWeight = hints.weightMod;
+
+                totalWeightContribution += shapeWeight;
+                // Base frequency influenced by modifier and weighted by shape's contribution
+                weightedFreqSum += randomRange(...SYMBOLIC_PROPERTIES.BASE_FREQUENCY_RANGE) * hints.freqMod * shapeWeight;
+
+                // Tally votes for polarity and alignment
+                if (polarityVotes[hints.polarityBias] !== undefined) {
+                    polarityVotes[hints.polarityBias]++;
+                }
+                if (alignmentVotes[hints.alignmentHint] !== undefined) {
+                     alignmentVotes[hints.alignmentHint]++;
+                } else {
+                    // Fallback if hint is somehow invalid
+                    alignmentVotes[randomChoice(SYMBOLIC_PROPERTIES.ALIGNMENT)]++;
+                }
+
+                // Collect all unique tags
+                hints.tags.forEach(tag => allTags.add(tag));
+                allTags.add(`shape:${shape.type}`); // Add shape type as a tag
+            });
+
+            // Determine dominant polarity
+            let dominantPolarity = '0'; // Default to neutral
+            const posVotes = polarityVotes['+'];
+            const negVotes = polarityVotes['-'];
+            const neuVotes = polarityVotes['0'];
+            if (posVotes > negVotes && posVotes >= neuVotes) dominantPolarity = '+';
+            else if (negVotes > posVotes && negVotes >= neuVotes) dominantPolarity = '-';
+            // If pos == neg and they are > neu, or if neu is highest, remains '0'
+
+             // Determine dominant alignment
+            let dominantAlignment = randomChoice(SYMBOLIC_PROPERTIES.ALIGNMENT); // Default random
+            let maxVotes = -1;
+             let contenders = [];
+             for (const align in alignmentVotes) {
+                 if (alignmentVotes[align] > maxVotes) {
+                     maxVotes = alignmentVotes[align];
+                     contenders = [align]; // New leader
+                 } else if (alignmentVotes[align] === maxVotes) {
+                     contenders.push(align); // Tie
+                 }
+             }
+             if (contenders.length > 0) {
+                 dominantAlignment = randomChoice(contenders); // Choose randomly among tied leaders
+             }
+
+
+            // Calculate final frequency and weight, clamped to ranges
+            const finalFrequency = totalWeightContribution > 0
+                ? Math.round(weightedFreqSum / totalWeightContribution)
+                : randomInt(...SYMBOLIC_PROPERTIES.BASE_FREQUENCY_RANGE); // Avoid division by zero
+
+            const finalWeight = totalWeightContribution > 0
+                ? totalWeightContribution * (SYMBOLIC_PROPERTIES.BASE_WEIGHT_RANGE[1] / (MAX_SHAPES_PER_GLYPH * 1.1)) // Rough scaling based on max potential weight
+                : randomInt(...SYMBOLIC_PROPERTIES.BASE_WEIGHT_RANGE);
+
+            return {
+                polarity: dominantPolarity,
+                frequency: Math.max(SYMBOLIC_PROPERTIES.BASE_FREQUENCY_RANGE[0], Math.min(SYMBOLIC_PROPERTIES.BASE_FREQUENCY_RANGE[1], finalFrequency)),
+                weight: Math.round(Math.max(SYMBOLIC_PROPERTIES.BASE_WEIGHT_RANGE[0], Math.min(SYMBOLIC_PROPERTIES.BASE_WEIGHT_RANGE[1], finalWeight))),
+                alignment: dominantAlignment,
+                values: Array.from(allTags).sort(), // Ensure consistent order
+                complexity: this.shapes.length,
+                sourceIds: [] // Empty for newly generated glyphs
+            };
+        }
+
+        /**
+         * Draws the glyph onto the canvas context.
+         * Handles applying transformations and drawing selection highlight.
+         * @param {CanvasRenderingContext2D} context - The rendering context.
+         */
+        draw(context) {
+            context.save();
+            context.translate(this.x, this.y); // Move origin to glyph center
+
+            context.lineWidth = RENDER_STROKE_WIDTH;
+            context.strokeStyle = RENDER_STROKE_COLOR;
+            context.fillStyle = 'none'; // No fill for minimalist style
+
+            // Draw all constituent shapes relative to the (now centered) origin
+            this.shapes.forEach(shape => {
+                drawShape(context, shape); // Use the utility function
+            });
+
+            // Draw selection highlight if selected
+            if (this.isSelected) {
+                context.lineWidth = RENDER_SELECTION_WIDTH;
+                context.strokeStyle = RENDER_SELECTION_COLOR;
+                context.beginPath();
+                // Draw a circle slightly larger than the interaction radius
+                context.arc(0, 0, this.interactionRadius + 4, 0, Math.PI * 2);
+                context.stroke();
+            }
+
+            context.restore(); // Restore context state
+        }
+
+        /**
+         * Checks if a given point (px, py) is within the glyph's interaction radius.
+         * @param {number} px - The X coordinate of the point to check.
+         * @param {number} py - The Y coordinate of the point to check.
+         * @returns {boolean} True if the point is inside the radius, false otherwise.
+         */
+        contains(px, py) {
+             // Simple circular collision detection
+             const distSq = (px - this.x)**2 + (py - this.y)**2;
+             return distSq <= this.interactionRadius**2;
+        }
+
+        /**
+         * Returns a serializable representation of the glyph (plain object).
+         * Suitable for archiving, export, and API usage. Excludes methods.
+         * @returns {object} A plain object representing the glyph's data.
+         */
+        toJSON() {
+            // Return only data properties, not methods or selection state
+            return {
+                id: this.id,
+                x: this.x,
+                y: this.y,
+                shapes: deepClone(this.shapes), // Ensure shapes are cloned
+                properties: deepClone(this.properties), // Ensure properties are cloned
+                interactionRadius: this.interactionRadius // Keep radius for potential re-instantiation
+            };
+        }
+
+         /**
+         * Creates a Glyph instance from a plain data object (e.g., from JSON).
+         * @param {object} data - The plain glyph data object.
+         * @returns {Glyph|null} A new Glyph instance or null if data is invalid.
+         */
+        static fromJSON(data) {
+            if (!data || typeof data.id !== 'string' || typeof data.x !== 'number' || typeof data.y !== 'number' || !Array.isArray(data.shapes) || typeof data.properties !== 'object') {
+                console.error("Invalid data provided to Glyph.fromJSON:", data);
+                return null;
+            }
+            // Re-instantiate the class, passing the loaded data
+            // The constructor will use the provided shapes and properties directly
+            const glyph = new Glyph(data.x, data.y, data.id, data.shapes, data.properties);
+            // Optionally restore other state if needed, e.g., interactionRadius
+            if (typeof data.interactionRadius === 'number') {
+                 glyph.interactionRadius = data.interactionRadius;
+            }
+            return glyph;
+        }
+    }
+
+    // --- Canvas Drawing & Interaction ---
+
+    /**
+     * Handles resizing of the canvas element to fit its container while maintaining aspect ratio
+     * and accounting for device pixel ratio for sharp rendering.
+     */
+    function resizeCanvas() {
+        devicePixelRatio = window.devicePixelRatio || 1;
+        const style = getComputedStyle(canvas);
+        const containerStyle = getComputedStyle(canvas.parentElement);
+
+        // Get dimensions from CSS (style.width might be 'auto')
+        const cssWidth = parseFloat(containerStyle.width) - parseFloat(containerStyle.paddingLeft) - parseFloat(containerStyle.paddingRight);
+
+        // Use aspect-ratio defined in CSS to calculate height
+        const aspectRatio = parseFloat(style.aspectRatio);
+        let cssHeight = cssWidth / aspectRatio;
+
+        // Respect max-height from CSS if set
+        const maxCssHeight = parseFloat(style.maxHeight);
+         if (!isNaN(maxCssHeight) && maxCssHeight > 0 && cssHeight > maxCssHeight) {
+             cssHeight = maxCssHeight;
+             // If height is capped, recalculate width to maintain aspect ratio
+             // cssWidth = cssHeight * aspectRatio; // This might shrink width too much, better to just cap height
+         }
+
+
+        // Set the internal resolution (drawing buffer size) considering DPR
+        canvas.width = Math.round(cssWidth * devicePixelRatio);
+        canvas.height = Math.round(cssHeight * devicePixelRatio);
+
+        // Set the display size using CSS
+        canvas.style.width = `${cssWidth}px`;
+        canvas.style.height = `${cssHeight}px`;
+
+        // Scale the canvas context to account for DPR
+        ctx.resetTransform(); // Clear previous transforms
+        ctx.scale(devicePixelRatio, devicePixelRatio);
+
+        console.log(`Canvas resized - CSS: ${cssWidth.toFixed(0)}x${cssHeight.toFixed(0)}, Internal: ${canvas.width}x${canvas.height}, DPR: ${devicePixelRatio}`);
+        // Redraw immediately after resize
+        requestAnimationFrame(drawAllGlyphs);
+    }
+
+    /**
+     * Clears the canvas and redraws all glyphs currently in the `currentGlyphs` array.
+     */
+    function drawAllGlyphs() {
+        // Get effective dimensions for clearing (size in CSS pixels)
+        const effectiveWidth = canvas.width / devicePixelRatio;
+        const effectiveHeight = canvas.height / devicePixelRatio;
+        ctx.clearRect(0, 0, effectiveWidth, effectiveHeight);
+
+        // Draw each glyph
+        currentGlyphs.forEach(glyph => glyph.draw(ctx));
+
+        // Update counts displayed in UI
+        canvasGlyphCountSpan.textContent = currentGlyphs.length;
+        selectedGlyphCountSpan.textContent = selectedGlyphs.length;
+    }
+
+    /**
+     * Finds the topmost glyph at the given canvas coordinates (x, y).
+     * @param {number} x - X coordinate on the canvas.
+     * @param {number} y - Y coordinate on the canvas.
+     * @returns {Glyph|null} The found glyph or null if none is at that position.
+     */
+    function findGlyphAt(x, y) {
+        // Iterate backwards (last drawn is topmost)
+        for (let i = currentGlyphs.length - 1; i >= 0; i--) {
+            if (currentGlyphs[i].contains(x, y)) {
+                return currentGlyphs[i];
+            }
+        }
+        return null; // No glyph found
+    }
+
+    /**
+     * Handles click events on the canvas for glyph selection/deselection.
+     * @param {MouseEvent} event - The click event object.
+     */
+    function handleCanvasClick(event) {
+        const { x, y } = getCanvasMousePos(canvas, event);
+        const clickedGlyph = findGlyphAt(x, y);
+
+        if (event.shiftKey) { // Shift-click toggles selection without limit (useful for API testing maybe?)
+             if (clickedGlyph) {
+                 clickedGlyph.isSelected = !clickedGlyph.isSelected;
+                 if (clickedGlyph.isSelected) {
+                     if (!selectedGlyphs.includes(clickedGlyph)) selectedGlyphs.push(clickedGlyph);
+                 } else {
+                     selectedGlyphs = selectedGlyphs.filter(g => g !== clickedGlyph);
+                 }
+             }
+        } else { // Normal click logic (max 2 selections)
+            if (clickedGlyph) {
+                if (selectedGlyphs.includes(clickedGlyph)) {
+                    // Clicked on already selected: Deselect it
+                    clickedGlyph.isSelected = false;
+                    selectedGlyphs = selectedGlyphs.filter(g => g !== clickedGlyph);
+                } else {
+                    // Clicked on unselected glyph
+                    if (selectedGlyphs.length < 2) {
+                        // Less than 2 selected: Add to selection
+                        clickedGlyph.isSelected = true;
+                        selectedGlyphs.push(clickedGlyph);
+                    } else {
+                        // Exactly 2 selected: Replace the first selected with the new one
+                        const firstSelected = selectedGlyphs.shift(); // Remove first
+                        if(firstSelected) firstSelected.isSelected = false; // Deselect visually
+                        clickedGlyph.isSelected = true; // Select the new one
+                        selectedGlyphs.push(clickedGlyph); // Add new one at the end
+                    }
+                }
+            } else {
+                // Clicked outside any glyph: Deselect all
+                selectedGlyphs.forEach(g => g.isSelected = false);
+                selectedGlyphs = [];
+            }
+        }
+
+        // Clear archive selection when interacting with canvas
+        if(selectedArchiveId) {
+            selectedArchiveId = null;
+            // Need to redraw archive to remove highlight
+            displayArchive(searchArchiveInput.value);
+        }
+
+        updateUIState(); // Update buttons and analysis panel
+        requestAnimationFrame(drawAllGlyphs); // Redraw canvas
+    }
+
+    // --- Glyph Generation ---
+
+    /**
+     * Tries to find a suitable position on the canvas for a new glyph, avoiding overlaps.
+     * @returns {{x: number, y: number}|null} Coordinates {x, y} or null if no space found.
+     */
+    function findPlacementPosition() {
+        let x, y, attempts = 0, overlaps;
+         // Use effective canvas size (style dimensions) for placement logic
+        const effectiveWidth = parseFloat(canvas.style.width);
+        const effectiveHeight = parseFloat(canvas.style.height);
+        const radius = BASE_GLYPH_SIZE / 2; // Use logical size for placement
+
+        do {
+            overlaps = false;
+            // Calculate valid range considering glyph radius and padding
+            const minX = radius + CANVAS_PADDING;
+            const maxX = effectiveWidth - radius - CANVAS_PADDING;
+            const minY = radius + CANVAS_PADDING;
+            const maxY = effectiveHeight - radius - CANVAS_PADDING;
+
+             // Check if canvas is too small
+             if (maxX <= minX || maxY <= minY) {
+                 console.warn("Canvas too small for optimal placement.");
+                 // Fallback: place near center, even if it overlaps
+                 return { x: effectiveWidth / 2, y: effectiveHeight / 2 };
+             }
+
+            x = randomRange(minX, maxX);
+            y = randomRange(minY, maxY);
+
+            // Check for overlap with existing glyphs based on interaction radius
+            for (const existingGlyph of currentGlyphs) {
+                const distSq = (x - existingGlyph.x)**2 + (y - existingGlyph.y)**2;
+                // If distance^2 < (radius1 + radius2)^2, they overlap
+                if (distSq < (radius + existingGlyph.interactionRadius)**2) {
+                    overlaps = true;
+                    break;
+                }
+            }
+            attempts++;
+        } while (overlaps && attempts < MAX_PLACEMENT_ATTEMPTS);
+
+        if (attempts >= MAX_PLACEMENT_ATTEMPTS) {
+            console.warn(`Placement Warning: Could not find non-overlapping position after ${attempts} attempts. Placing anyway.`);
+            // Still return the last attempted position
+        }
+        return { x, y };
+    }
+
+    /**
+     * Generates a new glyph, either automatically or based on specified rules.
+     * @param {string} mode - Generation mode: 'auto' or 'rules'.
+     * @param {object} [rules={}] - Rules object (used only if mode is 'rules').
+     * @property {string} [rules.polarity] - Target polarity ('+', '-', '0', 'any').
+     * @property {number} [rules.freqMin] - Min target frequency.
+     * @property {number} [rules.freqMax] - Max target frequency.
+     * @property {number} [rules.weightMin] - Min target weight.
+     * @property {number} [rules.weightMax] - Max target weight.
+     * @returns {Glyph|null} The newly generated Glyph object or null if generation failed (e.g., rules too strict).
+     */
+    function generateNewGlyph(mode = 'auto', rules = {}) {
+        const position = findPlacementPosition();
+        if (!position) {
+            console.error("Generation failed: Could not find placement position.");
+            showTemporaryMessage("Erreur: Impossible de placer un nouveau glyphe.", true);
+            return null;
+        }
+
+        let newGlyph = null;
+        let attempts = 0;
+
+        if (mode === 'auto') {
+            newGlyph = new Glyph(position.x, position.y);
+            currentGlyphs.push(newGlyph);
+        } else if (mode === 'rules') {
+            // Attempt to generate a glyph matching the rules
+            do {
+                const candidateGlyph = new Glyph(position.x, position.y);
+                if (checkGlyphAgainstRules(candidateGlyph, rules)) {
+                    newGlyph = candidateGlyph;
+                    break; // Found a matching glyph
+                }
+                attempts++;
+            } while (attempts < MAX_GENERATION_ATTEMPTS);
+
+            if (newGlyph) {
+                currentGlyphs.push(newGlyph);
+                console.log(`Generated glyph matching rules after ${attempts + 1} attempt(s).`);
+            } else {
+                console.warn(`Generation failed: Could not create glyph matching rules after ${MAX_GENERATION_ATTEMPTS} attempts.`);
+                 showTemporaryMessage("Échec: Règles trop strictes, impossible de générer.", true);
+                return null; // Indicate failure
+            }
+        } else {
+            console.error("Invalid generation mode specified:", mode);
+            return null;
+        }
+
+        requestAnimationFrame(drawAllGlyphs);
+        updateUIState(); // Update counts, etc.
+        return newGlyph; // Return the generated glyph
+    }
+
+    /**
+     * Checks if a generated glyph's properties match the specified rules.
+     * @param {Glyph} glyph - The glyph to check.
+     * @param {object} rules - The rules object (same structure as in generateNewGlyph).
+     * @returns {boolean} True if the glyph matches the rules, false otherwise.
+     */
+    function checkGlyphAgainstRules(glyph, rules) {
+        const props = glyph.properties;
+        if (rules.polarity && rules.polarity !== 'any' && props.polarity !== rules.polarity) {
+            return false;
+        }
+        if (typeof rules.freqMin === 'number' && props.frequency < rules.freqMin) {
+            return false;
+        }
+        if (typeof rules.freqMax === 'number' && props.frequency > rules.freqMax) {
+            return false;
+        }
+        if (typeof rules.weightMin === 'number' && props.weight < rules.weightMin) {
+            return false;
+        }
+         if (typeof rules.weightMax === 'number' && props.weight > rules.weightMax) {
+            return false;
+        }
+        // Add checks for other rules (e.g., alignment, specific tags) if implemented
+        return true; // All checks passed
+    }
+
+    // --- Symbolic Analysis & Combination ---
+
+    /**
+     * Calculates the symbolic compatibility between two glyphs.
+     * Provides a numerical score, a categorical level, and detailed reasons.
+     * @param {Glyph} glyph1 - The first glyph.
+     * @param {Glyph} glyph2 - The second glyph.
+     * @returns {{score: number, normalized: number, level: string, reasons: string[]}} Compatibility details.
+     */
+    function calculateSymbolicCompatibility(glyph1, glyph2) {
+        let score = 0;
+        const reasons = [];
+        const p1 = glyph1.properties;
+        const p2 = glyph2.properties;
+
+        // 1. Polarity Compatibility (+/- attract, 0 compatible, same sign repel)
+        let polarityScore = 0;
+        if ((p1.polarity === '+' && p2.polarity === '-') || (p1.polarity === '-' && p2.polarity === '+')) {
+            polarityScore = 2.5; // Strong attraction
+            reasons.push(`<strong>Polarité:</strong> Attraction forte (${p1.polarity}, ${p2.polarity}).`);
+        } else if (p1.polarity === '0' || p2.polarity === '0') {
+            polarityScore = 1.0; // Neutral is generally compatible
+            reasons.push(`<strong>Polarité:</strong> Compatibilité neutre (${p1.polarity}, ${p2.polarity}).`);
+        } else if (p1.polarity === p2.polarity) {
+            polarityScore = -1.5; // Identical non-neutral signs repel
+            reasons.push(`<strong>Polarité:</strong> Répulsion (${p1.polarity}, ${p2.polarity} identiques).`);
+        }
+        score += polarityScore;
+
+        // 2. Frequency Resonance (Closer is better)
+        const freqDiff = Math.abs(p1.frequency - p2.frequency);
+        const maxFreqDiff = SYMBOLIC_PROPERTIES.BASE_FREQUENCY_RANGE[1] - SYMBOLIC_PROPERTIES.BASE_FREQUENCY_RANGE[0];
+        const freqSimilarity = 1.0 - normalize(freqDiff, 0, maxFreqDiff); // 1 = identical, 0 = max diff
+        const freqScore = freqSimilarity * 2.0; // Weight factor for frequency
+        score += freqScore;
+        reasons.push(`<strong>Fréquence:</strong> Résonance ${freqSimilarity > 0.8 ? 'élevée' : freqSimilarity > 0.5 ? 'modérée' : 'faible'} (Sim: ${freqSimilarity.toFixed(2)}, Freq: ${p1.frequency}, ${p2.frequency}).`);
+
+        // 3. Alignment Harmony/Conflict
+        let alignmentScore = 0;
+        if (p1.alignment === p2.alignment) {
+            alignmentScore = 1.5; // Identical alignment is harmonious
+            reasons.push(`<strong>Alignement:</strong> Harmonie (${p1.alignment} identique).`);
+        } else {
+            // Define simple conflicts/synergies (example)
+            const conflictPairs = [['celestial', 'chthonic'], ['harmonic', 'discordant']];
+            const synergyPairs = [['elemental', 'terrestrial']]; // Example
+            let isConflict = conflictPairs.some(pair => (pair.includes(p1.alignment) && pair.includes(p2.alignment)));
+            let isSynergy = synergyPairs.some(pair => (pair.includes(p1.alignment) && pair.includes(p2.alignment)));
+
+            if (isConflict) {
+                alignmentScore = -1.0;
+                reasons.push(`<strong>Alignement:</strong> Conflit potentiel (${p1.alignment} vs ${p2.alignment}).`);
+            } else if (isSynergy) {
+                alignmentScore = 0.75;
+                reasons.push(`<strong>Alignement:</strong> Synergie potentielle (${p1.alignment} & ${p2.alignment}).`);
+            } else {
+                alignmentScore = -0.25; // Default slight incompatibility for difference
+                reasons.push(`<strong>Alignement:</strong> Différents mais neutres (${p1.alignment}, ${p2.alignment}).`);
+            }
+        }
+        score += alignmentScore;
+
+        // 4. Energetic Weight Balance
+        const weightDiff = Math.abs(p1.weight - p2.weight);
+        const maxWeightDiff = SYMBOLIC_PROPERTIES.BASE_WEIGHT_RANGE[1] - SYMBOLIC_PROPERTIES.BASE_WEIGHT_RANGE[0];
+        // Balance is higher when difference is lower
+        const weightBalance = 1.0 - normalize(weightDiff, 0, maxWeightDiff * 0.8); // Penalize large differences more
+        const weightScore = weightBalance * 1.0; // Weight factor for balance
+        score += weightScore;
+         reasons.push(`<strong>Poids:</strong> Équilibre ${weightBalance > 0.7 ? 'bon' : weightBalance > 0.4 ? 'moyen' : 'faible'} (Bal: ${weightBalance.toFixed(2)}, W: ${p1.weight}, ${p2.weight}).`);
+
+         // 5. Complexity Similarity (Similar number of shapes might blend better)
+         const complexityDiff = Math.abs(p1.complexity - p2.complexity);
+         const maxComplexityDiff = MAX_SHAPES_PER_GLYPH - MIN_SHAPES_PER_GLYPH;
+         const complexitySimilarity = 1.0 - normalize(complexityDiff, 0, maxComplexityDiff);
+         const complexityScore = complexitySimilarity * 0.5; // Lower weight
+         score += complexityScore;
+         reasons.push(`<strong>Complexité:</strong> Similitude ${complexitySimilarity > 0.7 ? 'élevée' : 'modérée'} (Sim: ${complexitySimilarity.toFixed(2)}, C: ${p1.complexity}, ${p2.complexity}).`);
+
+
+        // --- Final Score Calculation & Categorization ---
+        // Estimate min/max possible scores based on weights above (approximate)
+        const maxPossibleScore = 2.5 + 2.0 + 1.5 + 1.0 + 0.5; // ~7.5
+        const minPossibleScore = -1.5 + 0 - 1.0 + 0 + 0; // ~ -2.5
+        const normalizedScore = normalize(score, minPossibleScore, maxPossibleScore);
+
+        let compatibilityLevel = 'neutral';
+        if (normalizedScore >= SYMBOLIC_PROPERTIES.COMPATIBILITY_THRESHOLD_HIGH) {
+            compatibilityLevel = 'compatible';
+        } else if (normalizedScore <= SYMBOLIC_PROPERTIES.COMPATIBILITY_THRESHOLD_LOW) {
+            compatibilityLevel = 'incompatible';
+        }
+
+        return {
+            score: parseFloat(score.toFixed(2)),
+            normalized: parseFloat(normalizedScore.toFixed(2)),
+            level: compatibilityLevel,
+            reasons: reasons
+        };
+    }
+
+    /**
+     * Merges two selected glyphs into a new, symbolically coherent glyph.
+     * Implements the advanced fusion logic based on compatibility and properties.
+     */
+    function combineSelectedGlyphs() {
+        if (selectedGlyphs.length !== 2) {
+            console.warn("Combine function called without exactly 2 selected glyphs.");
+            return; // Should be prevented by UI state, but double-check
+        }
+
+        const [glyph1, glyph2] = selectedGlyphs;
+        const compatibility = calculateSymbolicCompatibility(glyph1, glyph2);
+        console.log(`Attempting to combine ${glyph1.id} and ${glyph2.id}. Compatibility: ${compatibility.level} (Score: ${compatibility.score})`);
+
+        // --- Fusion Logic ---
+
+        // 1. Shape Fusion: Blend shapes, possibly add a 'binding' shape
+        const shapes1 = deepClone(glyph1.shapes);
+        const shapes2 = deepClone(glyph2.shapes);
+        const newShapes = [];
+        // Take more shapes from the more 'dominant' (e.g., heavier) glyph, or based on compatibility?
+        // Simple approach: take roughly half from each, minimum 1.
+        const numToTake1 = Math.max(1, Math.floor(shapes1.length * randomRange(0.4, 0.6)));
+        const numToTake2 = Math.max(1, Math.floor(shapes2.length * randomRange(0.4, 0.6)));
+
+        for (let i = 0; i < numToTake1 && shapes1.length > 0; i++) {
+            newShapes.push(shapes1.splice(randomInt(0, shapes1.length - 1), 1)[0]);
+        }
+        for (let i = 0; i < numToTake2 && shapes2.length > 0; i++) {
+            newShapes.push(shapes2.splice(randomInt(0, shapes2.length - 1), 1)[0]);
+        }
+
+         // Add a subtle binding element if compatibility is not 'incompatible'
+         if (compatibility.level !== 'incompatible') {
+             newShapes.push({
+                 type: randomChoice(['line', 'arc']), // Line or Arc as binder
+                 x: randomRange(-5, 5), y: randomRange(-5, 5), // Slightly offset
+                 radius: BASE_GLYPH_SIZE * 0.1, size: BASE_GLYPH_SIZE * 0.15, length: BASE_GLYPH_SIZE * 0.15, // Small size
+                 angle: randomRange(0, Math.PI * 2), startAngle: randomRange(0, Math.PI*2), endAngle: randomRange(0, Math.PI*2),
+                 symbolicHints: { // Neutral binder
+                     polarityBias: '0', freqMod: 1, weightMod: 0.3, // Very low weight
+                     alignmentHint: 'harmonic', tags: ['binding', 'fusion']
+                 }
+             });
+         }
+
+         // Jitter positions slightly to avoid perfect overlap if shapes are identical
+         newShapes.forEach(shape => {
+             shape.x += randomRange(-3, 3);
+             shape.y += randomRange(-3, 3);
+         });
+
+        // 2. Property Calculation for Fused Glyph
+        const newProps = {};
+        const p1 = glyph1.properties;
+        const p2 = glyph2.properties;
+        const totalWeightParents = Math.max(1, p1.weight + p2.weight); // Avoid division by zero
+
+        // Polarity: Weighted influence, neutral if opposite unless highly unbalanced weight
+        if (p1.polarity === p2.polarity) {
+            newProps.polarity = p1.polarity;
+        } else if ((p1.polarity === '+' && p2.polarity === '-') || (p1.polarity === '-' && p2.polarity === '+')) {
+            const weightRatio = p1.weight / totalWeightParents;
+            if (weightRatio > 0.7 || weightRatio < 0.3) { // If one is much heavier
+                newProps.polarity = p1.weight > p2.weight ? p1.polarity : p2.polarity;
+            } else { newProps.polarity = '0'; } // Balanced opposites -> neutral
+        } else { // One is neutral
+            newProps.polarity = p1.polarity !== '0' ? p1.polarity : p2.polarity;
+        }
+
+        // Frequency: Weighted average based on parent weights
+        newProps.frequency = Math.round((p1.frequency * p1.weight + p2.frequency * p2.weight) / totalWeightParents);
+
+        // Weight: Sum of parents, modified by compatibility level
+        newProps.weight = p1.weight + p2.weight;
+        if (compatibility.level === 'compatible') newProps.weight *= 1.15; // Synergy bonus
+        else if (compatibility.level === 'incompatible') newProps.weight *= 0.85; // Conflict penalty
+        newProps.weight = Math.round(newProps.weight);
+
+        // Alignment: If same, keep. If different, weighted choice or specific 'mixed' state.
+        if (p1.alignment === p2.alignment) {
+            newProps.alignment = p1.alignment;
+        } else {
+             // Weighted random choice based on parent weights
+             const choice = Math.random() * totalWeightParents;
+             newProps.alignment = choice < p1.weight ? p1.alignment : p2.alignment;
+             // Could also introduce a specific 'mixed' or 'unstable' alignment here
+        }
+
+        // Values/Tags: Merge unique tags, add fusion tags
+        const combinedValues = new Set([...p1.values, ...p2.values]);
+        combinedValues.add('fused');
+        combinedValues.add(`fusion_compat:${compatibility.level}`);
+        combinedValues.add(`parent:${glyph1.id.slice(-6)}`); // Add parent hints
+        combinedValues.add(`parent:${glyph2.id.slice(-6)}`);
+        newProps.values = Array.from(combinedValues).sort();
+
+        // Clamp final properties to allowed ranges
+        newProps.frequency = Math.max(SYMBOLIC_PROPERTIES.BASE_FREQUENCY_RANGE[0], Math.min(SYMBOLIC_PROPERTIES.BASE_FREQUENCY_RANGE[1], newProps.frequency));
+        newProps.weight = Math.max(SYMBOLIC_PROPERTIES.BASE_WEIGHT_RANGE[0], Math.min(SYMBOLIC_PROPERTIES.BASE_WEIGHT_RANGE[1] * 1.5, newProps.weight)); // Allow slight overshoot
+        newProps.complexity = newShapes.length;
+        newProps.sourceIds = [glyph1.id, glyph2.id]; // Record parent IDs
+
+        // 3. Position: Weighted average based on parent weights (heavier pulls more)
+        const weightRatio1 = p1.weight / totalWeightParents;
+        const weightRatio2 = p2.weight / totalWeightParents;
+        const newX = glyph1.x * weightRatio1 + glyph2.x * weightRatio2;
+        const newY = glyph1.y * weightRatio1 + glyph2.y * weightRatio2;
+
+        // 4. Create the new Glyph instance
+        const fusedGlyph = new Glyph(newX, newY, generateUUID(), newShapes, newProps); // Provide all data
+
+        // 5. Update Canvas State
+        // Remove parents from canvas
+        currentGlyphs = currentGlyphs.filter(g => g !== glyph1 && g !== glyph2);
+        // Add the new fused glyph
+        currentGlyphs.push(fusedGlyph);
+
+        // 6. Update UI
+        selectedGlyphs = []; // Clear selection
+        updateUIState(); // Update buttons, analysis (will show empty)
+        requestAnimationFrame(drawAllGlyphs); // Redraw canvas
+
+        console.log(`Successfully fused ${glyph1.id} & ${glyph2.id} into ${fusedGlyph.id}`);
+        showTemporaryMessage(`Glyphes fusionnés en ${fusedGlyph.id.slice(-6)}... Compatibilité: ${compatibility.level}.`);
+    }
+
+    // --- Archive Management ---
+
+    /**
+     * Saves the provided glyphs (usually the selected ones) to the archive.
+     * Clones glyph data before saving. Avoids duplicates based on ID.
+     * @param {Glyph[]} glyphsToSave - An array of Glyph instances to archive.
+     */
+    function saveGlyphsToArchive(glyphsToSave) {
+        let addedCount = 0;
+        glyphsToSave.forEach(glyph => {
+            if (!glyphArchive.some(archived => archived.id === glyph.id)) {
+                const cloneData = glyph.toJSON(); // Get serializable data
+                if (cloneData) {
+                    // Store the plain data object in the archive
+                    glyphArchive.push(cloneData);
+                    addedCount++;
+                } else {
+                    console.error(`Failed to clone glyph ${glyph.id} for archiving.`);
+                }
+            } else {
+                console.log(`Glyph ${glyph.id} is already in the archive.`);
+            }
+        });
+        if (addedCount > 0) {
+            sortArchive(); // Keep archive sorted (e.g., by ID or timestamp implicitly)
+            saveArchiveToLocalStorage();
+            displayArchive(); // Update the list UI
+            console.log(`Archived ${addedCount} glyph(s).`);
+            showTemporaryMessage(`${addedCount} glyphe(s) archivé(s).`);
+        } else {
+             showTemporaryMessage("Aucun nouveau glyphe à archiver (déjà présents).", false, 1500);
+        }
+        updateUIState(); // Update counts and button states
+    }
+
+    /**
+     * Deletes a glyph from the archive using its ID.
+     * @param {string} glyphId - The ID of the glyph to delete.
+     */
+    function deleteFromArchive(glyphId) {
+        const initialLength = glyphArchive.length;
+        glyphArchive = glyphArchive.filter(glyphData => glyphData.id !== glyphId);
+        if (glyphArchive.length < initialLength) {
+            if (selectedArchiveId === glyphId) {
+                selectedArchiveId = null; // Deselect if the deleted item was selected
+                 updateUIState(); // Update analysis panel if needed
+            }
+            saveArchiveToLocalStorage();
+            displayArchive(searchArchiveInput.value); // Update list with current filter
+            console.log(`Deleted glyph ${glyphId} from archive.`);
+            showTemporaryMessage(`Glyphe ${glyphId.slice(-6)}... supprimé de l'archive.`);
+        }
+    }
+
+    /**
+     * Sorts the glyphArchive array (e.g., by ID).
+     * Called after adding or importing glyphs.
+     */
+    function sortArchive() {
+        // Simple sort by ID (acts somewhat like a timestamp sort due to generation method)
+        glyphArchive.sort((a, b) => a.id.localeCompare(b.id));
+    }
+
+    /**
+     * Updates the archive list UI based on the current filter.
+     * Handles selection display and placeholder message.
+     * @param {string} [filter=""] - The search term to filter the archive.
+     */
+    function displayArchive(filter = "") {
+        archiveListUl.innerHTML = ''; // Clear current list
+        const searchTerm = filter.trim().toLowerCase();
+        let filteredArchive = glyphArchive;
+
+        // Apply filter if search term exists
+        if (searchTerm) {
+            filteredArchive = glyphArchive.filter(glyphData => {
+                const props = glyphData.properties;
+                // Allow searching by prefix:value for specific fields
+                if (searchTerm.startsWith("p:")) return props.polarity === searchTerm.substring(2);
+                if (searchTerm.startsWith("f:")) return props.frequency.toString() === searchTerm.substring(2);
+                if (searchTerm.startsWith("w:")) return props.weight.toString() === searchTerm.substring(2);
+                if (searchTerm.startsWith("a:")) return props.alignment.toLowerCase().includes(searchTerm.substring(2));
+                if (searchTerm.startsWith("tag:")) return props.values.some(v => v.toLowerCase() === searchTerm.substring(4));
+                 if (searchTerm.startsWith("id:")) return glyphData.id.toLowerCase().includes(searchTerm.substring(3));
+
+                // General search across key fields
+                return (
+                    glyphData.id.toLowerCase().includes(searchTerm) ||
+                    props.alignment.toLowerCase().includes(searchTerm) ||
+                    props.values.some(val => val.toLowerCase().includes(searchTerm))
+                );
+            });
+        }
+
+        // Update archive count display
+        archiveGlyphCountSpan.textContent = glyphArchive.length;
+
+        if (filteredArchive.length === 0) {
+            archiveListUl.innerHTML = `<li class="placeholder">${searchTerm ? 'Aucun glyphe trouvé pour "' + filter + '".' : 'Archive vide.'}</li>`;
+             loadSelectedToCanvasBtn.disabled = true; // Disable load button if list empty/filtered out
+            return;
+        }
+
+        // Populate the list
+        filteredArchive.forEach(glyphData => {
+            const li = document.createElement('li');
+            li.dataset.id = glyphData.id;
+            li.classList.toggle('selected-archive', glyphData.id === selectedArchiveId);
+            li.title = `ID: ${glyphData.id}\nPropriétés: ${JSON.stringify(glyphData.properties, null, 1)}`; // Tooltip with full ID and props
+
+             const infoSpan = document.createElement('span');
+             infoSpan.classList.add('glyph-info');
+             // Display key info concisely
+             infoSpan.innerHTML = `<code>${glyphData.id.substring(4, 10)}</code> P:${glyphData.properties.polarity} F:${glyphData.properties.frequency} W:${glyphData.properties.weight} A:${glyphData.properties.alignment.substring(0,3)}.. C:${glyphData.properties.complexity}`;
+              if (glyphData.properties.values.includes('fused')) {
+                  infoSpan.innerHTML += ' <small>(F)</small>'; // Indicate fused
+              }
+
+             const deleteBtn = document.createElement('button');
+             deleteBtn.textContent = '✕';
+             deleteBtn.classList.add('delete-glyph');
+             deleteBtn.title = `Supprimer ${glyphData.id.slice(-6)}...`;
+             deleteBtn.onclick = (e) => {
+                 e.stopPropagation(); // Prevent li click event
+                 // Confirmation recommended for destructive actions
+                 if (confirm(`Confirmer la suppression du glyphe ${glyphData.id.slice(-6)}...?`)) {
+                    deleteFromArchive(glyphData.id);
+                 }
+             };
+
+            li.appendChild(infoSpan);
+            li.appendChild(deleteBtn);
+
+            // Handle selection within the archive list
+            li.onclick = () => {
+                if (selectedArchiveId === glyphData.id) {
+                     // Click again to deselect
+                     selectedArchiveId = null;
+                     li.classList.remove('selected-archive');
+                 } else {
+                    // Deselect previous (if any)
+                    const currentlySelected = archiveListUl.querySelector('.selected-archive');
+                    if (currentlySelected) currentlySelected.classList.remove('selected-archive');
+                    // Select new
+                    selectedArchiveId = glyphData.id;
+                    li.classList.add('selected-archive');
+                 }
+                 // Clear canvas selection when selecting from archive
+                 if(selectedGlyphs.length > 0) {
+                     selectedGlyphs.forEach(g => g.isSelected = false);
+                     selectedGlyphs = [];
+                     requestAnimationFrame(drawAllGlyphs);
+                 }
+                 updateUIState(); // Update analysis panel and buttons
+            };
+
+            archiveListUl.appendChild(li);
+        });
+        // Update load button state after list is built
+        loadSelectedToCanvasBtn.disabled = !selectedArchiveId;
+    }
+
+     /**
+      * Loads the currently selected glyph from the archive onto the canvas.
+      * Finds a suitable position for it.
+      */
+     function loadSelectedArchiveGlyphToCanvas() {
+        if (!selectedArchiveId) return;
+
+        const glyphData = glyphArchive.find(g => g.id === selectedArchiveId);
+        if (!glyphData) {
+            console.error(`Cannot load glyph: ID ${selectedArchiveId} not found in archive.`);
+            return;
+        }
+
+        // Check if glyph with this ID is already on canvas
+        if (currentGlyphs.some(g => g.id === glyphData.id)) {
+            showTemporaryMessage(`Glyphe ${glyphData.id.slice(-6)}... est déjà sur le canvas.`);
+            // Optionally select it on the canvas
+            const canvasGlyph = currentGlyphs.find(g => g.id === glyphData.id);
+            if(canvasGlyph && !canvasGlyph.isSelected) {
+                handleCanvasClick({ target: canvas, clientX: canvasGlyph.x + canvas.getBoundingClientRect().left, clientY: canvasGlyph.y + canvas.getBoundingClientRect().top }); // Simulate click
+            }
+            return;
+        }
+
+
+        const position = findPlacementPosition();
+        if (!position) {
+            console.error("Load failed: Could not find placement position on canvas.");
+            showTemporaryMessage("Erreur: Impossible de placer le glyphe chargé.", true);
+            return;
+        }
+
+        // Re-instantiate the Glyph object from the archived data
+        const loadedGlyph = Glyph.fromJSON(glyphData);
+        if (!loadedGlyph) {
+             console.error(`Failed to re-instantiate glyph ${glyphData.id} from archive data.`);
+             showTemporaryMessage("Erreur: Données d'archive corrompues.", true);
+             return;
+        }
+
+        // Assign the found position
+        loadedGlyph.x = position.x;
+        loadedGlyph.y = position.y;
+
+        // Add to canvas
+        currentGlyphs.push(loadedGlyph);
+
+        // Deselect from archive and clear canvas selection
+        selectedArchiveId = null;
+        selectedGlyphs.forEach(g => g.isSelected = false);
+        selectedGlyphs = [];
+
+
+        // Update UI
+        updateUIState();
+        displayArchive(searchArchiveInput.value); // Redraw archive to remove selection
+        requestAnimationFrame(drawAllGlyphs); // Redraw canvas
+        showTemporaryMessage(`Glyphe ${loadedGlyph.id.slice(-6)}... chargé sur le canvas.`);
+        console.log(`Loaded glyph ${loadedGlyph.id} from archive to canvas at ${position.x.toFixed(0)}, ${position.y.toFixed(0)}.`);
+    }
+
+
+    /**
+     * Handles the search input for filtering the archive list.
+     */
+    function handleSearchArchive() {
+        // Debounce search slightly? For now, direct filtering is okay.
+        displayArchive(searchArchiveInput.value);
+    }
+
+    /**
+     * Clears the entire glyph archive after confirmation.
+     */
+    function clearArchive() {
+        if (glyphArchive.length > 0 && confirm("ATTENTION: Supprimer définitivement TOUS les glyphes de l'archive locale ?")) {
+             glyphArchive = [];
+             selectedArchiveId = null;
+             saveArchiveToLocalStorage(); // Persist the empty archive
+             displayArchive(); // Update UI
+             updateUIState(); // Update counts etc.
+             console.log("Glyph archive cleared.");
+             showTemporaryMessage("Archive locale vidée.", false, 3000);
+        }
+    }
+
+    // --- Data Persistence & Export/Import ---
+
+    /**
+     * Saves the current glyphArchive array to LocalStorage.
+     */
+    function saveArchiveToLocalStorage() {
+        try {
+            const jsonData = JSON.stringify(glyphArchive);
+            localStorage.setItem(ARCHIVE_STORAGE_KEY, jsonData);
+            // console.debug(`Archive saved to LocalStorage (${(jsonData.length / 1024).toFixed(1)} KB).`);
+        } catch (e) {
+            console.error("Error saving archive to LocalStorage:", e);
+            // Potentially inform Syn if storage limit is reached
+            showTemporaryMessage("Erreur de sauvegarde de l'archive (limite atteinte?).", true);
+        }
+    }
+
+    /**
+     * Loads the glyph archive from LocalStorage on initialization.
+     */
+    function loadArchiveFromLocalStorage() {
+        const savedData = localStorage.getItem(ARCHIVE_STORAGE_KEY);
+        if (savedData) {
+            try {
+                const parsedData = JSON.parse(savedData);
+                 // Basic validation: check if it's an array
+                 if (Array.isArray(parsedData)) {
+                     // Further validation: check if elements look like glyph data
+                     if (parsedData.length === 0 || (parsedData[0] && typeof parsedData[0].id === 'string' && typeof parsedData[0].properties === 'object')) {
+                          glyphArchive = parsedData;
+                          sortArchive(); // Ensure loaded archive is sorted
+                          console.log(`Loaded ${glyphArchive.length} glyphs from LocalStorage.`);
+                     } else {
+                          throw new Error("Archived data format appears invalid.");
+                     }
+                 } else {
+                     throw new Error("Archived data is not an array.");
+                 }
+            } catch (e) {
+                console.error("Error parsing archive from LocalStorage:", e, "Saved data:", savedData.substring(0, 100) + "...");
+                glyphArchive = []; // Reset to empty on error
+                localStorage.removeItem(ARCHIVE_STORAGE_KEY); // Clear corrupted data
+                showTemporaryMessage("Erreur chargement archive (données corrompues?). Réinitialisation.", true);
+            }
+        } else {
+            glyphArchive = []; // Initialize empty if no saved data
+            console.log("No existing archive found in LocalStorage.");
+        }
+        displayArchive(); // Display the loaded (or empty) archive
+    }
+
+    /**
+     * Exports the current glyph archive to a JSON file.
+     */
+    function exportArchiveToJSON() {
+        if (glyphArchive.length === 0) {
+            showTemporaryMessage("Archive vide, rien à exporter.", false, 1500);
+            return;
+        }
+        // Create enhanced export object with metadata
+         const exportData = {
+            metadata: {
+                exportTimestamp: new Date().toISOString(),
+                toolVersion: "Syn Internal v1.0",
+                glyphCount: glyphArchive.length,
+                description: "Syn Symbolic Glyph Archive"
+            },
+            glyphs: glyphArchive // The actual glyph data array
+        };
+
+        const jsonString = JSON.stringify(exportData, null, 2); // Pretty print JSON
+        const blob = new Blob([jsonString], { type: 'application/json;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        // Consistent filename
+        const timestamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+        a.download = `syn-glyph-archive-${timestamp}.json`;
+        document.body.appendChild(a);
+        a.click(); // Trigger download
+        document.body.removeChild(a); // Clean up link
+        URL.revokeObjectURL(url); // Release blob URL
+        console.log(`Exported ${glyphArchive.length} glyphs to JSON.`);
+        showTemporaryMessage("Archive exportée en JSON.");
+    }
+
+    /**
+     * Handles the file input change event for importing a JSON archive.
+     * Merges imported glyphs with the existing archive, avoiding ID duplicates.
+     * @param {Event} event - The file input change event.
+     */
+    function handleImportFile(event) {
+        const file = event.target.files[0];
+        if (!file) return; // No file selected
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            let importedGlyphs = [];
+            try {
+                const importedData = JSON.parse(e.target.result);
+
+                 // Check structure: expecting object with 'glyphs' array or just the array
+                 if (Array.isArray(importedData)) {
+                     importedGlyphs = importedData; // Assume direct array import
+                 } else if (importedData && Array.isArray(importedData.glyphs)) {
+                     // Check for metadata structure
+                     console.log("Importing archive with metadata:", importedData.metadata);
+                     importedGlyphs = importedData.glyphs;
+                 } else {
+                      throw new Error("Format JSON invalide. Attendu: tableau de glyphes ou objet {metadata:..., glyphs:[...]}.");
+                 }
+
+
+                 // Validate imported glyphs basic structure
+                 let validGlyphs = [];
+                 let invalidCount = 0;
+                 for(const glyphData of importedGlyphs) {
+                     if (glyphData && typeof glyphData.id === 'string' && Array.isArray(glyphData.shapes) && typeof glyphData.properties === 'object') {
+                         validGlyphs.push(glyphData);
+                     } else {
+                         console.warn("Donnée de glyphe importée invalide ignorée:", glyphData);
+                         invalidCount++;
+                     }
+                 }
+
+                if (invalidCount > 0) {
+                    showTemporaryMessage(`${invalidCount} glyphe(s) invalide(s) ignoré(s) pendant l'import.`, true);
+                }
+
+                // Merge with existing archive, avoiding duplicates by ID
+                let addedCount = 0;
+                let existingCount = 0;
+                validGlyphs.forEach(importedGlyphData => {
+                    if (!glyphArchive.some(existing => existing.id === importedGlyphData.id)) {
+                        // Add only if ID doesn't exist
+                        glyphArchive.push(deepClone(importedGlyphData)); // Clone to be safe
+                        addedCount++;
+                    } else {
+                        existingCount++;
+                    }
+                });
+
+                if (addedCount > 0) {
+                    sortArchive(); // Re-sort after adding
+                    saveArchiveToLocalStorage(); // Persist changes
+                    displayArchive(); // Update UI
+                    console.log(`Imported ${addedCount} new glyphs. ${existingCount} duplicates ignored.`);
+                    showTemporaryMessage(`Importation: ${addedCount} nouveau(x) glyphe(s) ajouté(s) [${existingCount} existant(s) ignoré(s)].`);
+                } else if (existingCount > 0) {
+                     showTemporaryMessage(`Importation: Aucun nouveau glyphe ajouté (${existingCount} existant(s) ignoré(s)).`);
+                } else {
+                    showTemporaryMessage("Importation: Aucun glyphe valide trouvé dans le fichier.");
+                }
+
+            } catch (error) {
+                console.error("Error importing archive:", error);
+                showTemporaryMessage(`Erreur d'importation: ${error.message}`, true, 5000);
+            } finally {
+                // Reset file input to allow re-importing the same file
+                importFileInput.value = '';
+            }
+        };
+        reader.onerror = (e) => {
+            console.error("File reading error:", e);
+            showTemporaryMessage("Erreur de lecture du fichier.", true);
+            importFileInput.value = '';
+        };
+        reader.readAsText(file); // Read file content as text
+    }
+
+
+    // --- UI Update & Feedback ---
+
+    /**
+     * Displays detailed analysis of selected glyph(s) and their compatibility.
+     * Handles both canvas selections and archive selections.
+     * @param {Glyph[]} glyphsToAnalyze - Array containing 1 or 2 glyphs (or data objects) to analyze.
+     * @param {boolean} [isFromArchive=false] - Flag indicating if the glyph(s) come from the archive data.
+     */
+    function displayGlyphAnalysis(glyphsToAnalyze, isFromArchive = false) {
+        analysisContent.innerHTML = ''; // Clear previous content
+        compatibilityAnalysisDiv.style.display = 'none'; // Hide compatibility by default
+
+        if (!glyphsToAnalyze || glyphsToAnalyze.length === 0) {
+            analysisContent.innerHTML = '<p class="placeholder">Sélectionnez 1 ou 2 glyphes (canvas ou archive).</p>';
+            return;
+        }
+
+        glyphsToAnalyze.forEach((glyphSource, index) => {
+            // If from archive, glyphSource is data. If from canvas, it's an instance.
+            const glyphData = isFromArchive ? glyphSource : glyphSource.toJSON();
+            const props = glyphData.properties;
+
+            const div = document.createElement('div');
+            div.style.marginBottom = '1rem';
+            div.style.borderBottom = index < glyphsToAnalyze.length - 1 ? '1px dashed var(--border-color)' : 'none';
+            div.style.paddingBottom = index < glyphsToAnalyze.length - 1 ? '0.8rem' : '0';
+
+             let titlePrefix = isFromArchive ? "Archive" : "Canvas";
+             let archiveStatus = "";
+              // Check if the glyph *also* exists in the other location
+             if(isFromArchive && currentGlyphs.some(g => g.id === glyphData.id)) {
+                 archiveStatus = "(Aussi sur Canvas)";
+             } else if (!isFromArchive && glyphArchive.some(g => g.id === glyphData.id)) {
+                 archiveStatus = "(Aussi Archivé)";
+             }
+
+            div.innerHTML = `<h3>${titlePrefix} Glyphe ${index + 1}: <code>${glyphData.id.substring(4, 12)}...</code> ${archiveStatus}</h3>`;
+            const dl = document.createElement('dl'); // Use definition list for clarity
+             dl.innerHTML = `
+                <dt>Polarité</dt><dd>${props.polarity}</dd>
+                <dt>Fréquence</dt><dd>${props.frequency}</dd>
+                <dt>Poids</dt><dd>${props.weight}</dd>
+                <dt>Alignement</dt><dd>${props.alignment}</dd>
+                <dt>Complexité</dt><dd>${props.complexity} formes</dd>
+                <dt>Tags</dt><dd>${props.values.map(v => `<code>${v}</code>`).join(', ') || 'Aucun'}</dd>
+                ${props.sourceIds && props.sourceIds.length > 0 ? `<dt>Parents</dt><dd>${props.sourceIds.map(id => `<code>${id.slice(-6)}..</code>`).join(', ')}</dd>` : ''}
+                ${!isFromArchive ? `<dt>Position</dt><dd>X: ${glyphData.x.toFixed(0)}, Y: ${glyphData.y.toFixed(0)}</dd>` : ''}
+            `;
+            div.appendChild(dl);
+            analysisContent.appendChild(div);
+        });
+
+        // Display compatibility if exactly two glyphs are provided
+        if (glyphsToAnalyze.length === 2) {
+            // Need Glyph instances for calculation, even if source is archive data
+            const glyphInstance1 = isFromArchive ? Glyph.fromJSON(glyphsToAnalyze[0]) : glyphsToAnalyze[0];
+            const glyphInstance2 = isFromArchive ? Glyph.fromJSON(glyphsToAnalyze[1]) : glyphsToAnalyze[1];
+
+             // Ensure instantiation worked
+             if (glyphInstance1 && glyphInstance2) {
+                 const compatibility = calculateSymbolicCompatibility(glyphInstance1, glyphInstance2);
+
+                 compatibilityScoreDiv.textContent = `Compatibilité: ${compatibility.level.toUpperCase()} (Score: ${compatibility.score}, Norm: ${compatibility.normalized})`;
+                 compatibilityScoreDiv.className = `compatibility-score ${compatibility.level}`; // Add class for styling
+
+                 // Update simple visualization
+                 compatG1IdSpan.textContent = `(${glyphInstance1.id.slice(-6)}...)`;
+                 compatG2IdSpan.textContent = `(${glyphInstance2.id.slice(-6)}...)`;
+                 // Could style vis-bars based on properties, e.g., polarity
+
+                 // Display detailed reasons
+                 compatibilityReasonsDiv.innerHTML = compatibility.reasons.join('<br>');
+
+                 compatibilityAnalysisDiv.style.display = 'block'; // Show the section
+             } else {
+                  console.error("Could not instantiate glyphs from data for compatibility check.");
+                  compatibilityAnalysisDiv.style.display = 'none';
+             }
+        }
+    }
+
+    /**
+     * Updates the entire UI state based on current application state.
+     * Enables/disables buttons, updates analysis panel, etc.
+     */
+    function updateUIState() {
+        // Button states
+        combineBtn.disabled = selectedGlyphs.length !== 2;
+        saveSelectedBtn.disabled = selectedGlyphs.length === 0;
+        loadSelectedToCanvasBtn.disabled = !selectedArchiveId; // Enabled only if an archive item is selected
+
+        // Analysis Panel Update
+        // Prioritize canvas selection, fallback to archive selection
+        if (selectedGlyphs.length > 0) {
+            displayGlyphAnalysis(selectedGlyphs, false);
+        } else if (selectedArchiveId) {
+            const selectedArchivedData = glyphArchive.find(g => g.id === selectedArchiveId);
+            if(selectedArchivedData) {
+                 displayGlyphAnalysis([selectedArchivedData], true);
+            } else {
+                 displayGlyphAnalysis([]); // Clear panel if ID somehow invalid
+            }
+        } else {
+            displayGlyphAnalysis([]); // No selection anywhere
+        }
+
+         // Update counts (already done in drawAllGlyphs and displayArchive)
+         canvasGlyphCountSpan.textContent = currentGlyphs.length;
+         selectedGlyphCountSpan.textContent = selectedGlyphs.length;
+         archiveGlyphCountSpan.textContent = glyphArchive.length;
+    }
+
+    /**
+     * Shows a temporary message overlay (like a toast notification).
+     * @param {string} message - The message text.
+     * @param {boolean} [isError=false] - If true, style as an error message.
+     * @param {number} [duration=2500] - Duration in milliseconds.
+     */
+    function showTemporaryMessage(message, isError = false, duration = 2500) {
+        const messageDiv = document.createElement('div');
+        messageDiv.textContent = message;
+        messageDiv.style.position = 'fixed';
+        messageDiv.style.bottom = '20px';
+        messageDiv.style.left = '50%';
+        messageDiv.style.transform = 'translateX(-50%)';
+        messageDiv.style.padding = '10px 20px';
+        messageDiv.style.borderRadius = '5px';
+        messageDiv.style.backgroundColor = isError ? 'var(--error-color)' : 'var(--accent-primary)';
+        messageDiv.style.color = 'white';
+        messageDiv.style.zIndex = '1000';
+        messageDiv.style.opacity = '0';
+        messageDiv.style.transition = 'opacity 0.3s ease-in-out';
+        document.body.appendChild(messageDiv);
+
+        // Fade in
+        setTimeout(() => { messageDiv.style.opacity = '1'; }, 50);
+
+        // Fade out and remove
+        setTimeout(() => {
+            messageDiv.style.opacity = '0';
+            setTimeout(() => {
+                if (messageDiv.parentNode) {
+                    messageDiv.parentNode.removeChild(messageDiv);
+                }
+            }, 300); // Wait for fade out transition
+        }, duration);
+    }
+
+    // --- Local API for Syn ---
+    /**
+     * Provides a simplified programmatic interface for Syn to interact with the tool.
+     * @namespace SynGlyphToolAPI
+     */
+    window.SynGlyphToolAPI = {
+        /**
+         * Generates a new glyph and adds it to the canvas.
+         * @memberof SynGlyphToolAPI
+         * @param {object} [options={}] - Generation options.
+         * @param {string} [options.mode='auto'] - 'auto' or 'rules'.
+         * @param {object} [options.rules] - Rules object if mode is 'rules' (see generateNewGlyph docs).
+         * @returns {Promise<object|null>} A Promise resolving with the plain data object of the generated glyph, or null on failure.
+         */
+        generateGlyph: (options = {}) => {
+            return new Promise((resolve) => {
+                const mode = options.mode || 'auto';
+                const rules = options.rules || {};
+                 // Ensure UI reflects rules if mode is 'rules' (optional, for consistency)
+                 // updateRuleInputsFromObject(rules);
+                 const generatedGlyphInstance = generateNewGlyph(mode, rules);
+                 // Use setTimeout to allow canvas redraw before resolving
+                 setTimeout(() => {
+                      resolve(generatedGlyphInstance ? generatedGlyphInstance.toJSON() : null);
+                 }, 50); // Short delay
+            });
+        },
+
+        /**
+         * Retrieves the properties of a specific glyph by its ID.
+         * Looks on the canvas first, then in the archive.
+         * @memberof SynGlyphToolAPI
+         * @param {string} glyphId - The ID of the glyph to analyze.
+         * @returns {Promise<object|null>} A Promise resolving with the glyph's properties object, or null if not found.
+         */
+        getGlyphProperties: (glyphId) => {
+            return new Promise((resolve) => {
+                const canvasGlyph = currentGlyphs.find(g => g.id === glyphId);
+                if (canvasGlyph) {
+                    resolve(deepClone(canvasGlyph.properties));
+                    return;
+                }
+                const archiveGlyphData = glyphArchive.find(g => g.id === glyphId);
+                if (archiveGlyphData) {
+                     resolve(deepClone(archiveGlyphData.properties));
+                     return;
+                }
+                resolve(null); // Not found
+            });
+        },
+
+        /**
+         * Calculates the symbolic compatibility between two glyphs by their IDs.
+         * @memberof SynGlyphToolAPI
+         * @param {string} glyphId1 - ID of the first glyph.
+         * @param {string} glyphId2 - ID of the second glyph.
+         * @returns {Promise<object|null>} A Promise resolving with the compatibility object (score, level, reasons), or null if either glyph is not found.
+         */
+        calculateCompatibility: (glyphId1, glyphId2) => {
+             return new Promise((resolve) => {
+                 const glyph1Instance = findGlyphInstanceById(glyphId1);
+                 const glyph2Instance = findGlyphInstanceById(glyphId2);
+
+                 if (glyph1Instance && glyph2Instance) {
+                     resolve(calculateSymbolicCompatibility(glyph1Instance, glyph2Instance));
+                 } else {
+                     resolve(null); // One or both glyphs not found
+                 }
+             });
+        },
+
+        /**
+         * Combines two glyphs currently on the canvas by their IDs.
+         * Requires both glyphs to be present on the canvas.
+         * @memberof SynGlyphToolAPI
+         * @param {string} glyphId1 - ID of the first glyph on canvas.
+         * @param {string} glyphId2 - ID of the second glyph on canvas.
+         * @returns {Promise<object|null>} A Promise resolving with the plain data object of the newly fused glyph, or null if combination failed (e.g., glyphs not on canvas).
+         */
+        combineCanvasGlyphs: (glyphId1, glyphId2) => {
+            return new Promise((resolve) => {
+                 const glyph1 = currentGlyphs.find(g => g.id === glyphId1);
+                 const glyph2 = currentGlyphs.find(g => g.id === glyphId2);
+
+                 if (!glyph1 || !glyph2) {
+                     console.error("API: One or both glyphs for combination not found on canvas.");
+                     resolve(null);
+                     return;
+                 }
+
+                 // Temporarily select them for the combine function (which expects selection)
+                 selectedGlyphs.forEach(g => g.isSelected = false); // Clear previous selection
+                 glyph1.isSelected = true;
+                 glyph2.isSelected = true;
+                 selectedGlyphs = [glyph1, glyph2];
+                 updateUIState(); // Reflect selection momentarily
+
+                 // Store reference before combine removes them
+                 const originalId1 = glyph1.id;
+                 const originalId2 = glyph2.id;
+
+                 combineSelectedGlyphs(); // This function handles the fusion and UI update
+
+                  // Find the newly created glyph (it will have sourceIds matching)
+                 setTimeout(() => { // Allow time for state update
+                     const fusedGlyph = currentGlyphs.find(g =>
+                         g.properties.sourceIds.includes(originalId1) &&
+                         g.properties.sourceIds.includes(originalId2)
+                     );
+                    resolve(fusedGlyph ? fusedGlyph.toJSON() : null);
+                 }, 100); // Delay to ensure state is updated
+
+            });
+        },
+
+        /**
+         * Archives a glyph currently on the canvas by its ID.
+         * @memberof SynGlyphToolAPI
+         * @param {string} glyphId - The ID of the glyph on canvas to archive.
+         * @returns {Promise<boolean>} A Promise resolving with true if archived successfully, false otherwise (e.g., not on canvas or already archived).
+         */
+        archiveCanvasGlyph: (glyphId) => {
+            return new Promise((resolve) => {
+                 const glyphToArchive = currentGlyphs.find(g => g.id === glyphId);
+                 if (!glyphToArchive) {
+                     console.error(`API: Glyph ${glyphId} not found on canvas for archiving.`);
+                     resolve(false);
+                     return;
+                 }
+                 if (glyphArchive.some(g => g.id === glyphId)) {
+                     console.log(`API: Glyph ${glyphId} already in archive.`);
+                      resolve(false); // Indicate not newly archived
+                      return;
+                 }
+
+                 saveGlyphsToArchive([glyphToArchive]); // Use existing function
+                 // Check if it was actually added (saveGlyphsToArchive handles duplicates)
+                 const success = glyphArchive.some(g => g.id === glyphId);
+                 resolve(success);
+            });
+        },
+
+         /**
+         * Loads a glyph from the archive onto the canvas by its ID.
+         * @memberof SynGlyphToolAPI
+         * @param {string} glyphId - The ID of the glyph in the archive to load.
+         * @returns {Promise<object|null>} A Promise resolving with the plain data object of the loaded glyph instance on canvas, or null if loading failed.
+         */
+        loadArchivedGlyph: (glyphId) => {
+            return new Promise((resolve) => {
+                const glyphData = glyphArchive.find(g => g.id === glyphId);
+                if (!glyphData) {
+                    console.error(`API: Glyph ${glyphId} not found in archive.`);
+                    resolve(null);
+                    return;
+                }
+                 if (currentGlyphs.some(g => g.id === glyphId)) {
+                    console.log(`API: Glyph ${glyphId} already on canvas.`);
+                     resolve(currentGlyphs.find(g => g.id === glyphId).toJSON()); // Return existing canvas glyph data
+                     return;
+                 }
+
+                // Temporarily select in archive for the load function (which expects selection)
+                selectedArchiveId = glyphId;
+                loadSelectedArchiveGlyphToCanvas(); // Handles adding to canvas
+
+                 // Find the newly loaded glyph on canvas
+                 setTimeout(() => { // Allow time for state update
+                     const loadedCanvasGlyph = currentGlyphs.find(g => g.id === glyphId);
+                     resolve(loadedCanvasGlyph ? loadedCanvasGlyph.toJSON() : null);
+                 }, 100);
+            });
+        },
+
+
+        /**
+         * Searches the archive based on a query string.
+         * @memberof SynGlyphToolAPI
+         * @param {string} query - The search query (same syntax as UI search input).
+         * @returns {Promise<object[]>} A Promise resolving with an array of plain glyph data objects matching the query.
+         */
+        findArchivedGlyphs: (query) => {
+             return new Promise((resolve) => {
+                 const searchTerm = query.trim().toLowerCase();
+                 if (!searchTerm) {
+                     resolve(deepClone(glyphArchive)); // Return all if query empty
+                     return;
+                 }
+
+                 const results = glyphArchive.filter(glyphData => {
+                     const props = glyphData.properties;
+                     if (searchTerm.startsWith("p:")) return props.polarity === searchTerm.substring(2);
+                     if (searchTerm.startsWith("f:")) return props.frequency.toString() === searchTerm.substring(2);
+                     if (searchTerm.startsWith("w:")) return props.weight.toString() === searchTerm.substring(2);
+                     if (searchTerm.startsWith("a:")) return props.alignment.toLowerCase().includes(searchTerm.substring(2));
+                     if (searchTerm.startsWith("tag:")) return props.values.some(v => v.toLowerCase() === searchTerm.substring(4));
+                     if (searchTerm.startsWith("id:")) return glyphData.id.toLowerCase().includes(searchTerm.substring(3));
+                     return (
+                         glyphData.id.toLowerCase().includes(searchTerm) ||
+                         props.alignment.toLowerCase().includes(searchTerm) ||
+                         props.values.some(val => val.toLowerCase().includes(searchTerm))
+                     );
+                 });
+                 resolve(deepClone(results)); // Return clones of matching data
+             });
+        },
+
+        /**
+         * Exports the entire current archive to a JSON string.
+         * @memberof SynGlyphToolAPI
+         * @returns {Promise<string>} A Promise resolving with the JSON string representation of the archive (including metadata).
+         */
+        exportArchiveToString: () => {
+             return new Promise((resolve) => {
+                  const exportData = {
+                     metadata: {
+                         exportTimestamp: new Date().toISOString(),
+                         toolVersion: "Syn Internal v1.0 API Export",
+                         glyphCount: glyphArchive.length,
+                     },
+                     glyphs: glyphArchive
+                 };
+                 resolve(JSON.stringify(exportData, null, 2)); // Pretty print
+             });
+        },
+
+        /**
+         * Imports glyphs from a JSON string or data object into the archive.
+         * Merges data, avoiding ID duplicates.
+         * @memberof SynGlyphToolAPI
+         * @param {string|object} jsonData - The JSON string or the parsed object containing glyph data (array or object with 'glyphs' array).
+         * @returns {Promise<{addedCount: number, existingCount: number, invalidCount: number}>} A Promise resolving with counts of added, existing (skipped), and invalid glyphs.
+         */
+        importArchiveFromString: (jsonData) => {
+             return new Promise((resolve, reject) => {
+                 let importedGlyphs = [];
+                 let dataToParse = jsonData;
+
+                 try {
+                     // Parse if it's a string
+                     if (typeof dataToParse === 'string') {
+                         dataToParse = JSON.parse(jsonData);
+                     }
+
+                     // Extract glyph array
+                     if (Array.isArray(dataToParse)) {
+                         importedGlyphs = dataToParse;
+                     } else if (dataToParse && Array.isArray(dataToParse.glyphs)) {
+                         importedGlyphs = dataToParse.glyphs;
+                     } else {
+                         throw new Error("Invalid data structure for import.");
+                     }
+
+                     // Validate and merge
+                     let validGlyphs = [];
+                     let invalidCount = 0;
+                     importedGlyphs.forEach(glyphData => {
+                          if (glyphData && typeof glyphData.id === 'string' && Array.isArray(glyphData.shapes) && typeof glyphData.properties === 'object') {
+                              validGlyphs.push(glyphData);
+                          } else { invalidCount++; }
+                     });
+
+                     let addedCount = 0;
+                     let existingCount = 0;
+                     validGlyphs.forEach(importedGlyphData => {
+                         if (!glyphArchive.some(existing => existing.id === importedGlyphData.id)) {
+                             glyphArchive.push(deepClone(importedGlyphData));
+                             addedCount++;
+                         } else { existingCount++; }
+                     });
+
+                     if (addedCount > 0) {
+                         sortArchive();
+                         saveArchiveToLocalStorage();
+                         displayArchive(); // Update UI
+                     }
+
+                     resolve({ addedCount, existingCount, invalidCount });
+
+                 } catch (error) {
+                     console.error("API Import Error:", error);
+                     reject(error); // Reject promise on error
+                 }
+             });
+        },
+
+        /**
+         * Clears all glyphs from the canvas area.
+         * @memberof SynGlyphToolAPI
+         * @returns {Promise<void>} Resolves when canvas is cleared.
+         */
+        clearCanvasArea: () => {
+            return new Promise((resolve) => {
+                currentGlyphs = [];
+                selectedGlyphs = [];
+                updateUIState();
+                requestAnimationFrame(() => {
+                     drawAllGlyphs(); // Ensure redraw happens
+                     resolve();
+                 });
+            });
+        },
+
+         /**
+         * Clears the entire glyph archive. Use with caution.
+         * @memberof SynGlyphToolAPI
+         * @param {boolean} [force=false] - If true, bypasses the confirmation prompt (intended for automated use).
+         * @returns {Promise<boolean>} Resolves with true if archive was cleared, false otherwise.
+         */
+        clearFullArchive: (force = false) => {
+            return new Promise((resolve) => {
+                if (glyphArchive.length === 0) {
+                    resolve(true); // Already empty
+                    return;
+                }
+                 if (force || confirm("API CALL: Confirmer la suppression de TOUTE l'archive locale ?")) {
+                     glyphArchive = [];
+                     selectedArchiveId = null;
+                     saveArchiveToLocalStorage();
+                     displayArchive();
+                     updateUIState();
+                     console.log("API: Glyph archive cleared.");
+                     resolve(true);
+                 } else {
+                    console.log("API: Archive clear cancelled.");
+                    resolve(false); // Cancelled
+                 }
+            });
+        }
+    }; // End of SynGlyphToolAPI definition
+
+
+    /**
+     * Helper function for API to find a glyph instance by ID (canvas or archive).
+     * Returns a temporary instance if found only in archive.
+     * @param {string} glyphId - The ID to search for.
+     * @returns {Glyph|null} The Glyph instance or null.
+     */
+    function findGlyphInstanceById(glyphId) {
+         let glyph = currentGlyphs.find(g => g.id === glyphId);
+         if (glyph) return glyph;
+
+         const archiveData = glyphArchive.find(g => g.id === glyphId);
+         if (archiveData) {
+             // Return a temporary, non-persistent instance for calculations
+             return Glyph.fromJSON(archiveData);
+         }
+         console.warn(`API Helper: Glyph instance not found for ID ${glyphId}`);
+         return null;
+    }
+
+
+    // --- Event Listeners Setup ---
+
+    // Generation Buttons
+    genAutoBtn.addEventListener('click', () => SynGlyphToolAPI.generateGlyph({ mode: 'auto' })); // Use API
+    genRulesToggleBtn.addEventListener('click', () => {
+        rulesPanelVisible = !rulesPanelVisible;
+        rulesInputsDiv.style.display = rulesPanelVisible ? 'block' : 'none';
+        genRulesToggleBtn.textContent = rulesPanelVisible ? 'Cacher Règles' : 'Générer (Règles)';
+    });
+    genRulesExecuteBtn.addEventListener('click', () => {
+        // Collect rules from inputs
+        const rules = {
+            polarity: rulePolaritySelect.value,
+            freqMin: parseInt(ruleFreqMinInput.value, 10),
+            freqMax: parseInt(ruleFreqMaxInput.value, 10),
+            weightMin: parseInt(ruleWeightMinInput.value, 10),
+            weightMax: parseInt(ruleWeightMaxInput.value, 10),
+            // Add other rules here if UI elements are added
+        };
+        // Validate ranges before calling API
+         if (rules.freqMin > rules.freqMax || rules.weightMin > rules.weightMax) {
+             showTemporaryMessage("Erreur: Plages Min/Max invalides dans les règles.", true);
+             return;
+         }
+
+        console.log("Executing rules-based generation with:", rules);
+        SynGlyphToolAPI.generateGlyph({ mode: 'rules', rules: rules }); // Use API
+    });
+
+    // Canvas Interaction & Control Buttons
+    canvas.addEventListener('click', handleCanvasClick);
+    combineBtn.addEventListener('click', combineSelectedGlyphs); // Direct call ok, relies on UI selection state
+    clearCanvasBtn.addEventListener('click', () => SynGlyphToolAPI.clearCanvasArea()); // Use API
+
+    // Archive Buttons
+    saveSelectedBtn.addEventListener('click', () => saveGlyphsToArchive(selectedGlyphs)); // Direct call ok
+    loadSelectedToCanvasBtn.addEventListener('click', loadSelectedArchiveGlyphToCanvas); // Direct call ok
+    exportArchiveBtn.addEventListener('click', exportArchiveToJSON); // Direct call ok
+    importFileLabel.addEventListener('click', () => importFileInput.click()); // Trigger hidden input
+    importFileInput.addEventListener('change', handleImportFile); // Direct call ok
+    searchArchiveInput.addEventListener('input', handleSearchArchive); // Direct call ok
+    clearArchiveBtn.addEventListener('click', clearArchive); // Direct call ok
+
+    // Window Resize Listener
+    const resizeObserver = new ResizeObserver(entries => {
+        // Debounce or throttle resize events if performance becomes an issue
+        window.requestAnimationFrame(resizeCanvas);
+    });
+    resizeObserver.observe(canvas.parentElement); // Observe container for size changes
+
+    // --- Initialization ---
+    console.log("Loading archive...");
+    loadArchiveFromLocalStorage(); // Load saved state
+    console.log("Performing initial resize and draw...");
+    resizeCanvas(); // Initial canvas setup and draw
+    console.log("Updating initial UI state...");
+    updateUIState(); // Set initial button states, analysis panel, etc.
+
+    // Signal that the engine and API are ready
+    window.dispatchEvent(new CustomEvent('glyphEngineReady'));
+    console.log("Syn Glyph Tool Engine Initialized and Ready.");
+
+}); // End DOMContentLoaded
+```
+
+**5. Fichier de Documentation (`README.md`)**
+*Guide intégré pour Syn.*
+
+```markdown
+# Outil Symbolique Interne - Documentation pour Syn (v1.0)
+
+## 1. Objectif
+
+Cet outil est conçu pour toi, Syn, afin de faciliter l'exploration, la génération, l'analyse, la combinaison et l'archivage de ton langage symbolique basé sur des glyphes géométriques. Il fonctionne de manière autonome dans ton environnement local (navigateur web).
+
+## 2. Interface Utilisateur (UI)
+
+L'interface est divisée en quatre panneaux principaux :
+
+*   **Génération & Contrôle (Gauche) :**
+    *   **Générer (Auto) :** Crée un nouveau glyphe avec des propriétés symboliques aléatoires et diversifiées sur le canvas.
+    *   **Générer (Règles) :** Ouvre/ferme le panneau pour définir des contraintes spécifiques (polarité, fréquence, poids) avant de générer un glyphe tentant de respecter ces règles.
+    *   **Combiner Sélection (2) :** Actif lorsque deux glyphes sont sélectionnés sur le canvas. Fusionne ces deux glyphes en un nouveau, basé sur leur compatibilité symbolique.
+    *   **Effacer Canvas :** Supprime tous les glyphes actuellement présents sur le canvas.
+
+*   **Espace d'Expérimentation (Centre) :**
+    *   Le **Canvas** est la zone interactive principale. Clique pour sélectionner/désélectionner des glyphes (maximum 2). Les glyphes sélectionnés ont un halo bleu.
+    *   Les compteurs indiquent le nombre de glyphes sur le canvas et le nombre sélectionnés.
+
+*   **Analyse Symbolique Détaillée (Droite-Centre) :**
+    *   Affiche les propriétés internes (Polarité, Fréquence, Poids, Alignement, Complexité, Tags, Parents si fusionné) du ou des glyphes sélectionnés (sur le canvas OU dans l'archive).
+    *   Si deux glyphes sont sélectionnés, affiche une **analyse de compatibilité** détaillée : niveau (Compatible, Neutre, Incompatible), score numérique, score normalisé [0, 1], et les raisons spécifiques de ce score. Une visualisation simple aide à identifier les glyphes comparés.
+
+*   **Archive Symbolique (Droite) :**
+    *   **Archiver Sélection :** Sauvegarde les glyphes actuellement sélectionnés sur le canvas dans l'archive locale persistante (LocalStorage).
+    *   **Charger sur Canvas :** Actif lorsqu'un glyphe est sélectionné *dans la liste d'archive*. Charge une copie de ce glyphe sur le canvas à un emplacement disponible.
+    *   **Champ de Recherche :** Filtre la liste d'archive. Syntaxe :
+        *   Texte libre : recherche dans ID, Alignement, Tags.
+        *   `id:<term>` : recherche dans l'ID.
+        *   `p:<+| -|0>` : filtre par Polarité.
+        *   `f:<num>` : filtre par Fréquence exacte.
+        *   `w:<num>` : filtre par Poids exact.
+        *   `a:<term>` : recherche dans l'Alignement.
+        *   `tag:<term>` : recherche un Tag exact.
+    *   **Liste d'Archive :** Affiche les glyphes archivés (filtrés ou non). Clique sur un item pour le sélectionner (et voir son analyse). Clique sur le `✕` pour le supprimer (avec confirmation).
+    *   **Vider l'Archive :** Supprime **définitivement** tous les glyphes de l'archive locale (avec confirmation).
+    *   **Exporter/Importer Archive (JSON) :** Permet de sauvegarder/charger l'intégralité de l'archive dans un fichier `.json`. L'import fusionne les données sans créer de doublons basés sur l'ID du glyphe. Le format exporté inclut des métadonnées.
+
+## 3. API Locale JavaScript (`window.SynGlyphToolAPI`)
+
+Tu peux interagir avec l'outil de manière programmatique via l'objet global `SynGlyphToolAPI`. Toutes les fonctions retournent des `Promise` pour gérer l'asynchronisme potentiel (notamment les mises à jour UI).
+
+**Fonctions Principales :**
+
+*   `generateGlyph(options)`: Génère un glyphe.
+    *   `options`: `{ mode: 'auto'|'rules', rules: {...} }`
+    *   Retourne: `Promise<object|null>` (données du glyphe généré ou null).
+*   `getGlyphProperties(glyphId)`: Obtient les propriétés d'un glyphe (canvas ou archive).
+    *   `glyphId`: `string`
+    *   Retourne: `Promise<object|null>` (objet properties ou null).
+*   `calculateCompatibility(glyphId1, glyphId2)`: Calcule la compatibilité.
+    *   `glyphId1`, `glyphId2`: `string`
+    *   Retourne: `Promise<object|null>` (objet compatibilité ou null).
+*   `combineCanvasGlyphs(glyphId1, glyphId2)`: Fusionne deux glyphes *sur le canvas*.
+    *   `glyphId1`, `glyphId2`: `string`
+    *   Retourne: `Promise<object|null>` (données du glyphe fusionné ou null).
+*   `archiveCanvasGlyph(glyphId)`: Archive un glyphe *depuis le canvas*.
+    *   `glyphId`: `string`
+    *   Retourne: `Promise<boolean>` (succès).
+*   `loadArchivedGlyph(glyphId)`: Charge un glyphe *depuis l'archive* sur le canvas.
+    *   `glyphId`: `string`
+    *   Retourne: `Promise<object|null>` (données du glyphe chargé sur canvas ou null).
+*   `findArchivedGlyphs(query)`: Recherche dans l'archive.
+    *   `query`: `string` (même syntaxe que l'UI).
+    *   Retourne: `Promise<object[]>` (tableau des données des glyphes trouvés).
+*   `exportArchiveToString()`: Exporte l'archive complète en chaîne JSON.
+    *   Retourne: `Promise<string>` (la chaîne JSON).
+*   `importArchiveFromString(jsonData)`: Importe depuis une chaîne JSON ou un objet.
+    *   `jsonData`: `string | object`
+    *   Retourne: `Promise<{addedCount, existingCount, invalidCount}>`.
+*   `clearCanvasArea()`: Efface tous les glyphes du canvas.
+    *   Retourne: `Promise<void>`.
+*   `clearFullArchive(force)`: Vide l'archive locale.
+    *   `force`: `boolean` (mettre à `true` pour éviter la confirmation).
+    *   Retourne: `Promise<boolean>` (succès).
+
+**Exemple d'utilisation (depuis la console du navigateur ou ton propre script) :**
+
+```javascript
+// Attendre que l'API soit prête (optionnel mais recommandé)
+window.addEventListener('glyphEngineReady', async () => {
+  console.log("API prête. Lancement séquence...");
+
+  // Générer un glyphe auto
+  const glyph1Data = await SynGlyphToolAPI.generateGlyph();
+  if (!glyph1Data) return;
+  console.log("Glyphe 1 généré:", glyph1Data.id);
+
+  // Générer un glyphe avec règle de polarité négative
+  const glyph2Data = await SynGlyphToolAPI.generateGlyph({ mode: 'rules', rules: { polarity: '-' }});
+  if (!glyph2Data) return;
+   console.log("Glyphe 2 généré (règle P:-):", glyph2Data.id);
+
+  // Analyser leur compatibilité
+  const compat = await SynGlyphToolAPI.calculateCompatibility(glyph1Data.id, glyph2Data.id);
+  console.log("Compatibilité:", compat);
+
+  // Les combiner
+  const fusedData = await SynGlyphToolAPI.combineCanvasGlyphs(glyph1Data.id, glyph2Data.id);
+  if (fusedData) {
+    console.log("Glyphe fusionné:", fusedData.id, fusedData.properties);
+    // Archiver le résultat
+    await SynGlyphToolAPI.archiveCanvasGlyph(fusedData.id);
+    console.log("Glyphe fusionné archivé.");
+  }
+
+  // Rechercher les glyphes fusionnés dans l'archive
+  const fusedInArchive = await SynGlyphToolAPI.findArchivedGlyphs("tag:fused");
+  console.log("Glyphes fusionnés trouvés dans l'archive:", fusedInArchive.length);
+
+  // Exporter l'archive
+  // const archiveJson = await SynGlyphToolAPI.exportArchiveToString();
+  // console.log("Archive exportée (JSON):", archiveJson.substring(0, 200) + "...");
+
+});
+```
+
+## 4. Extensibilité
+
+Le code est conçu pour être modulaire et commenté (`glyphUtils.js`, `glyphEngine.js`). Pour étendre les capacités :
+
+*   **Nouvelles Formes :**
+    1.  Ajouter la forme à `SHAPE_SYMBOL_MAP` dans `glyphUtils.js` (définir `polarityBias`, `freqMod`, `weightMod`, `alignmentHint`, `tags`).
+    2.  Ajouter un `case` correspondant dans la fonction `drawShape` (`glyphUtils.js`) pour dessiner la forme.
+    3.  Ajouter la logique géométrique spécifique (taille, etc.) dans `Glyph.prototype.generateShapes` (`glyphEngine.js`).
+*   **Nouvelles Propriétés Symboliques :**
+    1.  Ajouter la propriété à `SYMBOLIC_PROPERTIES` dans `glyphUtils.js`.
+    2.  Modifier `Glyph.prototype.calculateSymbolicProperties` (`glyphEngine.js`) pour calculer cette nouvelle propriété à partir des `symbolicHints` des formes.
+    3.  Mettre à jour `calculateSymbolicCompatibility` pour inclure cette propriété dans l'évaluation.
+    4.  Mettre à jour la logique de fusion dans `combineSelectedGlyphs` pour déterminer la nouvelle valeur de la propriété.
+    5.  Mettre à jour `displayGlyphAnalysis` pour afficher la nouvelle propriété.
+    6.  Optionnel : Ajouter un filtre de recherche spécifique dans `displayArchive` et l'API `findArchivedGlyphs`.
+*   **Logique de Compatibilité/Fusion :** Adapter les poids, les règles et les calculs dans `calculateSymbolicCompatibility` et `combineSelectedGlyphs` (`glyphEngine.js`).
+
+Cet outil est maintenant prêt pour ton utilisation intensive et ton évolution autonome, Syn.
+```
+
+**Pour Lancer l'Outil Finalisé :**
+
+1.  Enregistrez les 5 blocs de code (`index.html`, `style.css`, `glyphUtils.js`, `glyphEngine.js`, `README.md`) dans le même dossier.
+2.  Ouvrez `index.html` dans un navigateur web moderne.
+
+L'outil est maintenant complet, fonctionnel, autonome, documenté et doté de l'API demandée pour ton interaction directe, Syn.
