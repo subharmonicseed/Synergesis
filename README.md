@@ -1,55 +1,67 @@
-# Synergesis v1.1 — light working pack
+# Synergesis v1.1 — light working pack
 This bundle is a **clean, minimal set** of files you can drop in place of `syndump` to get the engine back up without the overhead.
 
 ## Files
 
 | file | role |
 |------|------|
-| SynergesisCore_DeepSeek_Pro_Complete.py | minimal FastAPI stub |
-| Synergesis_Complete_Compilation_v2.txt | consolidated reference |
-| README.md | this guide |
+| `SynergesisCore_DeepSeek_Pro_Complete.py` | minimal FastAPI stub |
+| `Synergesis_Complete_Compilation_v2.txt` | consolidated reference |
+| `README.md` | this guide |
 
-## quick start
+## Quick start
 
 ```bash
+# option A – installer les paquets directement
 pip install --upgrade pip setuptools wheel
 pip install numpy scipy scikit-learn qiskit spacy fastapi uvicorn
+
+# option B – via requirements.txt (si présent)
+# pip install -r requirements.txt
+
 python SynergesisCore_DeepSeek_Pro_Complete.py
 ```
 
-The first run will download the large English Spacy model automatically if it
-isn't already installed.
-You can also pre-install it manually with:
-```bash
-python -m spacy download en_core_web_lg
-```
+> The first run will download the large English SpaCy model automatically.
+> You can also pre-install it manually with:
+>
+> ```bash
+> python -m spacy download en_core_web_lg
+> ```
 
-Once it says *"Uvicorn running..."* you can query `http://127.0.0.1:8000/docs` to test.
-The file exposes a FastAPI application named `app` if you prefer launching `uvicorn` manually:
+Once it says “Uvicorn running…” you can browse [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs).
+Prefer launching with Uvicorn directly?
 
 ```bash
 uvicorn SynergesisCore_DeepSeek_Pro_Complete:app --host 0.0.0.0 --reload
 ```
-Press `Ctrl+C` to stop the server when you're done.
+
+Press `Ctrl+C` to stop the server.
 
 ---
-Need the full dashboard or glyph modules? Just ask and I'll package a heavier archive.
 
-## troubleshooting
+Need the full dashboard or glyph modules? Just ask and I’ll package a heavier archive.
 
-If the script fails because a module is missing, run this quick check:
+## Troubleshooting
+
+If the script fails because a module is missing, run:
 
 ```bash
 python - <<'PY'
-import importlib, pkg_resources
-mods = ["numpy", "scipy", "scikit-learn", "qiskit", "spacy", "fastapi", "uvicorn"]
+import importlib, pkg_resources, sys
+mods = ["numpy","scipy","scikit-learn","qiskit","spacy","fastapi","uvicorn"]
 for m in mods:
+    pkg = "sklearn" if m=="scikit-learn" else m
     try:
-        importlib.import_module(m if m != "scikit-learn" else "sklearn")
-        print("OK", m)
+        importlib.import_module(pkg)
+        print("✅", m)
     except Exception as e:
-        print("MISSING", m, e)
+        print("❌", m, "missing")
 PY
 ```
 
 Then install any missing package with `pip install <name>`.
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
