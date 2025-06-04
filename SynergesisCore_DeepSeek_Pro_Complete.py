@@ -109,6 +109,38 @@ class AutoTuningQuantumClustererPro:
             print(f"Erreur PCA : {e}")
             return features[:, :3]  # Fallback
 
+# -- Simplified Core -------------------------------------------------------
+
+class SimpleClusterer:
+    """Very small placeholder clusterer"""
+
+    def __init__(self):
+        self.performance_log = []
+
+
+class SimpleMemory:
+    """Container for patterns and clustering"""
+
+    def __init__(self):
+        self.patterns = []
+        self.clusterer = SimpleClusterer()
+
+
+class SynergesisCore:
+    """Lightweight core used by the API."""
+
+    def __init__(self):
+        self.memory = SimpleMemory()
+
+    def process_input(self, state, context=""):
+        """Process input and log basic metrics."""
+        pattern_id = str(uuid.uuid4())
+        self.memory.patterns.append(pattern_id)
+        self.memory.clusterer.performance_log.append(
+            {"pattern_id": pattern_id, "timestamp": datetime.utcnow().isoformat()}
+        )
+        return pattern_id
+
 # API Professionnelle
 class SynergesisAPI:
     def __init__(self, core):
@@ -131,3 +163,10 @@ class SynergesisAPI:
                 "clusters": self.core.memory.clusterer.performance_log[-1],
                 "patterns_count": len(self.core.memory.patterns)
             }
+
+
+if __name__ == "__main__":
+    core = SynergesisCore()
+    api = SynergesisAPI(core)
+    import uvicorn
+    uvicorn.run(api.app, host="0.0.0.0", port=8000)
