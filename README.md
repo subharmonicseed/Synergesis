@@ -8,8 +8,8 @@ This bundle is a **clean, minimal set** of files you can drop in place of `syndu
 | SynergesisCore_DeepSeek_Pro_Complete.py | minimal FastAPI stub |
 | Synergesis_Complete_Compilation_v2.txt | consolidated reference (not runnable) |
 | README.md | this guide |
-| docs/architecture_v8.md | architecture overview |
-| docs/glyph_schema.md | glyph specification (WIP) |
+| [docs/architecture_v8.md](docs/architecture_v8.md) | architecture overview |
+| [docs/glyph_schema.md](docs/glyph_schema.md) | glyph specification (WIP) |
 
 The architecture document explains how each "agent" of Synergesis is implemented
 as a Python class within its module rather than as a standalone service. It
