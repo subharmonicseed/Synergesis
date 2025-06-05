@@ -5,8 +5,8 @@ This bundle is a **clean, minimal set** of files you can drop in place of `syndu
 
 | file | role |
 |------|------|
-| SynergesisCore_DeepSeek_Pro_Complete.py | core engine (FastAPI + algorithms) |
-| Synergesis_Complete_Compilation_v2.txt | consolidated reference |
+| SynergesisCore_DeepSeek_Pro_Complete.py | minimal FastAPI stub |
+| Synergesis_Complete_Compilation_v2.txt | consolidated reference (not runnable) |
 | README.md | this guide |
 
 ## quick start
@@ -20,7 +20,15 @@ pip install -r requirements.txt
 python SynergesisCore_DeepSeek_Pro_Complete.py
 ```
 
-Once it says *"Uvicorn running..."* you can query `http://127.0.0.1:8000/docs` to test.
+The script only launches a very small demo API. Once it says *"Uvicorn running..."*
+you can query `http://127.0.0.1:8000/docs` to test.
+
+If you prefer to start Uvicorn manually, the file exposes an application named
+`app`:
+
+```bash
+uvicorn SynergesisCore_DeepSeek_Pro_Complete:app --reload
+```
 
 ---
 Need the full dashboard or glyph modules? Just ask and I'll package a heavier archive.
