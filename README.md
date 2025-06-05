@@ -9,6 +9,7 @@ This bundle is a **clean, minimal set** of files you can drop in place of `syndu
 | Synergesis_Complete_Compilation_v2.txt | consolidated reference (not runnable) |
 | README.md | this guide |
 | docs/architecture_v8.md | architecture overview |
+| docs/glyph_schema.md | glyph specification (WIP) |
 
 ## quick start
 
