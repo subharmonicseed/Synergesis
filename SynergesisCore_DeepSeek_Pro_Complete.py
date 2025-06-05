@@ -13,7 +13,8 @@ from typing import Dict, Any
 # Chargement du modèle NLP avancé
 try:
     nlp = spacy.load("en_core_web_lg")
-except:
+except OSError:
+    print("SpaCy model 'en_core_web_lg' not found. Downloading...")
     spacy.cli.download("en_core_web_lg")
     nlp = spacy.load("en_core_web_lg")
 
