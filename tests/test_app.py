@@ -1,10 +1,9 @@
-import os
-import sys
+from fastapi import FastAPI
+import sys, pathlib
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+sys.path.append(str(pathlib.Path(__file__).resolve().parents[1]))
 
 from SynergesisCore_DeepSeek_Pro_Complete import create_app
-from fastapi import FastAPI
 
 
 def test_create_app_returns_fastapi_instance():

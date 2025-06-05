@@ -13,11 +13,11 @@ This repository provides a clean, minimal set of files. The script `SynergesisCo
 ## Quick start
 
 ```bash
-# option A – installer les paquets directement
+# Option A – installer les paquets directement
 pip install --upgrade pip setuptools wheel
 pip install numpy scipy scikit-learn qiskit spacy fastapi uvicorn
 
-# option B – via requirements.txt (si présent)
+# Option B – via le fichier requirements.txt
 pip install -r requirements.txt
 
 python SynergesisCore_DeepSeek_Pro_Complete.py

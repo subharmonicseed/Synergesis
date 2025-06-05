@@ -18,9 +18,12 @@ import uvicorn
 # Chargement du modèle NLP avancé
 try:
     nlp = spacy.load("en_core_web_lg")
-except OSError:
-    spacy.cli.download("en_core_web_lg")
-    nlp = spacy.load("en_core_web_lg")
+except OSError as e:
+    if "en_core_web_lg" in str(e):
+        spacy.cli.download("en_core_web_lg")
+        nlp = spacy.load("en_core_web_lg")
+    else:
+        raise
 
 # Nouveau système de validation contextuelle
 class AdvancedContextValidator:
