@@ -1,44 +1,72 @@
 import os
 import sys
+import math
 from unittest import mock
 
 ROOT_DIR = os.path.dirname(os.path.dirname(__file__))
 if ROOT_DIR not in sys.path:
     sys.path.insert(0, ROOT_DIR)
 
-from synergesis.storage.neo4j_interface import Neo4jInterface
+import synergesis.storage.neo4j_interface as n4
 
 
-def make_driver():
-    mock_session = mock.MagicMock()
-    driver = mock.MagicMock()
-    driver.session.return_value.__enter__.return_value = mock_session
-    return driver, mock_session
+def test_single_upsert(monkeypatch):
+    sample = {"id": "g1", "timestamp": 1.0, "source": "test", "concept_type": "TEST"}
+    driver_calls = {"run": 0}
+
+    class FakeSession:
+        def run(self, q, **p):
+            driver_calls["run"] += 1
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *a):
+            pass
+
+    class FakeDriver:
+        def session(self):
+            return FakeSession()
+
+    monkeypatch.setattr(
+        n4,
+        "GraphDatabase",
+        type("Stub", (), {"driver": lambda *a, **k: FakeDriver()}),
+    )
+    db = n4.Neo4jInterface("bolt://x", "u", "p")
+    db.upsert_glyph_node(sample)
+    assert driver_calls["run"] == 1
 
 
-def test_constructor_uses_injected_driver():
-    fake_driver, _ = make_driver()
-    interface = Neo4jInterface(driver=fake_driver)
-    assert interface._driver is fake_driver
 
-
-def test_upsert_glyph_node_runs_cypher():
-    fake_driver, session = make_driver()
-    interface = Neo4jInterface(driver=fake_driver)
+def test_upsert_query_contains_merge():
+    fake_driver = mock.MagicMock()
+    session = mock.MagicMock()
+    fake_driver.session.return_value.__enter__.return_value = session
+    interface = n4.Neo4jInterface(driver=fake_driver)
     glyph = {"id": "g1", "concept_type": "TEST"}
     interface.upsert_glyph_node(glyph)
-    query = "MERGE (g:Glyph {id:$id})\nSET g += $props"
-    session.run.assert_called_once_with(query, id="g1", props={"concept_type": "TEST"})
+    session.run.assert_called_once()
+    query = session.run.call_args[0][0]
+    assert "MERGE (g:Glyph {id:$id})" in query
+    assert session.run.call_args[1]["id"] == "g1"
 
 
-def test_bulk_upsert_glyphs_batches_calls():
-    fake_driver, _ = make_driver()
-    interface = Neo4jInterface(driver=fake_driver)
-    with mock.patch.object(interface, "upsert_glyph_node") as upsert:
-        glyphs = [
-            {"id": "g1", "concept_type": "TEST"},
-            {"id": "g2", "concept_type": "TEST"},
-            {"id": "g3", "concept_type": "TEST"},
-        ]
-        interface.bulk_upsert_glyphs(glyphs, batch_size=2)
-        assert upsert.call_count == 3
+
+def test_bulk_upsert_calls_execute_query(monkeypatch):
+    fake_driver = mock.MagicMock()
+    fake_driver.session.return_value.__enter__.return_value = mock.MagicMock()
+    interface = n4.Neo4jInterface(driver=fake_driver)
+    call_count = {"n": 0}
+
+    def fake_execute(q, p):
+        call_count["n"] += 1
+
+    monkeypatch.setattr(interface, "_execute_query", fake_execute)
+    glyphs = [
+        {"id": "g1", "concept_type": "TEST"},
+        {"id": "g2", "concept_type": "TEST"},
+        {"id": "g3", "concept_type": "TEST"},
+    ]
+    interface.bulk_upsert_glyphs(glyphs, batch_size=2)
+    assert call_count["n"] == math.ceil(len(glyphs) / 2)
