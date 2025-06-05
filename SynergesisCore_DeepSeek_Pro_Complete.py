@@ -160,11 +160,9 @@ class _Core:
         return pattern_id
 
 
-def create_app():
-    """Instantiate the stub core and expose the FastAPI app."""
-    core = _Core()
-    api = SynergesisAPI(core)
-    return api.app
+# --- factory & main -------------------------------------------------------
+def create_app() -> FastAPI:
+    return SynergesisAPI(_Core()).app
 
 
 app = create_app()
