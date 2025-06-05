@@ -80,6 +80,16 @@ synergesis/
 - **`protocols/`** : définitions de protocoles (metabolic, prospective, etc.).
 - **`agent_loop.py`** : boucle d'orchestration principale.
 
+### Agents implémentés comme classes
+
+Les « agents » mentionnés dans cette architecture (IntentionGenerator,
+SimulationEngine, ReflexiveCortex, etc.) sont chacun implémentés comme une
+classe Python à l’intérieur de leur module respectif. Ils ne constituent pas des
+processus indépendants : la boucle principale les instancie et orchestre leurs
+méthodes pour former le cycle cognitif. Chaque fichier cité ci-dessus doit donc
+définir la classe correspondante avec ses méthodes clés (souvent laissées en
+`pass` pour la première version).
+
 ## 3. Autres fichiers
 
 - **`scripts/`** : scripts exécutables (migration, tests, lancement de la boucle).
