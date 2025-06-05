@@ -8,16 +8,15 @@ This bundle is a **clean, minimal set** of files you can drop in place of `syndu
 | SynergesisCore_DeepSeek_Pro_Complete.py | minimal FastAPI stub |
 | Synergesis_Complete_Compilation_v2.txt | consolidated reference (not runnable) |
 | README.md | this guide |
+| docs/architecture_v8.md | architecture overview |
 
 ## quick start
 
 ```bash
-# install dependencies
-pip install numpy scipy scikit-learn qiskit spacy fastapi uvicorn
-# or use the bundled requirements
 pip install -r requirements.txt
 
 python SynergesisCore_DeepSeek_Pro_Complete.py
+python scripts/run_agent_loop.py
 ```
 
 The script only launches a very small demo API. Once it says *"Uvicorn running..."*
