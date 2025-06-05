@@ -18,8 +18,8 @@ provides the full directory tree and the role of every file.
 ## quick start
 
 ```bash
-pip install -r requirements.txt
-
+conda env create -f environment.yml
+conda activate synergesis-env
 python SynergesisCore_DeepSeek_Pro_Complete.py
 python scripts/run_agent_loop.py
 ```
@@ -44,6 +44,7 @@ This project is licensed under the [MIT License](LICENSE).
 Please ensure the test suite runs before opening a pull request:
 
 ```bash
-pytest
+conda activate synergesis-env
+pytest -q
 ```
 
