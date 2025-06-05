@@ -1,10 +1,11 @@
-name: synergesis
+name: synergesis-env
 channels:
   - defaults
+  - conda-forge
 dependencies:
   - python=3.10
   - pip
   - pytest
   - flake8
   - pip:
-    - -r requirements.txt
+      - -r requirements.txt
