@@ -23,6 +23,10 @@ pip install numpy scipy scikit-learn qiskit spacy fastapi uvicorn
 python SynergesisCore_DeepSeek_Pro_Complete.py
 ```
 
+Running the script will start a Uvicorn server on port `8000`. The
+application object is exposed as `app` so you can also launch Uvicorn
+manually if you prefer.
+
 > The first run will download the large English SpaCy model automatically.
 > You can also pre-install it manually with:
 >
