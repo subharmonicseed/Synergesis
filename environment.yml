@@ -1,0 +1,10 @@
+name: synergesis
+channels:
+  - defaults
+dependencies:
+  - python=3.10
+  - pip
+  - pytest
+  - flake8
+  - pip:
+    - -r requirements.txt
