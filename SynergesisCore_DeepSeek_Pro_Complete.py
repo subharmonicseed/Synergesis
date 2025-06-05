@@ -1,20 +1,19 @@
 
 # SynergesisCore_DeepSeek_Pro_Complete.py
+"""Minimal stub of the Synergesis core exposing a basic FastAPI app."""
+# Advanced features described in documentation are not implemented. Run this file directly or launch with `uvicorn SynergesisCore_DeepSeek_Pro_Complete:app --reload`.
 
 import numpy as np
-import pandas as pd
 from sklearn.cluster import MiniBatchKMeans
 from sklearn.decomposition import IncrementalPCA
 from qiskit.quantum_info import Statevector
 from datetime import datetime
-import streamlit as st
-import plotly.graph_objects as go
 import uuid
 from scipy.stats import entropy
 import spacy
 from fastapi import FastAPI, HTTPException
-import requests
 from typing import Dict, Any
+import uvicorn
 
 # Chargement du modèle NLP avancé
 try:
@@ -131,3 +130,42 @@ class SynergesisAPI:
                 "clusters": self.core.memory.clusterer.performance_log[-1],
                 "patterns_count": len(self.core.memory.patterns)
             }
+
+
+# --- Minimal runnable stub -------------------------------------------------
+class _Memory:
+    """Lightweight memory structure used by the demo core."""
+
+    def __init__(self):
+        self.patterns = []
+        self.clusterer = AutoTuningQuantumClustererPro()
+
+
+class _Core:
+    """Very small placeholder core to make the API runnable."""
+
+    def __init__(self):
+        self.memory = _Memory()
+        self.validator = AdvancedContextValidator()
+
+    def process_input(self, quantum_state, context):
+        self.validator.analyze_context(context)
+        pattern_id = str(uuid.uuid4())
+        self.memory.patterns.append(pattern_id)
+        if not self.memory.clusterer.performance_log:
+            self.memory.clusterer.performance_log.append({"timestamp": datetime.utcnow().isoformat()})
+        return pattern_id
+
+
+def create_app():
+    """Instantiate the stub core and expose the FastAPI app."""
+    core = _Core()
+    api = SynergesisAPI(core)
+    return api.app
+
+
+app = create_app()
+
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)
