@@ -8,6 +8,7 @@ This bundle is a **clean, minimal set** of files you can drop in place of `syndu
 | SynergesisCore_DeepSeek_Pro_Complete.py | minimal FastAPI stub |
 | Synergesis_Complete_Compilation_v2.txt | consolidated reference (not runnable) |
 | README.md | this guide |
+| docs/architecture_v8.md | architecture overview |
 
 ## quick start
 
