@@ -1,5 +1,6 @@
 # Synergesis v1.1 — light working pack
-This bundle is a **clean, minimal set** of files you can drop in place of `syndump` to get the engine back up without the overhead.
+This repository provides a clean, minimal set of files. The script `SynergesisCore_DeepSeek_Pro_Complete.py` is a lightweight demo stub; the full Synergesis engine is not included.
+
 
 ## Files
 
