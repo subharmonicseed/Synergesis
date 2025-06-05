@@ -28,3 +28,10 @@ Need the full dashboard or glyph modules? Just ask and I'll package a heavier ar
 ## License
 This project is licensed under the [MIT License](LICENSE).
 
+## Contributing
+Please ensure the test suite runs before opening a pull request:
+
+```bash
+pytest
+```
+

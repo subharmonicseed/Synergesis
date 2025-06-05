@@ -9,6 +9,8 @@ from scipy.stats import entropy
 import spacy
 from fastapi import FastAPI, HTTPException
 from typing import Dict, Any
+import uuid
+from datetime import datetime
 
 # Chargement du modèle NLP avancé
 try:
@@ -158,6 +160,13 @@ class SynergesisAPI:
                 "clusters": self.core.memory.clusterer.performance_log[-1],
                 "patterns_count": len(self.core.memory.patterns)
             }
+
+
+def create_app() -> FastAPI:
+    """Factory to create the FastAPI application."""
+    core = SynergesisCore()
+    api = SynergesisAPI(core)
+    return api.app
 
 
 if __name__ == "__main__":
