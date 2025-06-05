@@ -12,7 +12,11 @@ This bundle is a **clean, minimal set** of files you can drop in place of `syndu
 ## quick start
 
 ```bash
+# install dependencies
+pip install numpy scipy scikit-learn qiskit spacy fastapi uvicorn
+# or use the bundled requirements
 pip install -r requirements.txt
+
 python SynergesisCore_DeepSeek_Pro_Complete.py
 ```
 
