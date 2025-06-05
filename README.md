@@ -18,7 +18,7 @@ pip install --upgrade pip setuptools wheel
 pip install numpy scipy scikit-learn qiskit spacy fastapi uvicorn
 
 # option B – via requirements.txt (si présent)
-# pip install -r requirements.txt
+pip install -r requirements.txt
 
 python SynergesisCore_DeepSeek_Pro_Complete.py
 ```
@@ -66,6 +66,12 @@ PY
 ```
 
 Then install any missing package with `pip install <name>`.
+
+To run the basic test suite, execute:
+
+```bash
+pytest -q
+```
 
 ## License
 
