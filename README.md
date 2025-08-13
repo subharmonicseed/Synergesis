@@ -1,21 +1,15 @@
-# Synergesis 🧠
+# Synergesis AI System 🧠
 
-**Synergesis** is a modular AI agent system that plans, acts, reflects, and learns. It combines LLM reasoning with tool execution (web search, file I/O, shell) to perform complex tasks autonomously.
+**Synergesis** is an advanced modular AI agent system with quantum computing enhancements for knowledge synthesis, inconsistency detection, and creative suggestion generation. It combines LLM reasoning with tool execution (web search, file I/O, shell) and quantum-enhanced algorithms to perform complex tasks autonomously.
 
-![Agent Loop](https://i.imgur.com/abc123.png) <!-- Optional: Add diagram later -->
+## 🔧 Core Features
 
-
-## 🔧 Features
-
-
-- **Planning Agent**: Breaks tasks into steps
-- **Reflection**: Self-critiques and improves plans
-- **Memory**: Short-term and long-term memory (JSON)
-- **Tools**:
-  - Web search (via SerpAPI)
-  - File read/write (sandboxed)
-  - Shell commands (safe execution)
-- **Extensible**: Easy to add new tools and agents
+- **Modular Architecture**: Clean separation of agents, core, API, CLI, and storage components
+- **Quantum Agents**: Enhanced agents using quantum computing principles (Qiskit/PennyLane)
+- **Persistent Storage**: Neo4j graph database integration for knowledge persistence
+- **Multiple Interfaces**: Web dashboard and CLI chat interfaces
+- **Security**: Sandboxed tools and secure environment configuration
+- **Testing**: Comprehensive test suite with pytest
 
 
 ## 🚀 Quick Start
