@@ -1,17 +1,23 @@
+# synergesis/storage/neo4j_interface.py
+"""
+Interface for interacting with a Neo4j graph database.
+Handles connection and provides methods for data persistence.
+"""
 from __future__ import annotations
-
-from typing import Any, Dict, List, Optional
+import os
+from typing import Any, List
 
 try:
-    from neo4j import GraphDatabase
-except Exception:  # pragma: no cover - optional dependency
-    GraphDatabase = None  # type: ignore
+    from neo4j import GraphDatabase, Driver
+except ImportError:  # pragma: no cover - optional dependency
+    GraphDatabase = None
+    Driver = None
 
-GlyphData = Dict[str, Any]
-
+from synergesis.glyph_core import Glyph
+from synergesis.utils.data_conversion import pydantic_to_neo4j
 
 class Neo4jInterface:
-    """Thin wrapper around the neo4j driver."""
+    """Manages the connection and data operations for the Neo4j database."""
 
     def __init__(
         self,
@@ -19,54 +25,61 @@ class Neo4jInterface:
         user: str | None = None,
         password: str | None = None,
         *,
-        driver: Any = None,
+        driver: Driver | None = None,
     ) -> None:
-        """Initialize the interface.
-
-        Parameters
-        ----------
-        uri:
-            Bolt URI of the Neo4j instance.
-        user:
-            Username for authentication.
-        password:
-            Password for authentication.
-        driver:
-            Preconfigured driver, mainly for testing. If provided, ``uri`` and
-            credentials are ignored.
         """
-
-        if driver is not None:
+        Initializes the interface and connects to the database.
+        Connection details are read from environment variables as a fallback.
+        """
+        if driver:
             self._driver = driver
             return
+
         if GraphDatabase is None:
-            raise ImportError("neo4j package is required when no driver is provided")
-        self._driver = GraphDatabase.driver(uri, auth=(user, password))
+            raise ImportError("The 'neo4j' package is required to use Neo4jInterface.")
+
+        db_uri = uri or os.environ.get("NEO4J_URI")
+        db_user = user or os.environ.get("NEO4J_USER")
+        db_password = password or os.environ.get("NEO4J_PASSWORD")
+
+        if not all([db_uri, db_user, db_password]):
+            raise ValueError(
+                "Database connection details are missing. "
+                "Please provide them as arguments or set NEO4J_URI, "
+                "NEO4J_USER, and NEO4J_PASSWORD environment variables."
+            )
+
+        self._driver = GraphDatabase.driver(db_uri, auth=(db_user, db_password))
 
     def close(self) -> None:
-        """Close the underlying driver."""
-        self._driver.close()
+        """Closes the underlying database driver."""
+        if self._driver:
+            self._driver.close()
 
-    # ------------------------------------------------------------------
-    def upsert_glyph_node(self, glyph: GlyphData) -> None:
-        """Create or update a glyph node."""
-        gid = glyph.get("id")
-        if gid is None:
-            raise ValueError("Glyph must have an 'id' field")
-        props = {k: v for k, v in glyph.items() if k != "id"}
-        query = "MERGE (g:Glyph {id:$id})\nSET g += $props"
+    def bulk_upsert_glyphs(self, glyphs: List[Glyph]) -> None:
+        """
+        Upserts a batch of glyphs into the database efficiently.
+        It uses MERGE on the glyph's ID to either create a new node or update
+        an existing one.
+
+        Args:
+            glyphs: A list of Glyph objects to upsert.
+        """
+        if not glyphs:
+            return
+
+        # Convert Pydantic models to Neo4j-compatible dictionaries
+        glyph_properties = [pydantic_to_neo4j(g) for g in glyphs]
+
+        # This query uses UNWIND to process a list of glyphs as a stream,
+        # which is the most performant way to handle bulk operations in Neo4j.
+        query = """
+        UNWIND $glyphs AS glyph_props
+        MERGE (g:Glyph {id: glyph_props.id})
+        SET g = glyph_props
+        """
         try:
             with self._driver.session() as session:
-                session.run(query, id=gid, props=props)
+                session.run(query, glyphs=glyph_properties)
         except Exception as exc:  # pragma: no cover - driver errors
-            raise RuntimeError(f"Failed to upsert glyph {gid}: {exc}") from exc
-
-    def bulk_upsert_glyphs(self, glyphs: List[GlyphData], /, batch_size: int = 100) -> None:
-        """Upsert glyphs in batches."""
-        for start in range(0, len(glyphs), batch_size):
-            batch = glyphs[start : start + batch_size]
-            for glyph in batch:
-                self.upsert_glyph_node(glyph)
-
-
-__all__ = ["Neo4jInterface"]
+            raise RuntimeError(f"Failed to bulk upsert glyphs: {exc}") from exc

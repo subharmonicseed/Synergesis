@@ -1,8 +1,18 @@
+# Core Dependencies
+fastapi
+uvicorn[standard]
 numpy
 scipy
 scikit-learn
 qiskit
 spacy
-fastapi
-uvicorn
+neo4j
+
+# Testing
 pytest
+httpx
+
+# --- Spacy Model ---
+# The application requires the 'en_core_web_lg' model from Spacy.
+# After installing the dependencies above, please download the model by running:
+# python -m spacy download en_core_web_lg
