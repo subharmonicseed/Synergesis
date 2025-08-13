@@ -1,0 +1,54 @@
+
+general:
+  mode: "backtest"
+  ticker: "BTC/USDT"
+  interval: "15m"
+  history_period: "3d"
+  initial_capital: 10000
+  api: "ccxt"
+  exchange: "binance"
+  max_data_rows: 5000
+
+symbolic:
+  polarity_threshold_strong: 0.55
+  polarity_threshold_neutral: 0.18
+  decision_long_entry_threshold: 0.65
+  decision_short_entry_threshold: -0.65
+  glyph_stability_window: 5
+
+external_data:
+  sentiment_smoothing_period: 5
+  event_impact_decay_periods: 4
+  enable_nlp_glyph: true
+  nlp_engine_type: "simple"
+
+ml:
+  glyph_sequence_length: 7
+  use_rnn_prediction: true
+  rnn_confidence_threshold: 0.65
+  use_rl_decision: true
+  rl_confidence_threshold: 0.7
+  rnn_model_path: "models/syntraders_rnn_predictor.pt"
+  rl_agent_path: "models/syntraders_ppo_agent.zip"
+  rnn_feature_dim: 15
+  rl_state_dim: 18
+
+risk:
+  base_position_sizing_method: "risk_percent"
+  risk_per_trade_percent: 0.01
+  max_position_percent_of_capital: 0.10
+  commission_percent: 0.00075
+  slippage_percent: 0.0002
+
+adaptation:
+  enabled: false
+  update_frequency_trades: 50
+
+logging:
+  level: "INFO"
+  log_file: "syntraders_live.log"
+  log_to_console: true
+
+dashboard:
+  enabled: true
+  update_frequency_secs: 5

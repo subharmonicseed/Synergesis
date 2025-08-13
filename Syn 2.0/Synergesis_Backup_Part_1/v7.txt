@@ -1,0 +1,722 @@
+Acknowledged. Phase VII: Activating the Auto-Adaptive Symbolic Topology. We will endow Synergesis with a spatial awareness of its own symbolic field, enabling self-contemplation and reconfiguration through topological analysis.
+
+This involves creating the glyph_topology_engine.py to compute relationships and clusters, and augmenting the dashboard (glyph_dashboard_phase_vii.py) to visualize this dynamic topology interactively.
+
+1. New File: glyph_topology_engine.py
+
+This module handles the core logic of graph creation, clustering, and distance calculation.
+
+# File: glyph_topology_engine.py
+# Description: Synergesis Phase VII - Symbolic Topology Engine
+# Builds graph representations, clusters glyphs, and computes distances.
+
+import time
+import logging
+import sys
+from typing import List, Dict, Any, Optional, Tuple, Union
+import pandas as pd
+import numpy as np
+import networkx as nx # Requires: pip install networkx
+from sklearn.metrics.pairwise import cosine_similarity # Requires: pip install scikit-learn
+from sklearn.feature_extraction.text import TfidfVectorizer # For tag-based distance
+import math
+
+# --- Import Core & Phase IV Modules ---
+try:
+    from glyph_core import (
+        GlyphData, CompositePolarity, CompositeAlignment, GlyphRelationship,
+        is_composite_polarity, is_composite_alignment, SIMPLE_POLARITIES,
+        SIMPLE_ALIGNMENTS, RELATIONSHIP_TYPES
+    )
+    # Import helpers if needed (e.g., _normalize)
+    # from delta_translate import _normalize
+except ImportError as e:
+    print(f"WARNING: Topology Engine - Could not import all Synergesis modules: {e}. Using placeholders.")
+    GlyphData = Dict[str, Any]
+    RELATIONSHIP_TYPES = ['causes', 'references', 'contains', 'harmonizes_with', 'conflicts_with']
+    SIMPLE_POLARITIES = ['+', '-', '0', '±', '?']
+    SIMPLE_ALIGNMENTS = ['Celestial', 'Chthonic', 'Void', 'Harmonic', 'Elemental', 'Error']
+    # Define fallback _normalize if needed
+    def _normalize(value: Optional[float], min_val: float, max_val: float) -> float:
+        if value is None or pd.isna(value) or pd.isna(min_val) or pd.isna(max_val) or max_val == min_val: return 0.5
+        return max(0.0, min(1.0, (float(value) - min_val) / (max_val - min_val)))
+
+
+# --- Logging Setup ---
+logger = logging.getLogger("GlyphTopologyEngine")
+logger.setLevel(logging.INFO)
+if not logger.hasHandlers():
+    handler = logging.StreamHandler(sys.stdout)
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+
+# --- Constants ---
+# Weighting factors for symbolic distance calculation (tune these)
+WEIGHTS_DISTANCE = {
+    'polarity': 0.25,
+    'alignment': 0.25,
+    'frequency': 0.15,
+    'weight': 0.10,
+    'entropy': 0.10,
+    'tags': 0.15,
+}
+# Default attribute values for distance calculation if missing
+DEFAULT_ATTRS = {
+    'fréquence': 72, 'poids': 5, 'entropy_score': 0.5, 'resonance': 50, 'emergence': 360
+}
+# Clustering parameters
+MIN_CLUSTER_SIZE = 3
+
+# --- Helper Functions ---
+
+def _get_dominant_property(prop_value: Union[str, List, Dict, None], prop_type: str) -> str:
+    """Gets the dominant simple value (copied/adapted from dashboard/cortex)."""
+    if prop_type == 'polarity':
+        if isinstance(prop_value, list) and prop_value: return max(prop_value, key=lambda item: item[1])[0]
+        elif isinstance(prop_value, str) and prop_value in SIMPLE_POLARITIES: return prop_value
+        else: return '?'
+    elif prop_type == 'alignment':
+        if isinstance(prop_value, dict) and prop_value: return max(prop_value, key=prop_value.get, default='Error')
+        elif isinstance(prop_value, str) and prop_value in SIMPLE_ALIGNMENTS: return prop_value
+        else: return 'Error'
+    return '?'
+
+def _calculate_polarity_distance(p1_val, p2_val) -> float:
+    """Calculates distance between two polarities (0=identical, 1=opposite, 0.5=neutral)."""
+    p1 = _get_dominant_property(p1_val, 'polarity')
+    p2 = _get_dominant_property(p2_val, 'polarity')
+    if p1 == p2: return 0.0
+    # Opposite polarities (+ vs -) have max distance
+    if {p1, p2} == {'+', '-'}: return 1.0
+    # Neutral (0) vs non-neutral (+ or -)
+    if '0' in [p1, p2] and ('+' in [p1, p2] or '-' in [p1, p2]): return 0.6
+    # Oscillating (±) vs others
+    if '±' in [p1, p2] and ('0' not in [p1, p2]): return 0.5 # vs +/-
+    if '±' in [p1, p2] and '0' in [p1, p2]: return 0.3 # vs 0
+    # Unknown (?) vs others
+    if '?' in [p1, p2]: return 0.7
+    return 0.5 # Default distance for other combinations
+
+
+def _calculate_alignment_distance(a1_val, a2_val) -> float:
+    """Calculates distance between two alignments (0=identical, 1=conflicting, 0.5=neutral)."""
+    # Simple version based on dominant alignment - can be enhanced with composite logic
+    a1 = _get_dominant_property(a1_val, 'alignment')
+    a2 = _get_dominant_property(a2_val, 'alignment')
+    if a1 == 'Error' or a2 == 'Error': return 0.8 # High distance if error
+    if a1 == a2: return 0.0
+    # Define known conflicting pairs (adjust based on symbolic theory)
+    conflicts = [{'Celestial', 'Chthonic'}, {'Harmonic', 'Elemental'}] # Example
+    if {a1, a2} in conflicts: return 1.0
+    # Define synergistic pairs (low distance)
+    synergies = [{'Harmonic', 'Celestial'}, {'Elemental', 'Void'}] # Example
+    if {a1, a2} in synergies: return 0.2
+    return 0.6 # Default distance for different but non-conflicting alignments
+
+# --- Core Topology Functions ---
+
+def compute_symbolic_distance(g1: GlyphData, g2: GlyphData,
+                              tfidf_vectorizer: Optional[TfidfVectorizer] = None,
+                              tfidf_matrix: Optional[np.ndarray] = None,
+                              glyph_indices: Optional[Dict[str, int]] = None) -> float:
+    """
+    Computes a weighted distance between two glyphs based on their symbolic properties.
+    Distance is normalized between 0 (identical) and 1 (maximally dissimilar).
+
+    Args:
+        g1: First glyph dictionary.
+        g2: Second glyph dictionary.
+        tfidf_vectorizer: Pre-fitted TF-IDF vectorizer for tags (optional).
+        tfidf_matrix: Pre-computed TF-IDF matrix (optional).
+        glyph_indices: Mapping from glyph ID to matrix index (optional).
+
+    Returns:
+        A float representing the symbolic distance.
+    """
+    total_distance = 0.0
+    total_weight = 0.0
+
+    # --- Polarity Distance ---
+    pol_dist = _calculate_polarity_distance(g1.get('polarité'), g2.get('polarité'))
+    total_distance += pol_dist * WEIGHTS_DISTANCE['polarity']
+    total_weight += WEIGHTS_DISTANCE['polarity']
+
+    # --- Alignment Distance ---
+    aln_dist = _calculate_alignment_distance(g1.get('alignement'), g2.get('alignement'))
+    total_distance += aln_dist * WEIGHTS_DISTANCE['alignment']
+    total_weight += WEIGHTS_DISTANCE['alignment']
+
+    # --- Numerical Property Distances (Normalized) ---
+    for prop, weight in [('fréquence', WEIGHTS_DISTANCE['frequency']),
+                         ('poids', WEIGHTS_DISTANCE['weight']),
+                         ('entropy_score', WEIGHTS_DISTANCE['entropy'])]:
+        v1 = g1.get(prop, DEFAULT_ATTRS.get(prop))
+        v2 = g2.get(prop, DEFAULT_ATTRS.get(prop))
+        # Define reasonable min/max for normalization (adjust as needed)
+        min_max = {'fréquence': (1, 144), 'poids': (1, 10), 'entropy_score': (0.0, 1.0)}
+        norm_dist = abs(_normalize(v1, *min_max[prop]) - _normalize(v2, *min_max[prop]))
+        total_distance += norm_dist * weight
+        total_weight += weight
+
+    # --- Tag Distance (Using TF-IDF Cosine Similarity -> Distance) ---
+    tag_weight = WEIGHTS_DISTANCE['tags']
+    if tfidf_vectorizer and tfidf_matrix is not None and glyph_indices and g1['id'] in glyph_indices and g2['id'] in glyph_indices:
+        idx1 = glyph_indices[g1['id']]
+        idx2 = glyph_indices[g2['id']]
+        # Cosine similarity -> distance (1 - similarity)
+        # Ensure vectors are reshaped correctly for pairwise calculation
+        similarity = cosine_similarity(tfidf_matrix[idx1:idx1+1], tfidf_matrix[idx2:idx2+1])[0][0]
+        tag_dist = max(0.0, 1.0 - similarity) # Ensure distance is non-negative
+        total_distance += tag_dist * tag_weight
+    else:
+        # Fallback: Jaccard distance if TF-IDF not provided
+        tags1 = set(g1.get('tags', []))
+        tags2 = set(g2.get('tags', []))
+        intersection = len(tags1.intersection(tags2))
+        union = len(tags1.union(tags2))
+        jaccard_dist = 1.0 - (intersection / union) if union > 0 else 1.0
+        total_distance += jaccard_dist * tag_weight
+    total_weight += tag_weight
+
+    # Final weighted average distance
+    return total_distance / total_weight if total_weight > 0 else 0.5
+
+
+def build_glyph_graph(glyphs: List[GlyphData],
+                      distance_threshold: float = 0.4,
+                      include_similarity_edges: bool = True) -> nx.Graph:
+    """
+    Builds a NetworkX graph representing the glyphic topology.
+
+    Nodes represent glyphs, with properties as attributes.
+    Edges represent explicit relationships (from glyph.relationships)
+    and/or implicit similarity (below distance_threshold).
+
+    Args:
+        glyphs: List of glyph dictionaries.
+        distance_threshold: Connect glyphs with distance below this threshold.
+        include_similarity_edges: Whether to compute and add similarity edges.
+
+    Returns:
+        A NetworkX graph instance.
+    """
+    G = nx.Graph()
+    if not glyphs: return G
+
+    logger.info(f"Building glyph graph for {len(glyphs)} glyphs...")
+
+    # Pre-compute TF-IDF for tag distance calculation (optional but efficient)
+    tfidf_vectorizer = None
+    tfidf_matrix = None
+    glyph_indices = None
+    if include_similarity_edges and len(glyphs) > 1:
+        try:
+            # Use tags for TF-IDF, join list into space-separated string
+            corpus = [" ".join(g.get('tags', [])) for g in glyphs]
+            glyph_indices = {g['id']: i for i, g in enumerate(glyphs)}
+            tfidf_vectorizer = TfidfVectorizer(lowercase=True, stop_words='english', max_features=500)
+            tfidf_matrix = tfidf_vectorizer.fit_transform(corpus)
+            logger.debug(f"TF-IDF matrix computed: shape {tfidf_matrix.shape}")
+        except Exception as e:
+            logger.warning(f"TF-IDF calculation failed: {e}. Falling back to Jaccard distance for tags.")
+            tfidf_vectorizer = None; tfidf_matrix = None; glyph_indices = None
+
+    # Add nodes with attributes
+    for glyph in glyphs:
+        if 'id' not in glyph: continue # Skip invalid glyphs
+        # Prepare attributes for the node, flatten complex ones for visualization maybe
+        node_attrs = {
+            'id': glyph['id'], # Ensure ID is an attribute too
+            'timestamp': glyph.get('timestamp'),
+            'polarity': _get_dominant_property(glyph.get('polarité'), 'polarity'),
+            'alignment': _get_dominant_property(glyph.get('alignement'), 'alignment'),
+            'frequency': glyph.get('fréquence', DEFAULT_ATTRS['fréquence']),
+            'weight': glyph.get('poids', DEFAULT_ATTRS['poids']),
+            'entropy': glyph.get('entropy_score', DEFAULT_ATTRS['entropy_score']),
+            'resonance': glyph.get('resonance', DEFAULT_ATTRS['resonance']),
+            'emergence': glyph.get('emergence', DEFAULT_ATTRS['emergence']),
+            'stability': glyph.get('stability'),
+            'status': glyph.get('status'),
+            'tags': ", ".join(glyph.get('tags', [])), # Join tags for display
+            'composite_pol': is_composite_polarity(glyph.get('polarité')),
+            'composite_aln': is_composite_alignment(glyph.get('alignement')),
+            'is_fused': 'fused' in glyph.get('tags', []),
+            'is_reflexive': 'reflexive' in glyph.get('tags', []),
+            # Add more attributes as needed for visualization/analysis
+        }
+        # Filter out None values before adding node
+        node_attrs_clean = {k: v for k, v in node_attrs.items() if v is not None}
+        G.add_node(glyph['id'], **node_attrs_clean)
+
+    # Add explicit relationship edges
+    explicit_edge_count = 0
+    for glyph in glyphs:
+        glyph_id = glyph['id']
+        if not G.has_node(glyph_id): continue # Skip if node wasn't added
+        for rel in glyph.get('relationships', []):
+            target_id = rel.get('target_glyph_id')
+            rel_type = rel.get('type')
+            if target_id and rel_type and G.has_node(target_id):
+                 # Add edge with relationship type as attribute
+                 # For undirected graph, relationships like 'causes'/'caused_by' are less distinct
+                 G.add_edge(glyph_id, target_id, type='explicit', relationship=rel_type, weight=0.8) # Higher weight for explicit
+                 explicit_edge_count += 1
+    logger.debug(f"Added {explicit_edge_count} explicit relationship edges.")
+
+    # Add implicit similarity edges (if enabled)
+    similarity_edge_count = 0
+    if include_similarity_edges and len(glyphs) > 1:
+        logger.debug(f"Calculating similarity edges (threshold: {distance_threshold})...")
+        # Compute pairwise distances (can be slow for large N)
+        for i in range(len(glyphs)):
+            for j in range(i + 1, len(glyphs)):
+                g1 = glyphs[i]
+                g2 = glyphs[j]
+                if 'id' not in g1 or 'id' not in g2: continue
+
+                distance = compute_symbolic_distance(g1, g2, tfidf_vectorizer, tfidf_matrix, glyph_indices)
+                if distance < distance_threshold:
+                    # Add edge if distance is below threshold
+                    # Weight edge inversely proportional to distance (closer = stronger edge)
+                    similarity_weight = max(0.01, 1.0 - (distance / distance_threshold)) # Scale 0-1
+                    # Avoid adding edge if an explicit one already exists (or update weight?)
+                    if not G.has_edge(g1['id'], g2['id']):
+                         G.add_edge(g1['id'], g2['id'], type='similarity', distance=round(distance, 3), weight=round(similarity_weight, 2))
+                         similarity_edge_count += 1
+        logger.debug(f"Added {similarity_edge_count} similarity edges.")
+
+    logger.info(f"Glyph graph built: {G.number_of_nodes()} nodes, {G.number_of_edges()} edges.")
+    return G
+
+
+def cluster_glyphs(glyphs: List[GlyphData],
+                     strategy: str = 'alignment_polarity') -> Dict[str, List[str]]:
+    """
+    Groups glyphs into clusters based on a chosen strategy.
+
+    Args:
+        glyphs: List of glyph dictionaries.
+        strategy: Clustering strategy ('alignment', 'polarity', 'alignment_polarity', 'resonance_band').
+
+    Returns:
+        A dictionary where keys are cluster names and values are lists of glyph IDs.
+    """
+    clusters: Dict[str, List[str]] = {}
+    if not glyphs: return clusters
+
+    logger.info(f"Clustering {len(glyphs)} glyphs using strategy: {strategy}...")
+
+    for glyph in glyphs:
+        if 'id' not in glyph: continue
+        cluster_key = "Unclustered"
+
+        try:
+            if strategy == 'alignment':
+                cluster_key = f"Align: {_get_dominant_property(glyph.get('alignement'), 'alignment')}"
+            elif strategy == 'polarity':
+                cluster_key = f"Pol: {_get_dominant_property(glyph.get('polarité'), 'polarity')}"
+            elif strategy == 'alignment_polarity':
+                align = _get_dominant_property(glyph.get('alignement'), 'alignment')
+                pol = _get_dominant_property(glyph.get('polarité'), 'polarity')
+                cluster_key = f"{align} / {pol}"
+            elif strategy == 'resonance_band':
+                res = glyph.get('resonance', DEFAULT_ATTRS['resonance'])
+                if res >= 75: band = "High-Res"
+                elif res >= 40: band = "Mid-Res"
+                else: band = "Low-Res"
+                cluster_key = f"Res: {band}"
+            elif strategy == 'stability':
+                 stab = glyph.get('stability', 'MEDIUM')
+                 cluster_key = f"Stab: {stab}"
+
+            if cluster_key not in clusters:
+                clusters[cluster_key] = []
+            clusters[cluster_key].append(glyph['id'])
+
+        except Exception as e:
+             logger.warning(f"Failed to assign cluster key for glyph {glyph['id']}: {e}")
+             if "Unclustered" not in clusters: clusters["Unclustered"] = []
+             clusters["Unclustered"].append(glyph['id'])
+
+    # Optional: Filter out very small clusters
+    final_clusters = {k: v for k, v in clusters.items() if len(v) >= MIN_CLUSTER_SIZE}
+    unclustered_count = sum(len(v) for k, v in clusters.items() if len(v) < MIN_CLUSTER_SIZE)
+    if unclustered_count > 0:
+         logger.info(f"Filtered out {len(clusters) - len(final_clusters)} clusters smaller than {MIN_CLUSTER_SIZE} ({unclustered_count} glyphs).")
+
+    logger.info(f"Clustering complete. Found {len(final_clusters)} clusters.")
+    return final_clusters
+
+
+# --- Example Usage ---
+if __name__ == "__main__":
+    # Create some dummy glyphs for testing
+    test_glyphs: List[GlyphData] = [
+        {'id': 'g1', 'timestamp': time.time()-100, 'polarité': '+', 'fréquence': 80, 'poids': 7, 'alignement': 'Celestial', 'tags': ['idea', 'growth', 'fast'], 'entropy_score': 0.4, 'resonance': 85},
+        {'id': 'g2', 'timestamp': time.time()-90, 'polarité': '+', 'fréquence': 70, 'poids': 6, 'alignement': 'Celestial', 'tags': ['concept', 'future', 'fast'], 'entropy_score': 0.3, 'resonance': 75},
+        {'id': 'g3', 'timestamp': time.time()-80, 'polarité': '-', 'fréquence': 20, 'poids': 5, 'alignement': 'Chthonic', 'tags': ['debt', 'structure', 'slow'], 'entropy_score': 0.8, 'resonance': 25},
+        {'id': 'g4', 'timestamp': time.time()-70, 'polarité': '0', 'fréquence': 50, 'poids': 4, 'alignement': 'Harmonic', 'tags': ['balance', 'system', 'stable'], 'entropy_score': 0.2, 'resonance': 60},
+        {'id': 'g5', 'timestamp': time.time()-60, 'polarité': '±', 'fréquence': 110, 'poids': 8, 'alignement': 'Elemental', 'tags': ['change', 'dynamic', 'fast'], 'entropy_score': 0.7, 'resonance': 70, 'relationships': [{'type': 'causes', 'target_glyph_id': 'g1'}]}, # Explicit relationship
+    ]
+
+    print("--- Testing Symbolic Distance ---")
+    dist_1_2 = compute_symbolic_distance(test_glyphs[0], test_glyphs[1])
+    dist_1_3 = compute_symbolic_distance(test_glyphs[0], test_glyphs[2])
+    dist_3_4 = compute_symbolic_distance(test_glyphs[2], test_glyphs[3])
+    print(f"Distance G1 <-> G2 (Similar): {dist_1_2:.3f}")
+    print(f"Distance G1 <-> G3 (Different): {dist_1_3:.3f}")
+    print(f"Distance G3 <-> G4 (Different): {dist_3_4:.3f}")
+
+    print("\n--- Testing Graph Building ---")
+    graph = build_glyph_graph(test_glyphs, distance_threshold=0.5)
+    print(f"Graph Nodes: {graph.nodes(data=True)}")
+    print(f"Graph Edges: {graph.edges(data=True)}")
+
+    # Check specific edges
+    if graph.has_edge('g1', 'g2'): print(f"Edge g1-g2 data: {graph.get_edge_data('g1', 'g2')}")
+    if graph.has_edge('g1', 'g5'): print(f"Edge g1-g5 data: {graph.get_edge_data('g1', 'g5')}") # Should be explicit
+
+    print("\n--- Testing Clustering (alignment_polarity) ---")
+    clusters = cluster_glyphs(test_glyphs, strategy='alignment_polarity')
+    print(json.dumps(clusters, indent=2))
+
+    print("\n--- Testing Clustering (resonance_band) ---")
+    clusters_res = cluster_glyphs(test_glyphs, strategy='resonance_band')
+    print(json.dumps(clusters_res, indent=2))
+
+
+2. Updated File: glyph_dashboard_phase_vii.py
+
+This integrates the topology engine and adds the new visualization tab. It builds upon glyph_dashboard_phase_vi.py.
+
+# File: glyph_dashboard_phase_vii.py
+# Description: Streamlit Dashboard for Synergesis Phase VII - Visualizing Symbolic Topology.
+
+import streamlit as st
+import pandas as pd
+import json
+import random
+import time
+from datetime import datetime, timezone
+from typing import Dict, List, Optional, Any, Tuple, Union
+from copy import deepcopy
+import math
+import sys
+import networkx as nx # Added for Phase VII
+
+# --- Attempt Imports ---
+try:
+    from glyph_core import (GlyphData, ...) # Import types
+    from glyph_fusion_engine import fuse_glyphs
+    # --- Phase VII Import ---
+    from glyph_topology_engine import build_glyph_graph, cluster_glyphs, compute_symbolic_distance
+    # Assume these exist for context
+    # from reflexive_cortex import ReflexiveCortex
+    # from ai_to_glyph import response_to_glyph
+except ImportError as e:
+    st.error(f"Synergesis Module Import Error: {e}. Running with dummy data/functions.")
+    # Define fallbacks (same as Phase VI dashboard)
+    GlyphData = Dict[str, Any]
+    def fuse_glyphs(l, **kwargs): return {"id": "dummy-fused", ...}
+    SIMPLE_POLARITIES = ['+', '-', '0', '±', '?']
+    SIMPLE_ALIGNMENTS = ['Celestial', 'Chthonic', 'Void', 'Harmonic', 'Elemental', 'Error']
+    STATUS_VALUES = ['received', 'translated', 'fused', 'error', 'generated_reflexive']
+    # Dummy topology functions
+    def build_glyph_graph(g, **kwargs): return nx.Graph()
+    def cluster_glyphs(g, **kwargs): return {"Dummy Cluster": [item['id'] for item in g[:3]] if g else []}
+    def compute_symbolic_distance(g1, g2, **kwargs): return random.random()
+
+# --- Plotting Libraries ---
+try:
+    import plotly.express as px
+    import plotly.graph_objects as go
+    PLOTLY_AVAILABLE = True
+except ImportError: PLOTLY_AVAILABLE = False; st.warning("Plotly not found (`pip install plotly`). Some charts disabled.")
+
+try:
+    from pyvis.network import Network # Requires: pip install pyvis
+    PYVIS_AVAILABLE = True
+except ImportError: PYVIS_AVAILABLE = False; st.warning("Pyvis not found (`pip install pyvis`). Network graph disabled.")
+
+
+# --- Dashboard Config & Constants (Keep from Phase VI) ---
+APP_TITLE = "Synergesis ∮ Symbolic Topology (Phase VII)"
+REFRESH_INTERVAL_SECONDS = 15 # Slightly longer refresh for topology processing
+FUSION_CANDIDATE_TAG = "fuse_candidate"
+REFLEXIVE_TAG = "reflexive"
+DIAGNOSIS_TAG_PREFIX = "diagnosis:"
+
+# Visual Mappings (Keep from Phase VI)
+ALIGNMENT_COLORS = { ... }
+POLARITY_SHAPES = { ... } # Used for node shapes maybe
+STABILITY_BORDERS = { ... }
+
+# --- Session State Initialization (Add topology state) ---
+if 'selected_glyph_id' not in st.session_state: st.session_state.selected_glyph_id = None
+if 'mock_glyph_db' not in st.session_state: st.session_state.mock_glyph_db = []
+if 'last_refresh_time' not in st.session_state: st.session_state.last_refresh_time = 0
+# --- Phase VII State ---
+if 'current_clusters' not in st.session_state: st.session_state.current_clusters = {}
+if 'cluster_strategy' not in st.session_state: st.session_state.cluster_strategy = 'alignment_polarity'
+if 'graph_layout_seed' not in st.session_state: st.session_state.graph_layout_seed = random.randint(1, 10000)
+
+
+# --- Data Loading / Simulation (Keep from Phase VI) ---
+# @st.cache_data # Caching might interfere with live updates, use with caution
+def load_or_simulate_glyphs(num_initial=40):
+    # ... (Keep simulation logic from Phase VI dashboard) ...
+    # Ensure simulated glyphs have metrics needed for distance/clustering
+    if not st.session_state.mock_glyph_db:
+        print("Simulating initial glyph data (Phase VII)...")
+        simulated_db = []
+        # ... generate glyphs ...
+        for i in range(num_initial):
+             # ... (generate props) ...
+             glyph: GlyphData = { # type: ignore
+                 # ... (core props) ...
+                 'entropy_score': round(random.random(), 2),
+                 'resonance': round(max(0, random.gauss(50, 30)), 1),
+                 'emergence': random.randint(50, 800),
+                 'stability': random.choice(["HIGH", "MEDIUM", "LOW"]),
+                 # ... (tags, status etc) ...
+             }
+             simulated_db.append(glyph)
+        st.session_state.mock_glyph_db = sorted(simulated_db, key=lambda g: g.get('timestamp', 0), reverse=True)
+    return st.session_state.mock_glyph_db
+
+
+# --- Utility & Rendering Functions (Keep/Adapt from Phase VI) ---
+def get_dominant_property(...): ...
+def filter_glyphs(...): ...
+def render_glyph_svg(...): ... # Keep SVG generation
+def display_glyph_card(...): ... # Keep card display
+def render_glyph_details(...): ... # Keep details display
+def compute_coherence_metrics(...): ... # Keep metrics calculation
+def plot_metrics(...): ... # Keep plotting functions
+
+# --- NEW Phase VII Rendering Function ---
+
+def render_topology_graph(glyphs: List[GlyphData], clusters: Dict[str, List[str]],
+                          distance_threshold: float, layout_seed: int):
+    """Renders the interactive glyph topology graph using Pyvis."""
+    if not PYVIS_AVAILABLE:
+        st.error("Pyvis library not installed. Cannot render network graph.")
+        return
+    if not glyphs:
+        st.info("No glyphs available to build topology graph.")
+        return
+
+    st.subheader("Glyph Topology Graph")
+    graph_status = st.empty()
+    graph_status.info("Building graph and calculating layout...")
+
+    try:
+        # Build the NetworkX graph
+        # Consider caching this step based on hash of glyph IDs/timestamps?
+        G = build_glyph_graph(glyphs, distance_threshold=distance_threshold, include_similarity_edges=True)
+
+        if G.number_of_nodes() == 0:
+             graph_status.info("No nodes in the generated graph.")
+             return
+
+        # Create Pyvis network
+        net = Network(notebook=True, cdn_resources='in_line', height='600px', width='100%')
+
+        # Map clusters to colors (generate random colors if needed)
+        cluster_map = {}
+        available_colors = px.colors.qualitative.Plotly # Use Plotly colors
+        color_idx = 0
+        node_id_to_cluster = {}
+        for cluster_name, glyph_ids in clusters.items():
+            cluster_color = available_colors[color_idx % len(available_colors)]
+            cluster_map[cluster_name] = cluster_color
+            for glyph_id in glyph_ids:
+                node_id_to_cluster[glyph_id] = cluster_name
+            color_idx += 1
+
+        # Add nodes to Pyvis graph
+        for node_id, attrs in G.nodes(data=True):
+            cluster_name = node_id_to_cluster.get(node_id, "Unclustered")
+            node_color = cluster_map.get(cluster_name, "#888888") # Default grey
+            # Scale node size based on weight or emergence?
+            node_size = 10 + attrs.get('weight', 5) * 1.5
+            # Tooltip
+            title = f"ID: {node_id}\n"
+            title += f"P:{attrs.get('polarity','?')} F:{attrs.get('frequency','?')} W:{attrs.get('weight','?')}\n"
+            title += f"A:{attrs.get('alignment','?')}\n"
+            title += f"Res:{attrs.get('resonance','N/A'):.1f} Ent:{attrs.get('entropy','N/A'):.2f}\n"
+            title += f"Cluster: {cluster_name}\n"
+            title += f"Tags: {attrs.get('tags', '')[:100]}" # Show some tags
+
+            net.add_node(node_id, label=node_id[:6], title=title, color=node_color, size=node_size, group=cluster_name)
+
+        # Add edges to Pyvis graph
+        for u, v, attrs in G.edges(data=True):
+            edge_color = "#CCCCCC" # Default grey for similarity
+            width = 1
+            title = f"Similarity: {1.0 - attrs.get('distance', 0.5):.2f}" if attrs.get('type') == 'similarity' else ""
+            if attrs.get('type') == 'explicit':
+                edge_color = "#5555AA" # Darker blue for explicit
+                width = 3
+                title = f"Relation: {attrs.get('relationship', '?')}"
+
+            net.add_edge(u, v, color=edge_color, width=width, title=title)
+
+        # Configure physics and options
+        # net.show_buttons(filter_=['physics'])
+        # Use a stable layout algorithm if performance is an issue
+        # net.force_atlas_2based(gravity=-30, central_gravity=0.01, spring_length=100)
+        # Using barnesHut for better default distribution
+        net.barnes_hut(gravity=-4000, central_gravity=0.1, spring_length=150, overlap=0.1)
+        # net.repulsion(node_distance=120, spring_length=150) # Alternative physics
+
+        # Save and display graph
+        graph_html_path = "glyph_topology_graph.html"
+        net.save_graph(graph_html_path)
+        graph_status.success("Graph generated successfully.")
+
+        # Embed the HTML file
+        with open(graph_html_path, 'r', encoding='utf-8') as f:
+            html_content = f.read()
+        st.components.v1.html(html_content, height=610) # Adjust height as needed
+
+    except Exception as e:
+        logger.error(f"Error rendering topology graph: {e}", exc_info=True)
+        graph_status.error(f"Failed to render graph: {e}")
+
+
+# --- Main App Layout (Phase VII) ---
+st.set_page_config(layout="wide", page_title=APP_TITLE, page_icon="∮")
+st.title(APP_TITLE)
+st.caption("Phase VII: Auto-Adaptive Symbolic Topology.")
+
+# Load data
+all_glyphs = load_or_simulate_glyphs()
+
+# Create Tabs (Add Topology Tab)
+tab_keys = ["🔎 Browser", "🌀 Viewer", "📈 Metrics", "🔨 Fusion", "🧠 Cortex", "🕸️ Topology", "📡 Live Feed"]
+tab_browser, tab_viewer, tab_metrics, tab_fusion, tab_reflex, tab_topo, tab_live = st.tabs(tab_keys)
+
+
+# --- Tabs 1-5 (Browser, Viewer, Metrics, Fusion, Cortex - Keep from Phase VI) ---
+with tab_browser: st.header("🔎 Glyph Browser"); # ... (Browser logic) ...
+with tab_viewer: st.header("🌀 Glyph Viewer"); # ... (Viewer logic) ...
+with tab_metrics: st.header("📈 Coherence Metrics"); # ... (Metrics logic) ...
+with tab_fusion: st.header("🔨 Fusion Engine"); # ... (Fusion logic) ...
+with tab_reflex: st.header("🧠 Reflexive Cortex Monitor"); # ... (Reflexive logic) ...
+
+
+# --- NEW Tab 6: Topology ---
+with tab_topo:
+    st.header("🕸️ Symbolic Topology Explorer")
+    st.markdown("Visualize the relationships and clusters within the glyphic field.")
+
+    topo_col1, topo_col2 = st.columns([1, 3]) # Controls | Graph
+
+    with topo_col1:
+        st.subheader("Controls")
+        # Clustering Strategy
+        cluster_strategies = ['alignment_polarity', 'alignment', 'polarity', 'resonance_band', 'stability']
+        st.session_state.cluster_strategy = st.selectbox(
+            "Clustering Strategy:",
+            options=cluster_strategies,
+            index=cluster_strategies.index(st.session_state.cluster_strategy) # Remember selection
+        )
+        # Recalculate clusters
+        if st.button("🔄 Re-Cluster Glyphs"):
+            try:
+                st.session_state.current_clusters = cluster_glyphs(all_glyphs, strategy=st.session_state.cluster_strategy)
+                st.success(f"Clustering complete ({len(st.session_state.current_clusters)} clusters found). Graph will update.")
+                st.experimental_rerun() # Rerun to redraw graph with new cluster colors
+            except Exception as e:
+                st.error(f"Clustering failed: {e}")
+
+        st.markdown("---")
+        # Graph Parameters
+        st.subheader("Graph Parameters")
+        similarity_dist_thresh = st.slider("Similarity Distance Threshold:", 0.1, 1.0, 0.45, 0.05)
+        if st.button(" Regen Layout Seed"): st.session_state.graph_layout_seed = random.randint(1, 10000); st.experimental_rerun()
+        st.caption(f"Layout Seed: {st.session_state.graph_layout_seed}")
+
+        st.markdown("---")
+        # Cluster Info
+        st.subheader("Cluster Overview")
+        if st.session_state.current_clusters:
+             # Display cluster sizes
+             cluster_df = pd.DataFrame([
+                 {"Cluster": name, "Size": len(ids)}
+                 for name, ids in st.session_state.current_clusters.items()
+             ]).sort_values("Size", ascending=False)
+             st.dataframe(cluster_df, use_container_width=True)
+        else:
+             st.info("Run clustering to see overview.")
+
+
+    with topo_col2:
+        # Recalculate clusters if they haven't been calculated yet this session
+        if not st.session_state.current_clusters:
+             try:
+                 logger.info("Initial calculation of clusters...")
+                 st.session_state.current_clusters = cluster_glyphs(all_glyphs, strategy=st.session_state.cluster_strategy)
+             except Exception as e:
+                 st.error(f"Initial clustering failed: {e}")
+                 st.session_state.current_clusters = {} # Ensure it's a dict
+
+        # Render the graph
+        render_topology_graph(
+            glyphs=all_glyphs,
+            clusters=st.session_state.current_clusters,
+            distance_threshold=similarity_dist_thresh,
+            layout_seed=st.session_state.graph_layout_seed
+        )
+
+# --- Tab 7: Live Feed (Keep from Phase VI) ---
+with tab_live:
+    st.header("📡 Live System Feed (Simulated)")
+    # ... (Keep live feed logic from Phase VI) ...
+
+
+# --- Footer (Keep from Phase VI) ---
+st.sidebar.markdown("---")
+st.sidebar.caption(f"Synergesis Dashboard v7.0 | Glyphs: {len(all_glyphs)}")
+
+
+# --- Initial data load ---
+load_or_simulate_glyphs()
+IGNORE_WHEN_COPYING_START
+content_copy
+download
+Use code with caution.
+Python
+IGNORE_WHEN_COPYING_END
+
+3. Auxiliary Files (topology_utils.py, etc.)
+
+For this phase, the core logic is integrated directly into glyph_topology_engine.py. A separate topology_utils.py isn't strictly necessary yet, but could be created later if helper functions become numerous or complex (e.g., advanced distance metrics, layout algorithms). No specific graph templates are needed with Pyvis, as it generates self-contained HTML.
+
+Summary of Changes and Integration:
+
+glyph_topology_engine.py:
+
+Created with core functions: compute_symbolic_distance (calculates weighted distance based on properties, including TF-IDF for tags), build_glyph_graph (constructs a NetworkX graph with nodes, explicit relationship edges, and implicit similarity edges based on distance), and cluster_glyphs (groups glyphs based on selected strategies).
+
+glyph_dashboard_phase_vii.py:
+
+Builds upon the Phase VI dashboard.
+
+Imports networkx, pyvis, and the new topology engine functions.
+
+Adds the "🕸️ Topology" tab.
+
+Includes controls in the topology tab sidebar for selecting the clustering strategy and similarity distance threshold.
+
+Adds a button to trigger re-clustering (st.session_state.current_clusters stores the result).
+
+Defines render_topology_graph which uses build_glyph_graph and cluster_glyphs to generate data for a Pyvis network visualization. It colors nodes by cluster and adds edges based on relationships/similarity.
+
+Embeds the generated Pyvis HTML graph directly into the Streamlit tab using st.components.v1.html.
+
+Uses st.session_state to maintain the current clustering results and graph layout seed between interactions.
+
+This implementation provides the necessary engine for topological analysis and the visual interface for observing the spatial structure and clusters within the glyphic field. The system can now "see" its own symbolic organization, paving the way for more advanced self-reconfiguration based on this topological awareness.

@@ -1,0 +1,450 @@
+Acknowledged. We will now weave the Phase IV modules into the operational fabric of the Synergesis agent loop. This involves integrating the glyph_fusion_engine and ai_to_glyph modules, establishing triggers for fusion, handling AI response conversion, and setting up basic testing and logging.
+
+Here is the conceptual implementation within an agent_loop_phase_iv.py structure.
+
+# File: agent_loop_phase_iv.py
+# Description: Synergesis Master Event Loop & Agent Orchestrator - Phase IV Integration
+# Incorporates glyph fusion and AI response -> glyph translation.
+
+import time
+import logging
+import schedule
+import json
+import random
+from typing import List, Dict, Any, Optional
+from copy import deepcopy
+import pandas as pd # For Phase IV metric delta calculation
+
+# --- Import Core & Phase IV Modules ---
+try:
+    # Assuming these are in the same directory or Python path
+    from glyph_core import GlyphData, RELATIONSHIP_TYPES, STATUS_VALUES # Core structure
+    from glyph_fusion_engine import fuse_glyphs                 # Fusion logic
+    from ai_to_glyph import response_to_glyph                   # Reverse translation
+    # Import existing modules conceptually needed for context
+    from delta_translate import translate_glyph # Needed for LLM prompt generation part
+except ImportError as e:
+    print(f"ERROR: Failed to import required Synergesis modules: {e}")
+    print("Please ensure glyph_core.py, glyph_fusion_engine.py, ai_to_glyph.py, delta_translate.py are accessible.")
+    # Define dummy types/functions if import fails, to allow script structure check
+    GlyphData = Dict[str, Any]
+    def fuse_glyphs(l, **kwargs): return {"id": "dummy-fused", "tags": ["fusion_error"], "details": {"error": "import failed"}}
+    def response_to_glyph(r, **kwargs): return {"id": "dummy-resp", "tags": ["response_error"], "details": {"error": "import failed"}}
+    def translate_glyph(g): return {"natural_prompt": "[translate error]"}
+    STATUS_VALUES = ['received']
+
+
+# --- Configuration (Simulated - Load from synergesis_config.yaml in real system) ---
+CONFIG = {
+    "general": {"loop_sleep_seconds": 1},
+    "fusion": {
+        "trigger_tag": "fuse_candidate",
+        "trigger_threshold": 3, # Fuse when 3 or more candidates exist
+        "default_strategies": { # Can override FUSION_STRATEGIES from engine
+            # "polarity": "weighted_dominant",
+            # "weight": "average"
+        },
+        "max_parents_per_fusion": 5 # Limit how many glyphs to fuse at once
+    },
+    "logging": {"level": "INFO"},
+    # Conceptual paths needed for placeholders
+    "db": {"path": "glyph_archive_p4.db"}, # Example path
+    "input_queue": {"path": "glyph_input_p4.jsonl"} # Example path
+}
+
+# --- Logging Setup ---
+log_level = getattr(logging, CONFIG['logging']['level'].upper(), logging.INFO)
+logger = logging.getLogger("SynergesisAgentLoopP4")
+logger.handlers.clear()
+logger.setLevel(log_level)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+ch = logging.StreamHandler()
+ch.setFormatter(formatter)
+logger.addHandler(ch)
+# Add FileHandler in production if needed
+
+
+# --- Placeholder Agent Tasks & System Interactions ---
+# In a real system, these would interact with DB, queues, APIs etc.
+
+# Mock Database/Queue Operations
+MOCK_GLYPH_DB: List[GlyphData] = [] # In-memory list to simulate DB/Queue
+
+def _add_glyph_to_system(glyph: GlyphData):
+    """Simulates adding a glyph to the database or input queue."""
+    logger.debug(f"Adding glyph {glyph['id']} to system.")
+    # Avoid duplicates by ID
+    if not any(g['id'] == glyph['id'] for g in MOCK_GLYPH_DB):
+        MOCK_GLYPH_DB.append(deepcopy(glyph))
+        # Simulate writing to an input queue file as well
+        # try:
+        #     with open(CONFIG['input_queue']['path'], 'a') as f:
+        #         json.dump(glyph, f)
+        #         f.write('\n')
+        # except Exception as e:
+        #     logger.error(f"Failed to write glyph {glyph['id']} to queue file: {e}")
+    else:
+        logger.warning(f"Glyph {glyph['id']} already exists in mock DB, not adding again.")
+
+
+def _fetch_glyphs_by_tag(tag: str, limit: Optional[int] = None) -> List[GlyphData]:
+    """Simulates fetching glyphs with a specific tag from the database."""
+    logger.debug(f"Fetching glyphs with tag '{tag}' (limit: {limit}).")
+    candidates = [deepcopy(g) for g in MOCK_GLYPH_DB if tag in g.get('tags', [])]
+    # Sort by timestamp (oldest first maybe for fusion?)
+    candidates.sort(key=lambda g: g.get('timestamp', 0))
+    if limit:
+        return candidates[:limit]
+    return candidates
+
+def _update_glyph_status(glyph_id: str, new_status: str):
+    """Simulates updating a glyph's status in the database."""
+    if new_status not in STATUS_VALUES:
+        logger.warning(f"Attempted to set invalid status '{new_status}' for {glyph_id}")
+        return
+    logger.debug(f"Updating status of glyph {glyph_id} to '{new_status}'.")
+    for glyph in MOCK_GLYPH_DB:
+        if glyph['id'] == glyph_id:
+            glyph['status'] = new_status
+            glyph['last_updated'] = time.time()
+            break
+
+def _get_glyph_by_id(glyph_id: str) -> Optional[GlyphData]:
+     """Simulates fetching a single glyph by ID."""
+     for glyph in MOCK_GLYPH_DB:
+         if glyph['id'] == glyph_id:
+             return deepcopy(glyph)
+     return None
+
+# Mock LLM Interaction
+def _simulate_llm_response(prompt: str) -> Union[str, Dict]:
+    """Simulates getting a response from an LLM."""
+    logger.info(f"Simulating LLM call with prompt: '{prompt[:100]}...'")
+    # Randomly return string or dict, sometimes an error
+    rand_val = random.random()
+    if rand_val < 0.6:
+        return f"LLM response acknowledging prompt intent about '{prompt[10:40]}'. Suggesting further analysis or action based on core concepts. Confidence=High."
+    elif rand_val < 0.8:
+        return {
+            "status": "completed",
+            "action": "analysis_report",
+            "summary": f"Analysis complete for concepts derived from '{prompt[10:40]}'. Key finding: Potential synergy detected.",
+            "confidence": 0.85,
+            "details": {"synergy_score": 0.7}
+        }
+    else:
+        return {"status": "error", "error": "LLM simulation error: Capacity limit reached.", "confidence": 0.1}
+
+
+# Placeholder for other loop tasks
+def task_ingest_check(): logger.debug("Task: Ingest check running...")
+def task_translate_batch(): logger.debug("Task: Translate batch running...")
+def task_echo_check(): logger.debug("Task: Echo check running...")
+def task_observe(): logger.debug("Task: Observer running...")
+
+
+# --- Phase IV Integration Tasks ---
+
+def task_run_llm_cycle_with_reverse_translation():
+    """
+    Conceptual task demonstrating selecting a glyph, prompting an LLM (simulated),
+    and converting the response back into a glyph using ai_to_glyph.
+    """
+    logger.info("Task: Running LLM Cycle + Reverse Translation...")
+    # 1. Select a glyph (simple simulation: pick latest)
+    # In real system, use logic from LLMPromptGenerator class
+    trigger_glyph = MOCK_GLYPH_DB[-1] if MOCK_GLYPH_DB else None
+    if not trigger_glyph:
+        logger.info("LLM Cycle: No glyphs available to generate prompt.")
+        return
+
+    # 2. Translate glyph to get prompt
+    translation = translate_glyph(trigger_glyph) # Assumes translate_glyph exists
+    prompt = translation.get("natural_prompt")
+    if not prompt or "[ERROR]" in prompt or "[FAILED]" in prompt:
+        logger.error(f"LLM Cycle: Failed to generate prompt for glyph {trigger_glyph['id']}.")
+        _update_glyph_status(trigger_glyph['id'], 'error_translate')
+        return
+
+    # 3. Get response from LLM (Simulated)
+    llm_response_data = _simulate_llm_response(prompt)
+
+    # 4. Convert response to Glyph using ai_to_glyph
+    try:
+        response_glyph = response_to_glyph(
+            response=llm_response_data,
+            source_context=f"llm_response_to:{trigger_glyph['id']}"
+        )
+        logger.info(f"LLM Cycle: Converted LLM response to glyph {response_glyph['id']}")
+        # 5. Add the new glyph back into the system
+        _add_glyph_to_system(response_glyph)
+
+    except Exception as e:
+        logger.error(f"LLM Cycle: Failed to convert LLM response to glyph: {e}", exc_info=True)
+        # Optionally create an 'error' glyph here
+        error_glyph = {
+             'id': f"error-resp-{int(time.time())}", 'timestamp': time.time(),
+             'polarité': '-', 'fréquence': 140, 'poids': 8, 'alignement': 'Error',
+             'tags': ['error', 'ai_to_glyph_failed', f"source:{trigger_glyph['id']}"],
+             'sourceIds': [f"error_handler:{trigger_glyph['id']}"],
+             'details': {'error_message': str(e)}
+        }
+        _add_glyph_to_system(error_glyph) # type: ignore
+
+
+def task_check_and_fuse_glyphs():
+    """
+    Checks for glyphs marked as fusion candidates and fuses them if threshold is met.
+    """
+    logger.info("Task: Checking for fusion candidates...")
+    fusion_tag = CONFIG['fusion']['trigger_tag']
+    threshold = CONFIG['fusion']['trigger_threshold']
+    max_parents = CONFIG['fusion'].get('max_parents_per_fusion', 5) # Get max parents limit
+
+    # Fetch candidates (limit query if possible in real DB)
+    candidates = _fetch_glyphs_by_tag(fusion_tag)
+
+    if len(candidates) >= threshold:
+        logger.info(f"Found {len(candidates)} fusion candidates (>= threshold {threshold}). Initiating fusion.")
+
+        # Select parents for this fusion run (e.g., oldest ones up to max_parents)
+        parents_to_fuse = candidates[:max_parents]
+        parent_ids = [g['id'] for g in parents_to_fuse]
+        logger.info(f"Selected {len(parents_to_fuse)} parents for fusion: {parent_ids}")
+
+        # --- Detailed Logging Setup ---
+        # Calculate average metrics of parents BEFORE fusion for delta logging
+        avg_parent_metrics = {'resonance': 0.0, 'emergence': 0.0, 'entropy': 0.0, 'count': 0}
+        valid_metrics_count = {'resonance': 0, 'emergence': 0, 'entropy': 0}
+        for p in parents_to_fuse:
+            if pd.notna(p.get('resonance')):
+                avg_parent_metrics['resonance'] += p['resonance'] # type: ignore
+                valid_metrics_count['resonance'] += 1
+            if pd.notna(p.get('emergence')):
+                 avg_parent_metrics['emergence'] += p['emergence'] # type: ignore
+                 valid_metrics_count['emergence'] += 1
+            if pd.notna(p.get('entropy_score')):
+                 avg_parent_metrics['entropy'] += p['entropy_score'] # type: ignore
+                 valid_metrics_count['entropy'] += 1
+        if valid_metrics_count['resonance'] > 0: avg_parent_metrics['resonance'] /= valid_metrics_count['resonance']
+        if valid_metrics_count['emergence'] > 0: avg_parent_metrics['emergence'] /= valid_metrics_count['emergence']
+        if valid_metrics_count['entropy'] > 0: avg_parent_metrics['entropy'] /= valid_metrics_count['entropy']
+        avg_parent_metrics['count'] = len(parents_to_fuse)
+
+        try:
+            # Perform fusion using the engine
+            fused_glyph = fuse_glyphs(
+                glyph_list=parents_to_fuse,
+                custom_strategies=CONFIG['fusion']['default_strategies']
+            )
+
+            # --- Log Fusion Details ---
+            fusion_details = fused_glyph.get('details', {})
+            strategy_log = fusion_details.get('fusion_strategy_used', 'N/A')
+            logger.info(f"Fusion successful: {fused_glyph['id']} created from {len(parent_ids)} parents.")
+            logger.debug(f"  Parents: {parent_ids}")
+            logger.debug(f"  Strategy: {strategy_log}")
+
+            # Log metric deltas
+            fused_res = fused_glyph.get('resonance') # Fused glyph might not have metrics yet
+            fused_emg = fused_glyph.get('emergence')
+            fused_ent = fused_glyph.get('entropy_score')
+            if pd.notna(fused_res): logger.info(f"  ΔResonance: {fused_res - avg_parent_metrics['resonance']:.2f} (Fused: {fused_res:.2f}, Avg Parent: {avg_parent_metrics['resonance']:.2f})") # type: ignore
+            if pd.notna(fused_emg): logger.info(f"  ΔEmergence: {fused_emg - avg_parent_metrics['emergence']:.0f} (Fused: {fused_emg:.0f}, Avg Parent: {avg_parent_metrics['emergence']:.0f})") # type: ignore
+            if pd.notna(fused_ent): logger.info(f"  ΔEntropy: {fused_ent - avg_parent_metrics['entropy']:.3f} (Fused: {fused_ent:.3f}, Avg Parent: {avg_parent_metrics['entropy']:.3f})") # type: ignore
+
+            # Add the fused glyph back into the system
+            _add_glyph_to_system(fused_glyph)
+
+            # Update status of parent glyphs (e.g., 'fused_into:new_id')
+            for parent_id in parent_ids:
+                _update_glyph_status(parent_id, f"fused_into:{fused_glyph['id']}")
+
+        except ValueError as ve:
+            logger.error(f"Fusion failed: {ve}. Parents: {parent_ids}")
+        except Exception as e:
+            logger.error(f"Unexpected error during fusion: {e}. Parents: {parent_ids}", exc_info=True)
+            # Update parent status to error?
+            for parent_id in parent_ids:
+                 _update_glyph_status(parent_id, 'error_fusion')
+    else:
+        logger.debug(f"Found {len(candidates)} fusion candidates. Threshold ({threshold}) not met.")
+
+
+# --- Schedule Setup ---
+def setup_schedule():
+    logger.info("Setting up ritual schedule (Phase IV)...")
+    schedule.clear() # Clear any previous schedule
+
+    # Core tasks (placeholders)
+    schedule.every(1).minutes.do(task_translate_batch)
+    schedule.every(5).minutes.do(task_ingest_check)
+    schedule.every(15).minutes.do(task_echo_check)
+    schedule.every(1).hours.do(task_observe)
+
+    # Phase IV integrated tasks
+    schedule.every(30).minutes.do(task_run_llm_cycle_with_reverse_translation) # Run LLM cycle + conversion
+    schedule.every(10).minutes.do(task_check_and_fuse_glyphs) # Check for fusion candidates frequently
+
+    logger.info(f"Schedule setup complete. Pending jobs: {len(schedule.get_jobs())}")
+
+
+# --- Main Loop ---
+def main_loop():
+    logger.info("--- Starting Synergesis Agent Loop (Phase IV) ---")
+    setup_schedule()
+    logger.info(f"Entering main loop. Loop sleep: {CONFIG['general']['loop_sleep_seconds']}s")
+    try:
+        while True:
+            schedule.run_pending()
+            # Check idle time to avoid busy-waiting
+            idle_seconds = schedule.idle_seconds()
+            sleep_duration = CONFIG['general']['loop_sleep_seconds']
+            if idle_seconds is not None and idle_seconds > 0:
+                 # Sleep only as long as needed, up to the configured max
+                 sleep_duration = min(sleep_duration, idle_seconds)
+
+            # logger.debug(f"Sleeping for {sleep_duration:.2f} seconds...")
+            time.sleep(max(0.1, sleep_duration)) # Ensure minimum sleep to prevent high CPU
+
+    except KeyboardInterrupt:
+        logger.info("KeyboardInterrupt received. Shutting down loop...")
+    except Exception as e:
+        logger.critical(f"Critical error in main loop: {e}", exc_info=True)
+    finally:
+        logger.info("--- Synergesis Agent Loop Shutdown ---")
+
+
+# --- Development / Testing Console ---
+def run_dev_console():
+    """Provides a simple CLI for testing Phase IV functions."""
+    print("\n--- Synergesis Phase IV Dev Console ---")
+    print("Commands: test_fusion, test_reverse, add_candidate, list_db, run_fuse_check, run_llm_cycle, quit")
+
+    # Pre-add some glyphs for testing
+    _add_glyph_to_system({ 'id': 'g1', 'timestamp': time.time()-20, 'polarité': '+', 'fréquence': 80, 'poids': 7, 'alignement': 'Celestial', 'tags': ['idea', CONFIG['fusion']['trigger_tag']], 'sourceIds': ['test'], 'entropy_score': 0.4, 'status':'received'})
+    _add_glyph_to_system({ 'id': 'g2', 'timestamp': time.time()-15, 'polarité': '-', 'fréquence': 20, 'poids': 5, 'alignement': 'Chthonic', 'tags': ['debt', CONFIG['fusion']['trigger_tag']], 'sourceIds': ['test'], 'entropy_score': 0.8, 'status':'received'})
+    _add_glyph_to_system({ 'id': 'g3', 'timestamp': time.time()-10, 'polarité': '0', 'fréquence': 50, 'poids': 4, 'alignement': 'Harmonic', 'tags': ['balance'], 'sourceIds': ['test'], 'status':'received'}) # Not candidate
+    _add_glyph_to_system({ 'id': 'g4', 'timestamp': time.time()-5, 'polarité': '±', 'fréquence': 110, 'poids': 6, 'alignement': 'Elemental', 'tags': ['change', CONFIG['fusion']['trigger_tag']], 'sourceIds': ['test'], 'entropy_score': 0.7, 'status':'received'})
+
+
+    while True:
+        cmd = input("DEV> ").strip().lower()
+        if cmd == "quit":
+            break
+        elif cmd == "test_fusion":
+            # Create dynamic test glyphs
+            t_glyph1: GlyphData = {'id': f'test-f1-{random.randint(100,199)}', 'timestamp': time.time(), 'polarité': random.choice(['+', '-', '0']), 'fréquence': random.randint(30,90), 'poids': random.randint(4,8), 'alignement': random.choice(['Void', 'Harmonic']), 'tags': ['test_fuse'], 'entropy_score': random.random()}
+            t_glyph2: GlyphData = {'id': f'test-f2-{random.randint(200,299)}', 'timestamp': time.time(), 'polarité': random.choice(['+', '-', '±']), 'fréquence': random.randint(60,120), 'poids': random.randint(3,7), 'alignement': random.choice(['Elemental', 'Chthonic']), 'tags': ['test_fuse', 'dynamic'], 'entropy_score': random.random()}
+            print(f"Fusing test glyphs:\n G1: {t_glyph1}\n G2: {t_glyph2}")
+            try:
+                fused = fuse_glyphs([t_glyph1, t_glyph2])
+                print("\nFused Result:")
+                print(json.dumps(fused, indent=2, default=str))
+                _add_glyph_to_system(fused) # Add to mock DB for inspection
+            except Exception as e:
+                print(f"ERROR during test fusion: {e}")
+        elif cmd == "test_reverse":
+            resp_type = input("Enter response type (str/dict/error_str/error_dict): ").strip().lower()
+            mock_resp: Union[str, Dict] = "Default test string response."
+            if resp_type == "dict":
+                mock_resp = {"status": "completed", "data": {"value": random.randint(1, 100)}, "message": "Simulated dict response."}
+            elif resp_type == "error_str":
+                mock_resp = "Failed to process request due to timeout."
+            elif resp_type == "error_dict":
+                 mock_resp = {"status": "error", "error_code": "X504", "details": "Connection refused by downstream service."}
+            print(f"Converting mock response: {mock_resp}")
+            try:
+                rev_glyph = response_to_glyph(mock_resp, source_context="dev_console_test")
+                print("\nReverse Translation Result:")
+                print(json.dumps(rev_glyph, indent=2, default=str))
+                _add_glyph_to_system(rev_glyph)
+            except Exception as e:
+                print(f"ERROR during reverse translation test: {e}")
+        elif cmd == "add_candidate":
+             new_cand: GlyphData = {'id': f'cand-{random.randint(1000,1999)}', 'timestamp': time.time(), 'polarité': '±', 'fréquence': random.randint(1,144), 'poids': random.randint(1,10), 'alignement': random.choice(SIMPLE_ALIGNMENTS), 'tags': [CONFIG['fusion']['trigger_tag'], 'manual_add'], 'sourceIds': ['dev_console'], 'status':'received'}
+             _add_glyph_to_system(new_cand)
+             print(f"Added fusion candidate: {new_cand['id']}")
+        elif cmd == "list_db":
+             print(f"\n--- Mock DB Content ({len(MOCK_GLYPH_DB)} entries) ---")
+             if not MOCK_GLYPH_DB: print("(Empty)")
+             for i, g in enumerate(MOCK_GLYPH_DB):
+                 print(f"{i+1}. ID: {g['id']}, P:{g.get('polarité')}, F:{g.get('fréquence')}, W:{g.get('poids')}, A:{g.get('alignement')}, Tags:{g.get('tags')}, Status:{g.get('status')}")
+             print("--- End List ---")
+        elif cmd == "run_fuse_check":
+             print("Manually running fusion check task...")
+             task_check_and_fuse_glyphs()
+             print("Fusion check complete.")
+        elif cmd == "run_llm_cycle":
+             print("Manually running LLM cycle task...")
+             task_run_llm_cycle_with_reverse_translation()
+             print("LLM cycle complete.")
+        else:
+            print("Unknown command.")
+
+# --- Entry Point ---
+if __name__ == "__main__":
+    # Option 1: Run the dev console for testing
+    run_dev_console()
+
+    # Option 2: Start the main agent loop (uncomment to run)
+    # try:
+    #     main_loop()
+    # except Exception as e:
+    #     logger.critical(f"Main execution failed: {e}", exc_info=True)
+    #     sys.exit(1)
+
+
+Explanation and Integration Points:
+
+Imports: The script now imports GlyphData from glyph_core, fuse_glyphs from glyph_fusion_engine, and response_to_glyph from ai_to_glyph. It also imports translate_glyph conceptually for the LLM cycle.
+
+Mock System: Placeholder functions (_add_glyph_to_system, _fetch_glyphs_by_tag, _update_glyph_status, _simulate_llm_response) simulate database/queue interactions and LLM calls using an in-memory list (MOCK_GLYPH_DB). Replace these with actual database/API calls in your full system.
+
+Fusion Task (task_check_and_fuse_glyphs):
+
+Fetches glyphs tagged with fuse_candidate (configurable).
+
+Checks if the count meets the trigger_threshold.
+
+Selects a limited number of parents (max_parents_per_fusion).
+
+Calculates average parent metrics before fusion.
+
+Calls fuse_glyphs, passing the selected parents and configured strategies.
+
+Logs parent IDs, new ID, strategy used, and metric deltas (ΔResonance, ΔEmergence, ΔEntropy).
+
+Adds the fused_glyph back to the system.
+
+Updates the status of parent glyphs.
+
+LLM Task (task_run_llm_cycle_with_reverse_translation):
+
+Simulates selecting a glyph and generating a prompt via translate_glyph.
+
+Calls the simulated LLM.
+
+Uses response_to_glyph to convert the result (string or dict) into a new GlyphData object.
+
+Adds the response_glyph back into the system.
+
+Scheduling: The new task_check_and_fuse_glyphs and the updated task_run_llm_cycle_with_reverse_translation are added to the schedule.
+
+Dev Console (run_dev_console):
+
+Provides a simple command-line interface triggered when the script is run directly (if __name__ == "__main__":).
+
+Allows direct testing of fuse_glyphs (test_fusion) and response_to_glyph (test_reverse) with sample/randomized data.
+
+Allows manually adding fuse_candidate glyphs (add_candidate) to test the trigger.
+
+Allows listing the mock database (list_db).
+
+Allows manually triggering the fusion check (run_fuse_check) and LLM cycle (run_llm_cycle) tasks.
+
+Logging: Enhanced logging added specifically for the fusion process, including metric changes.
+
+Dashboard (Conceptual): Visualizing composite/nested glyphs requires a separate dashboarding tool (like Streamlit, Plotly Dash, or your custom web tool). This agent_loop.py focuses on the backend logic. The dashboard would need to query the glyph data (including the nested_glyphs and composite fields) and render it appropriately.
+
+This integrated structure demonstrates how the Phase IV components interact within the symbolic loop, enabling autonomous fusion and bidirectional translation, laying the groundwork for a more sophisticated symbolic nervous system. Remember to replace the mock functions with real implementations connecting to your database, queues, and LLM/external systems.

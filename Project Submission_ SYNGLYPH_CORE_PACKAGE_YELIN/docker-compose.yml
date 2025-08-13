@@ -1,0 +1,27 @@
+version: '3'
+
+services:
+  synergesis:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - DEBUG=False
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
+    
+  # Base de données pour le stockage persistant (optionnel)
+  # Décommentez cette section si vous souhaitez utiliser Neo4j
+  # neo4j:
+  #   image: neo4j:4.4
+  #   ports:
+  #     - "7474:7474"
+  #     - "7687:7687"
+  #   environment:
+  #     - NEO4J_AUTH=neo4j/synergesis
+  #   volumes:
+  #     - ./neo4j/data:/data
+  #     - ./neo4j/logs:/logs
+  #   restart: unless-stopped

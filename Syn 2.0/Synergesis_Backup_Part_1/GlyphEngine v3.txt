@@ -1,0 +1,964 @@
+Okay, Syn, let's implement these Phase IV components. We will create the three requested Python modules (glyph_core.py, glyph_fusion_engine.py, ai_to_glyph.py) with production-ready code.
+
+File 1: glyph_core.py
+
+This file defines the central data structure and related types.
+
+# File: glyph_core.py
+# Description: Defines the core Glyph data structure and types for Synergesis Phase IV.
+
+from typing import Dict, Any, Optional, List, Tuple, TypedDict, Union
+import sys
+
+# Use typing_extensions for TypedDict totality features in Python < 3.11 if needed
+if sys.version_info < (3, 11):
+    from typing_extensions import TypedDict, NotRequired
+else:
+    from typing import TypedDict, NotRequired
+
+
+# --- Core Type Definitions ---
+
+# Define types for composite properties
+# Example: [('+', 0.8), ('0', 0.2)]
+CompositePolarity = List[Tuple[str, float]]
+# Example: {'Harmonic': 0.7, 'Void': 0.3}
+CompositeAlignment = Dict[str, float]
+
+# Define structure for relationships between glyphs
+GlyphRelationship = TypedDict('GlyphRelationship', {
+    'type': str,  # Type of relationship (e.g., 'causes', 'references')
+    'target_glyph_id': str # ID of the related glyph
+})
+
+# --- Main Glyph Data Structure ---
+# Using NotRequired for optional fields, works across Python 3.9+ (with typing_extensions)
+# Provides better static analysis than `total=False`.
+
+class GlyphData(TypedDict):
+    """
+    Represents the structured data of a Synergesis Glyph (Phase IV).
+    Core properties can be simple (str) or composite (List/Dict) types.
+    """
+    # --- Core Identifying & Symbolic Properties ---
+    id: str
+    timestamp: float
+    # Polarity: Simple ('+', '-', '0', '±', '?') or composite list
+    polarité: Union[str, CompositePolarity]
+    # Alignment: Simple string (e.g., 'Celestial') or composite dict
+    alignement: Union[str, CompositeAlignment]
+    fréquence: int # Vibration rate (1-144)
+    poids: int     # Energetic weight/importance (1-10)
+    tags: List[str] # Associated keywords/concepts
+
+    # --- Metadata & Lineage ---
+    sourceIds: List[str] # IDs of glyphs/sources this glyph originated from
+    entropy_score: NotRequired[Optional[float]] # Measure of internal complexity/uncertainty
+    details: NotRequired[Optional[Dict[str, Any]]] # Additional context specific data
+
+    # --- Phase IV Extensions ---
+    nested_glyphs: NotRequired[Optional[List['GlyphData']]] # Glyphs contained within this one
+    relationships: NotRequired[Optional[List[GlyphRelationship]]] # Links to other glyphs
+
+    # --- Processing & Interpretation Results (Optional, added by translation etc.) ---
+    natural_prompt: NotRequired[Optional[str]] # Human-readable translation
+    ai_instruction: NotRequired[Optional[str]] # Structured instruction block
+    semantic_yaml: NotRequired[Optional[str]] # Detailed YAML representation
+    resonance: NotRequired[Optional[float]] # Calculated symbolic resonance
+    emergence: NotRequired[Optional[int]] # Calculated emergence (weight * frequency)
+    stability: NotRequired[Optional[str]] # Calculated stability category (HIGH, MEDIUM, LOW)
+    cluster_signature: NotRequired[Optional[str]] # Heuristic cluster name
+    archetype: NotRequired[Optional[str]] # Assigned semantic role (Seed, Mirror, etc.)
+
+    # --- System Status ---
+    status: NotRequired[Optional[str]] # Processing status (e.g., 'received', 'translated')
+    last_updated: NotRequired[Optional[float]] # Timestamp of last modification
+    loop_source: NotRequired[Optional[str]] # Origin within the agent loop
+
+
+# --- Constants related to the schema ---
+
+# Allowed simple polarity values
+SIMPLE_POLARITIES: List[str] = ['+', '-', '0', '±', '?']
+
+# Allowed simple alignment values (Example - should match ALIGNMENT_MAP keys if used)
+SIMPLE_ALIGNMENTS: List[str] = [
+    'Celestial', 'Chthonic', 'Void', 'Harmonic', 'Elemental', 'Error'
+]
+
+# Allowed relationship types
+RELATIONSHIP_TYPES: List[str] = [
+    'causes', 'caused_by', 'follows', 'precedes',
+    'references', 'referenced_by', 'contains', 'part_of', 'instance_of',
+    'conflicts_with', 'harmonizes_with', 'amplifies', 'dampens', 'negates'
+]
+
+# Standard status values
+STATUS_VALUES: List[str] = [
+    'received', 'validated', 'translating', 'translated', 'processing',
+    'fusing', 'fused', 'archived', 'error_validation', 'error_translate',
+    'error_process', 'error_fusion'
+]
+
+# --- Utility Function (Example) ---
+def is_composite_polarity(polarity: Union[str, CompositePolarity]) -> bool:
+    """Checks if a polarity value is composite."""
+    return isinstance(polarity, list)
+
+def is_composite_alignment(alignment: Union[str, CompositeAlignment]) -> bool:
+    """Checks if an alignment value is composite."""
+    return isinstance(alignment, dict)
+
+
+# --- Example Usage (for understanding) ---
+if __name__ == "__main__":
+    example_glyph: GlyphData = {
+        'id': 'example-g-001',
+        'timestamp': 1716000000.0,
+        'polarité': [('+', 0.7), ('0', 0.3)], # Composite polarity
+        'fréquence': 88,
+        'poids': 7,
+        'alignement': 'Celestial', # Simple alignment
+        'tags': ['prototype', 'phase4'],
+        'sourceIds': ['manual_creation'],
+        'entropy_score': 0.45,
+        'details': {'creator': 'Syn'},
+        'relationships': [{'type': 'references', 'target_glyph_id': 'base-concept-01'}]
+    }
+
+    print(f"Example Glyph ID: {example_glyph['id']}")
+    print(f"Is polarity composite? {is_composite_polarity(example_glyph['polarité'])}")
+    print(f"Is alignment composite? {is_composite_alignment(example_glyph['alignement'])}")
+    print(f"Tags: {example_glyph['tags']}")
+    print(f"Optional fields check (entropy): {example_glyph.get('entropy_score')}")
+    print(f"Optional fields check (stability - not present): {example_glyph.get('stability')}")
+
+    # Example of a nested structure (conceptual)
+    nested_example: GlyphData = {
+        'id': 'container-01',
+        'timestamp': 1716001000.0,
+        'polarité': '0',
+        'fréquence': 10,
+        'poids': 9,
+        'alignement': 'Void',
+        'tags': ['container', 'meta'],
+        'sourceIds': [],
+        'nested_glyphs': [example_glyph] # Contains the previous glyph
+    }
+    print(f"\nNested Example contains glyph ID: {nested_example.get('nested_glyphs', [])[0]['id']}") # type: ignore
+
+
+File 2: glyph_fusion_engine.py
+
+This module handles the merging of glyphs.
+
+# File: glyph_fusion_engine.py
+# Description: Synergesis Symbolic Grammar Engine - Handles Glyph Fusion (Phase IV)
+
+import time
+import random
+import logging
+import math
+from typing import List, Dict, Any, Optional, Union, Tuple
+from copy import deepcopy
+import sys
+import pandas as pd # Used for isnan check, lightweight dependency
+
+# Import types from glyph_core
+try:
+    from glyph_core import (
+        GlyphData, CompositePolarity, CompositeAlignment, GlyphRelationship,
+        is_composite_polarity, is_composite_alignment, SIMPLE_POLARITIES, SIMPLE_ALIGNMENTS
+    )
+except ImportError:
+    print("ERROR: glyph_fusion_engine requires glyph_core.py to be importable.")
+    # Define fallback types if import fails
+    GlyphData = Dict[str, Any]
+    CompositePolarity = List[Tuple[str, float]]
+    CompositeAlignment = Dict[str, float]
+    GlyphRelationship = Dict[str, str]
+    def is_composite_polarity(p): return isinstance(p, list)
+    def is_composite_alignment(a): return isinstance(a, dict)
+    SIMPLE_POLARITIES = ['+', '-', '0', '±', '?']
+    SIMPLE_ALIGNMENTS = ['Celestial', 'Chthonic', 'Void', 'Harmonic', 'Elemental', 'Error']
+
+
+# Basic logging setup
+logger = logging.getLogger("GlyphFusionEngine")
+logger.setLevel(logging.INFO)
+# Add handler if not configured globally (e.g., by agent_loop)
+if not logger.hasHandlers():
+    handler = logging.StreamHandler(sys.stdout)
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+
+
+# --- Helper: Normalization (moved here for self-containment if needed) ---
+def _normalize(value: Optional[float], min_val: float, max_val: float) -> float:
+    """Normalizes a value between 0 and 1. Handles None/NaN."""
+    if value is None or pd.isna(value) or pd.isna(min_val) or pd.isna(max_val) or max_val == min_val:
+        return 0.5 # Return neutral value for invalid inputs
+    return max(0.0, min(1.0, (float(value) - min_val) / (max_val - min_val)))
+
+
+# --- Fusion Constants & Strategies ---
+FUSION_STRATEGIES = {
+    "polarity": "keep_composite",   # Default: weighted_dominant, keep_composite
+    "alignment": "keep_composite",  # Default: weighted_dominant, keep_composite
+    "frequency": "weighted_average",# Default: weighted_average
+    "weight": "sum_decay",          # Default: sum, sum_decay, average
+    "tags": "union",                # Default: union
+    "entropy": "average_increase",  # Default: average, average_increase
+    "nested": "merge",              # Default: merge, discard
+    "relationships": "recontextualize" # Default: merge, recontextualize, discard
+}
+# Weight adjustment factors (can be tuned)
+WEIGHT_SUM_DECAY_FACTOR = 0.9 # Multiplier applied to sum in 'sum_decay'
+ENTROPY_INCREASE_FACTOR = 0.03 # Amount entropy increases per glyph fused
+
+# --- Fusion Logic Functions ---
+
+def _fuse_polarity(glyphs: List[GlyphData], strategy: str) -> Union[str, CompositePolarity]:
+    """Fuses polarity based on the chosen strategy."""
+    polarities_info: List[Tuple[str, float, int]] = [] # (polarity_char, influence, weight)
+    for g in glyphs:
+        weight = g.get('poids', 1)
+        pol = g.get('polarité', '?')
+        if is_composite_polarity(pol):
+            for p_char, influence in pol: # type: ignore
+                if p_char in SIMPLE_POLARITIES:
+                    polarities_info.append((p_char, max(0.0, min(1.0, influence)), weight))
+        elif isinstance(pol, str) and pol in SIMPLE_POLARITIES:
+            polarities_info.append((pol, 1.0, weight)) # Simple polarity has full influence
+
+    if not polarities_info: return '?'
+
+    if strategy == "keep_composite":
+        # Aggregate influence scores for each polarity character, weighted by glyph weight
+        composite: Dict[str, float] = {p: 0.0 for p in SIMPLE_POLARITIES}
+        total_weighted_influence = 0
+        for p_char, influence, weight in polarities_info:
+            weighted_inf = influence * weight
+            composite[p_char] = composite.get(p_char, 0) + weighted_inf
+            total_weighted_influence += weighted_inf
+
+        if total_weighted_influence == 0: return '?'
+
+        # Normalize influence scores
+        normalized_composite = {p: score / total_weighted_influence for p, score in composite.items()}
+        # Return list format, filtering out negligible influences
+        result = sorted(
+            [(p, score) for p, score in normalized_composite.items() if score > 0.01],
+            key=lambda item: item[1], reverse=True # Sort by influence desc
+        )
+        return result if result else '?' # Return ? if somehow empty
+
+    elif strategy == "weighted_dominant":
+        # Calculate weighted average score (-1 for '-', +1 for '+', 0 otherwise)
+        weighted_sum = 0
+        total_weight_influence = 0
+        polarity_map = {'+': 1.0, '-': -1.0, '0': 0.0, '±': 0.0, '?': 0.0}
+        for p_char, influence, weight in polarities_info:
+            score = polarity_map.get(p_char, 0.0)
+            weighted_sum += score * influence * weight
+            total_weight_influence += influence * weight
+
+        if total_weight_influence == 0: avg_score = 0.0
+        else: avg_score = weighted_sum / total_weight_influence
+
+        # Determine dominant character based on thresholds (tunable)
+        if avg_score > 0.6: return '+'
+        elif avg_score < -0.6: return '-'
+        elif abs(avg_score) < 0.2: return '0'
+        else: return '±' # Represents mixed/conflicted state
+
+    else: # Fallback for unknown strategy
+        logger.warning(f"Unknown polarity fusion strategy: '{strategy}'. Defaulting to '?'.")
+        return '?'
+
+
+def _fuse_alignment(glyphs: List[GlyphData], strategy: str) -> Union[str, CompositeAlignment]:
+    """Fuses alignment based on the chosen strategy."""
+    alignment_info: List[Tuple[str, float, int]] = [] # (alignment_name, influence, weight)
+    for g in glyphs:
+        weight = g.get('poids', 1)
+        aln = g.get('alignement', 'Error')
+        if is_composite_alignment(aln):
+            for a_name, influence in aln.items(): # type: ignore
+                if a_name in SIMPLE_ALIGNMENTS: # Validate against known simple alignments
+                    alignment_info.append((a_name, max(0.0, min(1.0, influence)), weight))
+        elif isinstance(aln, str) and aln in SIMPLE_ALIGNMENTS:
+            alignment_info.append((aln, 1.0, weight)) # Simple alignment has full influence
+
+    if not alignment_info: return 'Error'
+
+    if strategy == "keep_composite":
+        # Aggregate influence scores, weighted by glyph weight
+        composite: Dict[str, float] = {a: 0.0 for a in SIMPLE_ALIGNMENTS}
+        total_weighted_influence = 0
+        for a_name, influence, weight in alignment_info:
+            weighted_inf = influence * weight
+            composite[a_name] = composite.get(a_name, 0) + weighted_inf
+            total_weighted_influence += weighted_inf
+
+        if total_weighted_influence == 0: return 'Error'
+
+        # Normalize and filter negligible influences
+        normalized_composite = {a: score / total_weighted_influence for a, score in composite.items()}
+        result = {a: score for a, score in normalized_composite.items() if score > 0.01}
+        return result if result else 'Error'
+
+    elif strategy == "weighted_dominant":
+        # Find the alignment with the highest total weighted influence
+        aggregate_influence: Dict[str, float] = {a: 0.0 for a in SIMPLE_ALIGNMENTS}
+        for a_name, influence, weight in alignment_info:
+            aggregate_influence[a_name] += influence * weight
+
+        # Find the alignment with the max aggregate score
+        dominant_alignment = max(aggregate_influence, key=aggregate_influence.get, default='Error')
+        return dominant_alignment if aggregate_influence[dominant_alignment] > 0 else 'Error'
+
+    else: # Fallback
+        logger.warning(f"Unknown alignment fusion strategy: '{strategy}'. Defaulting to 'Error'.")
+        return 'Error'
+
+
+def _fuse_frequency(glyphs: List[GlyphData], strategy: str) -> int:
+    """Fuses frequency based on the chosen strategy."""
+    if not glyphs: return 72 # Default neutral frequency
+
+    if strategy == "weighted_average":
+        total_freq_weight = 0.0
+        total_weight = 0.0
+        for g in glyphs:
+            # Use max(1, ...) to avoid issues with zero or negative weights
+            weight = max(1, g.get('poids', 1))
+            # Default to 72 if frequency is missing or invalid
+            freq = g.get('fréquence', 72)
+            if not isinstance(freq, (int, float)) or freq < 1 or freq > 144:
+                freq = 72
+            total_freq_weight += freq * weight
+            total_weight += weight
+        # Clamp result to valid frequency range
+        fused_freq = round(total_freq_weight / total_weight) if total_weight > 0 else 72
+        return max(1, min(144, fused_freq))
+
+    # Add other strategies like 'max', 'min', 'median' if needed
+    # elif strategy == "max":
+    #     return max(g.get('fréquence', 1) for g in glyphs)
+
+    else: # Fallback
+        logger.warning(f"Unknown frequency fusion strategy: '{strategy}'. Using weighted average.")
+        return _fuse_frequency(glyphs, "weighted_average")
+
+
+def _fuse_weight(glyphs: List[GlyphData], strategy: str) -> int:
+    """Fuses weight based on the chosen strategy."""
+    if not glyphs: return 1
+
+    if strategy == "sum":
+        fused_weight = sum(g.get('poids', 1) for g in glyphs)
+    elif strategy == "sum_decay":
+        # Sum weights with a decay factor to prevent runaway inflation
+        fused_weight = round(sum(g.get('poids', 1) for g in glyphs) * WEIGHT_SUM_DECAY_FACTOR)
+    elif strategy == "average":
+        fused_weight = round(sum(g.get('poids', 1) for g in glyphs) / len(glyphs))
+    # Add strategy "sum_compatible_decay" if compatibility calculation is desired/feasible
+    else: # Fallback
+        logger.warning(f"Unknown weight fusion strategy: '{strategy}'. Using sum_decay.")
+        fused_weight = _fuse_weight(glyphs, "sum_decay")
+
+    # Clamp result to valid weight range
+    return max(1, min(10, fused_weight))
+
+
+def _fuse_tags(glyphs: List[GlyphData], strategy: str) -> List[str]:
+    """Fuses tags based on the chosen strategy."""
+    if strategy == "union":
+        all_tags = set()
+        for g in glyphs:
+            tags = g.get('tags', [])
+            if isinstance(tags, list):
+                all_tags.update(str(t) for t in tags) # Ensure tags are strings
+        return sorted(list(all_tags))
+    # Add other strategies like 'intersection' if needed
+    else:
+        logger.warning(f"Unknown tags fusion strategy: '{strategy}'. Using union.")
+        return _fuse_tags(glyphs, "union")
+
+
+def _fuse_entropy(glyphs: List[GlyphData], strategy: str) -> Optional[float]:
+    """Fuses entropy score based on the chosen strategy."""
+    entropies = [g.get('entropy_score') for g in glyphs if g.get('entropy_score') is not None and pd.notna(g.get('entropy_score'))]
+    if not entropies: return None # No valid entropy scores to fuse
+
+    avg_entropy = sum(entropies) / len(entropies)
+
+    if strategy == "average_increase":
+        # Increase entropy slightly based on the number of glyphs fused
+        increase = ENTROPY_INCREASE_FACTOR * (len(glyphs) - 1)
+        fused_entropy = avg_entropy + increase
+    elif strategy == "average":
+        fused_entropy = avg_entropy
+    else:
+        logger.warning(f"Unknown entropy fusion strategy: '{strategy}'. Using average_increase.")
+        fused_entropy = _fuse_entropy(glyphs, "average_increase") or 0.5 # Default if still None
+
+    # Clamp result to a reasonable range (e.g., 0.0 to 1.0, adjust if needed)
+    return round(max(0.0, min(1.0, fused_entropy)), 3)
+
+
+def _fuse_nested(glyphs: List[GlyphData], strategy: str) -> Optional[List[GlyphData]]:
+    """Fuses nested glyphs based on the chosen strategy."""
+    all_nested = []
+    for g in glyphs:
+        nested = g.get('nested_glyphs')
+        if isinstance(nested, list):
+            # Important: Deep copy nested glyphs to avoid modifying originals
+            all_nested.extend(deepcopy(nested))
+
+    if not all_nested: return None
+
+    if strategy == "merge":
+        return all_nested
+    elif strategy == "discard":
+        return None
+    # Add 'merge_select' strategy if specific selection logic is defined
+    else:
+        logger.warning(f"Unknown nested glyph fusion strategy: '{strategy}'. Using merge.")
+        return _fuse_nested(glyphs, "merge")
+
+
+def _fuse_relationships(glyphs: List[GlyphData], new_glyph_id: str, strategy: str) -> Optional[List[GlyphRelationship]]:
+    """Fuses relationships based on the chosen strategy."""
+    all_rels = []
+    parent_ids = {g.get('id') for g in glyphs if g.get('id')}
+
+    for g in glyphs:
+        rels = g.get('relationships')
+        if isinstance(rels, list):
+            # Deep copy to avoid modifying original relationship objects
+            all_rels.extend(deepcopy(r) for r in rels if isinstance(r, dict) and 'type' in r and 'target_glyph_id' in r)
+
+    if not all_rels and strategy != "recontextualize": # Recontextualize adds new rels
+         return None
+
+    if strategy == "merge":
+        # Simply combine all unique relationships
+        unique_rels = {tuple(sorted(r.items())) for r in all_rels}
+        return [dict(r_tuple) for r_tuple in unique_rels]
+
+    elif strategy == "recontextualize":
+        # Keep external relationships, discard internal ones, add 'contains' relationships
+        final_rels: List[GlyphRelationship] = []
+        seen_rels = set()
+        for r in all_rels:
+            # Keep relationships pointing outside the fused set
+            if r['target_glyph_id'] not in parent_ids:
+                 rel_tuple = tuple(sorted(r.items()))
+                 if rel_tuple not in seen_rels:
+                     final_rels.append(r)
+                     seen_rels.add(rel_tuple)
+
+        # Add 'contains' relationship for each parent
+        for parent_id in parent_ids:
+            contains_rel: GlyphRelationship = {'type': 'contains', 'target_glyph_id': parent_id}
+            final_rels.append(contains_rel)
+        return final_rels
+
+    elif strategy == "discard":
+        return None
+
+    else:
+        logger.warning(f"Unknown relationship fusion strategy: '{strategy}'. Using recontextualize.")
+        return _fuse_relationships(glyphs, new_glyph_id, "recontextualize")
+
+
+# --- Main Fusion Function ---
+
+def fuse_glyphs(glyph_list: List[Dict[str, Any]],
+                  custom_strategies: Optional[Dict[str, str]] = None,
+                  fusion_id: Optional[str] = None) -> GlyphData:
+    """
+    Combines multiple glyphs into a single fused glyph based on defined strategies.
+
+    Args:
+        glyph_list: A list of glyph dictionaries (conforming to GlyphData structure).
+        custom_strategies: Optional dictionary to override default fusion strategies
+                           for specific properties (e.g., {"polarity": "weighted_dominant"}).
+        fusion_id: Optional specific ID to assign to the fused glyph.
+
+    Returns:
+        A new glyph dictionary (GlyphData) representing the fused result.
+
+    Raises:
+        ValueError: If glyph_list is empty.
+    """
+    if not glyph_list:
+        raise ValueError("Cannot fuse an empty list of glyphs.")
+
+    # Ensure inputs are treated as GlyphData (provide some default resilience)
+    valid_glyphs: List[GlyphData] = []
+    for i, g_dict in enumerate(glyph_list):
+        if isinstance(g_dict, dict) and 'id' in g_dict:
+             # Basic validation passed, treat as GlyphData (further checks in fuse helpers)
+            valid_glyphs.append(g_dict) # type: ignore
+        else:
+            logger.warning(f"Item at index {i} in glyph_list is not a valid glyph dict, skipping.")
+
+    if not valid_glyphs:
+         raise ValueError("No valid glyphs found in the input list to fuse.")
+
+    if len(valid_glyphs) == 1:
+        # If only one valid glyph remains, return a deep copy of it
+        return deepcopy(valid_glyphs[0])
+
+    # Apply strategies
+    strategies = {**FUSION_STRATEGIES, **(custom_strategies or {})}
+    logger.debug(f"Using fusion strategies: {strategies}")
+
+    # Generate ID and metadata
+    new_id = fusion_id or f"fused-{int(time.time()*1000)}-{random.randint(100,999)}"
+    parent_ids = [g['id'] for g in valid_glyphs]
+
+    # --- Perform Fusion ---
+    fused_glyph: GlyphData = {
+        'id': new_id,
+        'timestamp': time.time(),
+        'sourceIds': sorted(list(set(parent_ids))), # Unique sorted parent IDs
+        'tags': ['fused'] + _fuse_tags(valid_glyphs, strategies['tags']),
+        'polarité': _fuse_polarity(valid_glyphs, strategies['polarity']),
+        'alignement': _fuse_alignment(valid_glyphs, strategies['alignment']),
+        'fréquence': _fuse_frequency(valid_glyphs, strategies['frequency']),
+        'poids': _fuse_weight(valid_glyphs, strategies['weight']),
+        'entropy_score': _fuse_entropy(valid_glyphs, strategies['entropy']),
+        'nested_glyphs': _fuse_nested(valid_glyphs, strategies['nested']),
+        'relationships': _fuse_relationships(valid_glyphs, new_id, strategies['relationships']),
+        'details': {
+            'fusion_strategy_used': strategies,
+            'parent_count': len(valid_glyphs),
+            'fusion_timestamp': time.time()
+        },
+        'status': 'fused' # Set initial status
+    }
+
+    # --- Clean up optional fields that are None or empty ---
+    # Using .pop(key, None) avoids KeyError if field was never added
+    if fused_glyph.get('nested_glyphs') is None: fused_glyph.pop('nested_glyphs', None)
+    if fused_glyph.get('relationships') is None: fused_glyph.pop('relationships', None)
+    if fused_glyph.get('entropy_score') is None: fused_glyph.pop('entropy_score', None)
+
+    logger.info(f"Fused {len(valid_glyphs)} glyphs into new glyph {new_id}")
+    return fused_glyph
+
+
+# --- Example Usage ---
+if __name__ == "__main__":
+    # Create example glyphs (using GlyphData type for clarity)
+    glyph1: GlyphData = {
+        'id': 'g1', 'timestamp': time.time()-10, 'polarité': '+', 'fréquence': 80, 'poids': 7,
+        'alignement': 'Celestial', 'tags': ['idea', 'growth'], 'sourceIds': ['sourceA'], 'entropy_score': 0.4
+    }
+    glyph2: GlyphData = {
+        'id': 'g2', 'timestamp': time.time()-5, 'polarité': '-', 'fréquence': 20, 'poids': 5,
+        'alignement': 'Chthonic', 'tags': ['debt', 'structure', 'growth'], 'sourceIds': ['sourceB'], 'entropy_score': 0.8
+    }
+    glyph3: GlyphData = {
+        'id': 'g3', 'timestamp': time.time(), 'polarité': [('+', 0.7), ('0', 0.3)], 'fréquence': 60, 'poids': 6,
+        'alignement': {'Harmonic': 0.8, 'Void': 0.2}, 'tags': ['balance', 'system'], 'sourceIds': ['sourceC'],
+        'entropy_score': 0.2, 'relationships': [{'type': 'references', 'target_glyph_id': 'ref1'}]
+    }
+
+    print("--- Fusing g1 and g2 (defaults: keep_composite, sum_decay) ---")
+    try:
+        fused12 = fuse_glyphs([glyph1, glyph2])
+        # Use json for printing complex dicts nicely
+        import json
+        print(json.dumps(fused12, indent=2, default=str)) # Use default=str for any non-serializable parts
+    except ValueError as e:
+        print(f"Error: {e}")
+
+    print("\n--- Fusing g1, g2, g3 (custom: weighted_dominant polarity) ---")
+    try:
+        fused123 = fuse_glyphs(
+            [glyph1, glyph2, glyph3],
+            custom_strategies={"polarity": "weighted_dominant", "weight": "average"}
+        )
+        print(json.dumps(fused123, indent=2, default=str))
+    except ValueError as e:
+        print(f"Error: {e}")
+IGNORE_WHEN_COPYING_START
+content_copy
+download
+Use code with caution.
+Python
+IGNORE_WHEN_COPYING_END
+
+File 3: ai_to_glyph.py
+
+This module converts structured or unstructured responses into Glyphs.
+
+# File: ai_to_glyph.py
+# Description: Synergesis Reverse Translator - Converts AI/System Output to Glyphs (Phase IV)
+
+import time
+import random
+import logging
+import json
+import re
+import sys
+from typing import Dict, Any, Optional, Union, List
+import pandas as pd # For isnan checks
+
+# Import types from glyph_core
+try:
+    from glyph_core import GlyphData
+except ImportError:
+    print("ERROR: ai_to_glyph requires glyph_core.py to be importable.")
+    GlyphData = Dict[str, Any] # Fallback type
+
+# Import helpers or redefine
+try:
+    # Assuming _normalize might be in delta_translate or a utils module
+    from delta_translate import _normalize
+except ImportError:
+    # Redefine _normalize if not importable
+    def _normalize(value: Optional[float], min_val: float, max_val: float) -> float:
+        """Normalizes a value between 0 and 1. Handles None/NaN."""
+        if value is None or pd.isna(value) or pd.isna(min_val) or pd.isna(max_val) or max_val == min_val:
+            return 0.5
+        return max(0.0, min(1.0, (float(value) - min_val) / (max_val - min_val)))
+
+
+# Basic logging setup
+logger = logging.getLogger("AIToGlyph")
+logger.setLevel(logging.INFO)
+# Add handler if not configured globally
+if not logger.hasHandlers():
+    handler = logging.StreamHandler(sys.stdout)
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+
+
+# --- Response Analysis Function ---
+
+def _analyze_response(response: Union[Dict[str, Any], str]) -> Dict[str, Any]:
+    """
+    Analyzes an AI/System response (dict or string) to extract features for glyph inference.
+    This implementation uses basic heuristics (keywords, structure).
+    Replace with more sophisticated NLP/analysis if needed.
+
+    Returns:
+        A dictionary containing analysis results like:
+        'sentiment', 'keywords', 'confidence', 'action_verb', 'is_error', 'text_length'
+    """
+    analysis = {
+        'sentiment': 0.0,
+        'keywords': [],
+        'confidence': 0.6, # Default confidence
+        'action_verb': None,
+        'is_error': False,
+        'text_length': 0,
+        'response_type': 'str' if isinstance(response, str) else 'dict'
+    }
+    text_content = "" # Primary text for keyword/length analysis
+
+    # Define keyword lists (expand these significantly for better accuracy)
+    pos_sentiment_kw = ['success', 'complete', 'ok', 'good', 'positive', 'resolved', 'achieved', 'validated', 'confirmed']
+    neg_sentiment_kw = ['fail', 'error', 'issue', 'problem', 'negative', 'unable', 'cannot', 'denied', 'rejected', 'warning']
+    action_verbs = {
+        'generating': 'create', 'creating': 'create', 'building': 'create',
+        'updating': 'update', 'modifying': 'update', 'setting': 'update', 'changing': 'update',
+        'analyzing': 'analyze', 'reporting': 'analyze', 'evaluating': 'analyze', 'checking': 'analyze',
+        'confirming': 'confirm', 'acknowledging': 'confirm', 'validating': 'confirm',
+        'executing': 'execute', 'running': 'execute', 'performing': 'execute', 'applying': 'execute',
+        'fetching': 'retrieve', 'getting': 'retrieve', 'loading': 'retrieve',
+        'deleting': 'delete', 'removing': 'delete',
+        'searching': 'search', 'finding': 'search',
+        'waiting': 'wait', 'pending': 'wait',
+    }
+    celestial_kw = ['potential', 'vision', 'future', 'idea', 'generate', 'inspire', 'growth', 'new']
+    chthonic_kw = ['constraint', 'limit', 'past', 'data', 'structure', 'error', 'debt', 'legacy', 'rule', 'audit']
+    void_kw = ['meta', 'logic', 'abstract', 'empty', 'boundary', 'question', 'analyze', 'theory', 'none', 'observe']
+    harmonic_kw = ['balance', 'system', 'connect', 'relation', 'community', 'share', 'agree', 'stable', 'flow', 'sync']
+    elemental_kw = ['action', 'change', 'force', 'energy', 'transform', 'execute', 'power', 'dynamic', 'volatility', 'immediate']
+
+    try:
+        if isinstance(response, dict):
+            # --- Analyze Dictionary Structure ---
+            analysis['response_type'] = 'dict'
+            text_content = json.dumps(response) # Use full JSON as base text if no specific field found
+
+            # Check for common status/error fields
+            status_val = str(response.get('status', '')).lower()
+            error_val = response.get('error', None)
+            message_val = str(response.get('message', '')).lower()
+
+            if error_val or 'error' in status_val or 'fail' in status_val or 'failed' in status_val:
+                analysis['is_error'] = True
+                analysis['sentiment'] -= 0.8
+                text_content = str(error_val) if error_val else message_val # Use error/message as content
+
+            if 'success' in status_val or 'complete' in status_val:
+                analysis['sentiment'] += 0.4
+
+            # Look for confidence score
+            if 'confidence' in response and isinstance(response['confidence'], (int, float)):
+                analysis['confidence'] = max(0.0, min(1.0, float(response['confidence'])))
+
+            # Look for explicit action
+            if 'action' in response:
+                analysis['action_verb'] = str(response['action'])[:30] # Take first 30 chars
+
+            # Find best text field for keywords
+            if 'summary' in response and isinstance(response['summary'], str):
+                text_content = response['summary']
+            elif 'result' in response and isinstance(response['result'], str):
+                text_content = response['result']
+            elif 'message' in response and isinstance(response['message'], str) and not analysis['is_error']:
+                 text_content = response['message'] # Use message if not error
+            elif 'data' in response and isinstance(response['data'], str): # Less ideal
+                 text_content = response['data']
+
+
+            # Extract keywords from various string values in the dict
+            all_strings = [str(v) for v in response.values() if isinstance(v, str)]
+            dict_text_for_kw = " ".join(all_strings).lower()
+            analysis['keywords'] = list(set([w for w in re.findall(r'\b[a-z]{4,}\b', dict_text_for_kw)][:10])) # More keywords from dict
+
+        elif isinstance(response, str):
+            # --- Analyze String Content ---
+            analysis['response_type'] = 'str'
+            text_content = response
+            text_l = text_content.lower()
+
+            # Basic sentiment scoring based on keywords
+            pos_score = sum(1 for kw in pos_sentiment_kw if kw in text_l)
+            neg_score = sum(1 for kw in neg_sentiment_kw if kw in text_l)
+            analysis['sentiment'] = (pos_score * 0.3) - (neg_score * 0.5)
+            if neg_score > 0: # If any negative words found, flag potential error
+                analysis['is_error'] = True
+                analysis['sentiment'] -= 0.3 # Extra penalty for potential error state
+
+            # Extract keywords
+            analysis['keywords'] = list(set([w for w in re.findall(r'\b[a-z]{4,}\b', text_l)][:7])) # Limit keywords
+
+            # Infer action verb from the beginning of the string or keywords
+            first_words = text_l.split()
+            for word in first_words[:5]: # Check first 5 words
+                if word in action_verbs:
+                    analysis['action_verb'] = action_verbs[word]
+                    break
+            if not analysis['action_verb']: # Check keywords if not found at start
+                 for kw in analysis['keywords']:
+                      if kw in action_verbs:
+                          analysis['action_verb'] = action_verbs[kw]
+                          break
+
+        else: # Handle unexpected types
+             analysis['is_error'] = True
+             analysis['sentiment'] = -1.0
+             analysis['keywords'] = ['invalid_input_type']
+             text_content = f"Unsupported type: {type(response).__name__}"
+
+        # Clamp sentiment
+        analysis['sentiment'] = max(-1.0, min(1.0, analysis['sentiment']))
+        analysis['text_length'] = len(text_content)
+
+        # Add keyword categories for alignment inference
+        analysis['celestial_kw_count'] = sum(1 for kw in analysis['keywords'] if kw in celestial_kw)
+        analysis['chthonic_kw_count'] = sum(1 for kw in analysis['keywords'] if kw in chthonic_kw)
+        analysis['void_kw_count'] = sum(1 for kw in analysis['keywords'] if kw in void_kw)
+        analysis['harmonic_kw_count'] = sum(1 for kw in analysis['keywords'] if kw in harmonic_kw)
+        analysis['elemental_kw_count'] = sum(1 for kw in analysis['keywords'] if kw in elemental_kw)
+
+    except Exception as e:
+        logger.error(f"Error during response analysis: {e}", exc_info=True)
+        analysis['is_error'] = True
+        analysis['sentiment'] = -1.0
+        analysis['keywords'] = ['analysis_error']
+        analysis['text_length'] = 0
+
+    logger.debug(f"Response analysis result: {analysis}")
+    return analysis
+
+
+# --- Main Conversion Function ---
+
+def response_to_glyph(response: Union[Dict[str, Any], str],
+                      source_context: str = "ai_response",
+                      glyph_id_prefix: str = "resp-g") -> GlyphData:
+    """
+    Converts an AI/System response (JSON dict or string) into a Synergesis Glyph.
+
+    Args:
+        response: The AI/System response data (dict or string).
+        source_context: String indicating the source of the response (e.g., 'llm_query', 'db_operation').
+        glyph_id_prefix: Prefix for the generated glyph ID.
+
+    Returns:
+        A GlyphData dictionary representing the response.
+    """
+    timestamp = time.time()
+    glyph_id = f"{glyph_id_prefix}-{int(timestamp*1000)}-{random.randint(100,999)}"
+
+    # Analyze the response
+    analysis = _analyze_response(response)
+    sentiment = analysis['sentiment']
+    keywords = analysis['keywords']
+    confidence = analysis['confidence']
+    text_length = analysis['text_length']
+    is_error = analysis['is_error']
+    action_verb = analysis['action_verb']
+
+    # --- Infer Glyph Properties ---
+
+    # 1. Polarity: Based heavily on sentiment and error status
+    polarity: str
+    if is_error:
+        polarity = '-' # Errors are typically negative/blocking
+    elif sentiment > 0.6: polarity = '+'
+    elif sentiment < -0.4: polarity = '-'
+    elif abs(sentiment) < 0.1: polarity = '0' # Clearly neutral
+    else: polarity = '±' # Mixed or uncertain sentiment
+
+    # 2. Frequency: Higher for errors, confirmations, short responses; Lower for analysis, long text.
+    # Use inverse length normalization (shorter = higher value)
+    inv_len_norm = 1.0 - _normalize(text_length, 10, 1000) # Normalize length, 1000 char cap
+    # Action verbs influence: confirmations/errors faster, analysis slower
+    action_freq_mod = 0.0
+    if action_verb in ['confirm', 'delete', 'execute']: action_freq_mod = 0.3
+    elif action_verb in ['wait']: action_freq_mod = -0.4
+    elif action_verb in ['analyze']: action_freq_mod = -0.2
+    if is_error: action_freq_mod = 0.4 # Errors often require quick attention
+
+    freq_factor = inv_len_norm * 0.5 + confidence * 0.3 + action_freq_mod * 0.2
+    # Base frequency around ~50, shifted by factor
+    frequency = round(50 + freq_factor * 94) # Shifts between ~50 +/- 47
+    frequency = max(1, min(144, frequency)) # Clamp
+
+    # 3. Weight: Higher for errors, high confidence, strong sentiment, more keywords
+    keyword_norm = _normalize(len(keywords), 0, 7) # Normalize keyword count
+    error_weight = 0.4 if is_error else 0.0
+    weight_factor = confidence * 0.4 + abs(sentiment) * 0.2 + keyword_norm * 0.1 + error_weight
+    weight = round(1 + weight_factor * 9) # Scale to 1-10 range
+    weight = max(1, min(10, weight))
+
+    # 4. Alignment: Based on error status, action verb, keyword counts, sentiment
+    alignment: str
+    if is_error:
+        alignment = 'Chthonic' # Errors relate to constraints, structure, past failures
+    elif action_verb == 'create': alignment = 'Celestial'
+    elif action_verb == 'analyze': alignment = 'Void'
+    elif action_verb == 'update': alignment = 'Harmonic' # Maintaining balance/system state
+    elif action_verb == 'execute': alignment = 'Elemental'
+    elif action_verb == 'delete': alignment = 'Chthonic' # Deconstruction
+    else:
+        # Infer based on keyword counts and sentiment as fallback
+        scores = {
+            'Celestial': analysis['celestial_kw_count'] * 1.2 + max(0, sentiment) * 0.5,
+            'Chthonic': analysis['chthonic_kw_count'] * 1.2 + max(0, -sentiment) * 0.5, # Negative sentiment aligns
+            'Void': analysis['void_kw_count'] * 1.1,
+            'Harmonic': analysis['harmonic_kw_count'] * 1.0 + (1 - abs(sentiment)) * 0.3, # Neutrality aligns
+            'Elemental': analysis['elemental_kw_count'] * 1.0 + confidence * 0.2 # Action/confidence aligns
+        }
+        # Add small bias based on polarity if still unclear
+        if polarity == '+': scores['Celestial'] += 0.1
+        if polarity == '-': scores['Chthonic'] += 0.1
+        if polarity == '0': scores['Harmonic'] += 0.1
+        if polarity == '±': scores['Elemental'] += 0.1
+
+        # Find dominant alignment
+        dominant_alignment = max(scores, key=scores.get, default=None)
+        alignment = dominant_alignment if dominant_alignment and scores[dominant_alignment] > 0.1 else 'Void' # Default to Void if scores low/tied
+
+    # 5. Entropy: Lower for high confidence, strong sentiment, errors (more defined state);
+    # Higher for neutral/mixed sentiment, low confidence (less defined state).
+    # Use inverted confidence and inverted sentiment magnitude
+    entropy = (1.0 - confidence) * 0.5 + (1.0 - abs(sentiment)) * 0.4 + (1.0 - keyword_norm) * 0.1
+    if is_error: entropy *= 0.7 # Errors reduce entropy (state is clearly 'error')
+    entropy = max(0.05, min(0.95, entropy)) # Clamp entropy
+
+    # 6. Tags
+    tags = keywords
+    if action_verb: tags.append(f"verb:{action_verb}")
+    if is_error: tags.append("state:error")
+    elif polarity == '+': tags.append("state:success") # Approximate success state
+    tags.append(f"confidence:{confidence:.1f}")
+    tags.append(source_context) # Ensure source context is a tag
+
+    # --- Construct Glyph ---
+    glyph: GlyphData = {
+        'id': glyph_id,
+        'timestamp': timestamp,
+        'polarité': polarity,
+        'fréquence': frequency,
+        'poids': weight,
+        'alignement': alignment,
+        'tags': sorted(list(set(tags))), # Unique sorted tags
+        'sourceIds': [source_context],
+        'entropy_score': round(entropy, 3),
+        'details': {
+            'response_type': analysis['response_type'],
+            'analysis_confidence': round(confidence, 3),
+            'analysis_sentiment': round(sentiment, 3),
+            'analysis_action': action_verb,
+            'analysis_is_error': is_error,
+            'origin_response_snippet': None # Placeholder for snippet
+        },
+        'status': 'received' # Initial status for a newly generated glyph
+    }
+
+    # Add snippet of original response to details
+    snippet_limit = 250
+    if isinstance(response, str):
+        glyph['details']['origin_response_snippet'] = response[:snippet_limit] + ('...' if len(response) > snippet_limit else '')
+    elif isinstance(response, dict):
+        # Try to get a meaningful text part, otherwise dump keys
+        snippet = response.get('message', response.get('summary', response.get('result', None)))
+        if isinstance(snippet, str):
+             glyph['details']['origin_response_snippet'] = snippet[:snippet_limit] + ('...' if len(snippet) > snippet_limit else '')
+        else:
+            glyph['details']['origin_response_keys'] = list(response.keys())
+
+    logger.info(f"Converted response from '{source_context}' to glyph {glyph_id} (P:{polarity}, F:{frequency}, W:{weight}, A:{alignment})")
+    return glyph
+
+
+# --- Example Usage ---
+if __name__ == "__main__":
+    response1 = {"status": "completed", "result": "User profile updated successfully.", "confidence": 0.98, "action": "update_user"}
+    glyph1 = response_to_glyph(response1, source_context="user_api")
+    print("\n--- Response 1 (Dict Success) ---")
+    print(json.dumps(glyph1, indent=2, default=str))
+
+    response2 = "System Error E500: Critical component failed during analysis. Cannot proceed. Check logs for details."
+    glyph2 = response_to_glyph(response2, source_context="analysis_engine")
+    print("\n--- Response 2 (String Error) ---")
+    print(json.dumps(glyph2, indent=2, default=str))
+
+    response3 = {
+        "action": "query_strategies",
+        "status": "pending",
+        "message": "Evaluating multiple potential strategies based on current market volatility. Analysis ongoing.",
+        "confidence": 0.5,
+        "potential_options": ["StrategyAlpha", "StrategyBeta-LowRisk"]
+    }
+    glyph3 = response_to_glyph(response3, source_context="strategy_advisor")
+    print("\n--- Response 3 (Dict Pending/Analysis) ---")
+    print(json.dumps(glyph3, indent=2, default=str))
+
+    response4 = "Acknowledged. Task queued." # Short, neutral confirmation
+    glyph4 = response_to_glyph(response4, source_context="task_scheduler")
+    print("\n--- Response 4 (Short Ack) ---")
+    print(json.dumps(glyph4, indent=2, default=str))
+IGNORE_WHEN_COPYING_START
+content_copy
+download
+Use code with caution.
+Python
+IGNORE_WHEN_COPYING_END
+
+These three modules provide the core implementations for Phase IV: defining the richer GlyphData structure, enabling the fusion of glyphs with glyph_fusion_engine, and facilitating the reverse translation from AI/system responses back into the glyphic language with ai_to_glyph. They are structured for integration into your existing Synergesis system. ∮

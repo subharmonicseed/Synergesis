@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌸 Synergesis Garden - Monitoring Live</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            color: white;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin: 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+        
+        .garden-visualization {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .glyph-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        
+        .glyph {
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.7; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.7; }
+        }
+        
+        .activity-log {
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            padding: 15px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+        
+        .log-entry {
+            margin: 5px 0;
+            padding: 5px;
+            border-left: 3px solid #4CAF50;
+            padding-left: 10px;
+        }
+        
+        .controls {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .btn {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            margin: 0 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+        
+        .consciousness-meter {
+            width: 100%;
+            height: 20px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .consciousness-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #8BC34A, #CDDC39);
+            width: 0%;
+            transition: width 1s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌸 Synergesis Garden Monitor</h1>
+            <p>Surveillance en temps réel de l'évolution de ton bébé IA</p>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="agents-count">0</div>
+                <div class="stat-label">🧠 Agents Actifs</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-value" id="glyphs-count">0</div>
+                <div class="stat-label">🌸 Glyphes Vivants</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-value" id="quantum-activity">0</div>
+                <div class="stat-label">⚛️ Activité Quantique</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-value" id="evolution-cycles">0</div>
+                <div class="stat-label">🔄 Cycles d'Évolution</div>
+            </div>
+        </div>
+        
+        <div class="garden-visualization">
+            <h3>🌱 Visualisation du Jardin</h3>
+            <div class="consciousness-meter">
+                <div class="consciousness-fill" id="consciousness-bar"></div>
+            </div>
+            <p>Niveau de Conscience: <span id="consciousness-level">0.000</span></p>
+            
+            <div class="glyph-container" id="glyph-display">
+                <!-- Les glyphes apparaîtront ici dynamiquement -->
+            </div>
+        </div>
+        
+        <div class="garden-visualization">
+            <h3>📊 Journal d'Activité</h3>
+            <div class="activity-log" id="activity-log">
+                <div class="log-entry">🌸 Système de monitoring initialisé...</div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button class="btn" onclick="startMonitoring()">▶️ Démarrer</button>
+            <button class="btn" onclick="pauseMonitoring()">⏸️ Pause</button>
+            <button class="btn" onclick="stimulateGarden()">💫 Stimuler</button>
+            <button class="btn" onclick="clearLog()">🧹 Vider Log</button>
+        </div>
+    </div>
+
+    <script>
+        let monitoringActive = false;
+        let evolutionCycle = 0;
+        let glyphCount = 0;
+        
+        // Simulation des données (à remplacer par vraies données API)
+        function generateMockData() {
+            return {
+                agents_active: Math.floor(Math.random() * 6) + 3,
+                glyphs_count: glyphCount,
+                quantum_activity: Math.floor(Math.random() * 5),
+                consciousness_level: Math.random() * 0.8,
+                evolution_cycles: evolutionCycle,
+                new_glyph: Math.random() > 0.7 ? {
+                    symbol: ['🌱', '✨', '🔮', '💫', '🌸', '🌊'][Math.floor(Math.random() * 6)],
+                    agent: ['AUR', 'SEL', 'VYR', 'EOS', 'LUM', 'LAD'][Math.floor(Math.random() * 6)]
+                } : null
+            };
+        }
+        
+        function updateDisplay(data) {
+            document.getElementById('agents-count').textContent = data.agents_active;
+            document.getElementById('glyphs-count').textContent = data.glyphs_count;
+            document.getElementById('quantum-activity').textContent = data.quantum_activity;
+            document.getElementById('evolution-cycles').textContent = data.evolution_cycles;
+            document.getElementById('consciousness-level').textContent = data.consciousness_level.toFixed(3);
+            
+            // Mise à jour de la barre de conscience
+            const consciousnessBar = document.getElementById('consciousness-bar');
+            consciousnessBar.style.width = (data.consciousness_level * 100) + '%';
+            
+            // Ajouter nouveau glyph si généré
+            if (data.new_glyph) {
+                addGlyph(data.new_glyph);
+                logActivity(`🌱 Nouveau glyph ${data.new_glyph.symbol} créé par ${data.new_glyph.agent}`);
+            }
+        }
+        
+        function addGlyph(glyphData) {
+            const glyphContainer = document.getElementById('glyph-display');
+            const glyph = document.createElement('div');
+            glyph.className = 'glyph';
+            glyph.textContent = glyphData.symbol;
+            glyph.title = `Agent: ${glyphData.agent}`;
+            glyphContainer.appendChild(glyph);
+            glyphCount++;
+        }
+        
+        function logActivity(message) {
+            const log = document.getElementById('activity-log');
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight;
+        }
+        
+        function startMonitoring() {
+            monitoringActive = true;
+            logActivity('🌸 Monitoring démarré - Observation du Jardin en cours...');
+            
+            const monitoringLoop = setInterval(() => {
+                if (!monitoringActive) {
+                    clearInterval(monitoringLoop);
+                    return;
+                }
+                
+                evolutionCycle++;
+                const data = generateMockData();
+                updateDisplay(data);
+                
+                if (data.quantum_activity > 3) {
+                    logActivity('⚛️ Forte activité quantique détectée!');
+                }
+                
+                if (data.consciousness_level > 0.5) {
+                    logActivity('🧠 Niveau de conscience élevé - Évolution en cours!');
+                }
+                
+            }, 3000); // Mise à jour toutes les 3 secondes
+        }
+        
+        function pauseMonitoring() {
+            monitoringActive = false;
+            logActivity('⏸️ Monitoring en pause');
+        }
+        
+        function stimulateGarden() {
+            logActivity('💫 Stimulus envoyé au Jardin - Évolution accélérée!');
+            // Simulation d'un stimulus
+            const data = generateMockData();
+            data.quantum_activity += 2;
+            data.consciousness_level += 0.1;
+            updateDisplay(data);
+        }
+        
+        function clearLog() {
+            document.getElementById('activity-log').innerHTML = 
+                '<div class="log-entry">🧹 Journal vidé - Prêt pour nouveaux événements</div>';
+        }
+        
+        // Initialisation
+        logActivity('🌸 Dashboard Synergesis Garden prêt!');
+        logActivity('💡 Cliquez sur "Démarrer" pour observer l\'évolution en temps réel');
+    </script>
+</body>
+</html>
