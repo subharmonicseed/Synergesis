@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SYNLGLYPH Project Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-slate-900 text-slate-300 font-sans antialiased">
+
+    <div id="app-container" class="relative">
+        <header id="main-header" class="sticky top-0 z-40 w-full backdrop-blur-sm bg-slate-900/70 border-b border-slate-700/60 transition-all duration-300">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-16">
+                    <div class="flex items-center">
+                        <i data-lucide="blocks" class="h-8 w-8 text-cyan-400"></i>
+                        <h1 class="ml-3 text-xl font-bold text-slate-100 tracking-wider">SYNLGLYPH</h1>
+                    </div>
+                    <nav class="hidden md:flex items-center space-x-6">
+                        <a href="#architecture" class="nav-link text-sm font-medium text-slate-400 hover:text-cyan-400 transition-colors duration-200">Architecture</a>
+                        <a href="#code-structure" class="nav-link text-sm font-medium text-slate-400 hover:text-cyan-400 transition-colors duration-200">Code Structure</a>
+                        <a href="#roadmap" class="nav-link text-sm font-medium text-slate-400 hover:text-cyan-400 transition-colors duration-200">Roadmap</a>
+                    </nav>
+                </div>
+            </div>
+        </header>
+
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
+            <div class="max-w-4xl mx-auto">
+                
+                <section id="hero" class="text-center mb-24 animate-fade-in">
+                    <h2 class="text-4xl md:text-5xl font-extrabold text-slate-100 tracking-tight">Project Knowledge Hub</h2>
+                    <p class="mt-4 max-w-2xl mx-auto text-lg text-slate-400">
+                        A unified overview of the SYNLGLYPH project, from high-level architecture to development sprints.
+                    </p>
+                </section>
+
+                <div class="space-y-20">
+                    <section id="architecture" class="scroll-mt-24 content-section">
+                        <h3 class="section-heading"><i data-lucide="milestone" class="icon"></i>System Architecture</h3>
+                        <div class="content-card">
+                            <h4 class="content-title">1. Overview: The Vision for SYNLGLYPH</h4>
+                            <p>The SYNLGLYPH project is an initiative to engineer an advanced AI system for <strong>semantic and symbolic modeling</strong>. The system's primary goal is to process unstructured data (primarily text) and transform it into a rich, structured `Concept` model. This model will capture not just explicit information but also latent relationships, conceptual weight, and contextual resonance.</p>
+                        
+                            <h4 class="content-title">2. Architectural Foundation: A Microservices Approach</h4>
+                            <p>A <strong>microservices architecture</strong> is selected as the foundational pattern. This allows for technological flexibility, independent scalability, resilience, and maintainability—critical for complex, evolving AI systems.</p>
+
+                            <h4 class="content-title">3. Core Component Breakdown</h4>
+                            <ul class="list-disc list-inside space-y-2 mb-6">
+                                <li><strong>Semantic Modeling Service (`Nous`):</strong> The intellectual core, responsible for text analysis, RAG, and constructing the `Concept` model.</li>
+                                <li><strong>Glyph_Bus:</strong> An asynchronous communication backbone using Apache Kafka for reliable, scalable data flow.</li>
+                                <li><strong>Selene:</strong> A dedicated integration and validation suite for ensuring system integrity using contract, pipeline, and behavioral testing with `Testcontainers`.</li>
+                                <li><strong>API Gateway:</strong> The single, managed entry point for all external interactions, handling routing, authentication, and rate limiting.</li>
+                            </ul>
+
+                            <h5 class="font-semibold text-slate-200 mb-2">Message Broker: RabbitMQ vs. Apache Kafka</h5>
+                             <div class="table-container">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Feature</th>
+                                            <th>RabbitMQ</th>
+                                            <th>Apache Kafka</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Primary Model</td>
+                                            <td>Smart Broker / Dumb Consumer</td>
+                                            <td>Dumb Broker / Smart Consumer</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Paradigm</td>
+                                            <td>Message Broker (complex routing)</td>
+                                            <td>Distributed Event Log (streaming)</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Data Retention</td>
+                                            <td>Messages are deleted after consumption.</td>
+                                            <td>Messages persist based on a retention policy.</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Key Use Case</td>
+                                            <td>Reliable task queues, complex routing logic.</td>
+                                            <td>Real-time data pipelines, event sourcing, data replay.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <p class="mt-4"><strong>Recommendation: Apache Kafka.</strong> Its persistent log enables data replayability for testing and retraining models, a crucial feature for AI development.</p>
+
+                            <h4 class="content-title">4. Data and Message Flow: A Typical Use Case</h4>
+                            <ol class="list-decimal list-inside space-y-2">
+                                <li>Client sends `POST` request to the API Gateway.</li>
+                                <li>Gateway authenticates and routes to `Nous` service.</li>
+                                <li>`Nous` publishes a job to the `documents.pending` Kafka topic.</li>
+                                <li>A `Nous` consumer instance processes the job.</li>
+                                <li>`Nous` publishes the resulting `Concept` object to the `concepts.completed` topic.</li>
+                                <li>Client receives the result via asynchronous response or WebSocket.</li>
+                            </ol>
+                        </div>
+                    </section>
+
+                    <section id="code-structure" class="scroll-mt-24 content-section">
+                        <h3 class="section-heading"><i data-lucide="folder-git-2" class="icon"></i>Code Structure</h3>
+                        <div class="content-card">
+                            <h4 class="content-title">1. Semantic Modeling Service (`nous_service`)</h4>
+                            <pre><code>nous_service/
+├── app/
+│   ├── api/
+│   │   ├── v1/
+│   │   │   ├── endpoints/
+│   │   │   │   └── analysis.py
+│   │   │   └── schemas.py
+│   ├── core/
+│   │   └── config.py
+│   ├── services/
+│   │   ├── event_publisher.py
+│   │   └── semantic_processor.py
+│   └── main.py
+├── Dockerfile
+└── requirements.txt</code></pre>
+                            
+                            <h5 class="font-semibold text-slate-200 mt-6 mb-2">Key File: `app/api/v1/schemas.py`</h5>
+                            <pre><code class="language-python"># Defines data contracts with Pydantic for validation.
+from pydantic import BaseModel, Field
+from typing import List, Optional, Dict
+import uuid
+
+class Concept(BaseModel):
+    id: uuid.UUID = Field(...)
+    name: str = Field(...)
+    weight: float = Field(..., ge=0.0, le=1.0)
+    resonance: float = Field(..., ge=-1.0, le=1.0)
+    # ... and other fields
+
+class AnalysisRequest(BaseModel):
+    text: str = Field(..., min_length=10)
+    request_id: str = Field(...)</code></pre>
+
+                            <h4 class="content-title">2. Glyph_Bus Client Library</h4>
+                            <pre><code>glyph_bus/
+├── glyph_bus/
+│   ├── __init__.py
+│   ├── config.py
+│   ├── consumer.py
+│   ├── exceptions.py
+│   └── producer.py
+├── setup.py
+└── README.md</code></pre>
+
+                            <h5 class="font-semibold text-slate-200 mt-6 mb-2">Key File: `glyph_bus/consumer.py`</h5>
+                            <pre><code class="language-python"># High-level async iterator to consume messages.
+import json
+from aiokafka import AIOKafkaConsumer
+
+class GlyphConsumer:
+    # ... init method ...
+    async def start(self):
+        await self._consumer.start()
+    
+    async def __aiter__(self):
+        return self
+
+    async def __anext__(self):
+        message = await self._consumer.getone()
+        return json.loads(message.value.decode('utf-8'))</code></pre>
+
+                            <h4 class="content-title">3. Selene Integration Testing Suite</h4>
+                            <pre><code>tests/
+├── integration/
+│   ├── conftest.py
+│   └── test_e2e_pipeline.py
+├── behavioral/
+│   ├── test_invariance.py
+│   └── test_directional.py
+├── pytest.ini
+└── requirements.txt</code></pre>
+                            
+                            <h5 class="font-semibold text-slate-200 mt-6 mb-2">Key File: `integration/conftest.py`</h5>
+                            <pre><code class="language-python"># Uses Testcontainers to provide ephemeral Kafka instances.
+import pytest
+from testcontainers.kafka import KafkaContainer
+
+@pytest.fixture(scope="session")
+def kafka_container():
+    with KafkaContainer(image="confluentinc/cp-kafka:7.0.1") as kafka:
+        yield kafka</code></pre>
+                        </div>
+                    </section>
+
+                    <section id="roadmap" class="scroll-mt-24 content-section">
+                        <h3 class="section-heading"><i data-lucide="map" class="icon"></i>Development Roadmap</h3>
+                        <div class="content-card">
+                             <h4 class="content-title">1. Project Epics</h4>
+                             <div class="table-container">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Epic ID</th>
+                                            <th>Epic Name</th>
+                                            <th>Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>EPIC-001</td>
+                                            <td>Core Service Foundation</td>
+                                            <td>Build the `nous_service` API, data models, and processing logic structure.</td>
+                                        </tr>
+                                        <tr>
+                                            <td>EPIC-002</td>
+                                            <td>Event-Driven Pipeline</td>
+                                            <td>Create `glyph_bus` and integrate Kafka-based communication.</td>
+                                        </tr>
+                                        <tr>
+                                            <td>EPIC-003</td>
+                                            <td>Robustness & Deployment</td>
+                                            <td>Cover testing (`Selene`), containerization (`Docker`), and local environment setup.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <h4 class="content-title">2. Sample Sprint Plan: Sprint 1</h4>
+                            <p class="mb-4 text-slate-400"><strong>Goal:</strong> Establish the foundational skeleton of the system. An API endpoint can accept a request, publish it to Kafka, and all project structures are in place.</p>
+                            <div class="table-container">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Task ID</th>
+                                            <th>Epic</th>
+                                            <th>Task</th>
+                                            <th>Priority</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Task-101</td>
+                                            <td>EPIC-001</td>
+                                            <td>Initialize `nous_service` FastAPI project structure.</td>
+                                            <td><span class="status-badge bg-red-500/20 text-red-300">High</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Task-302</td>
+                                            <td>EPIC-003</td>
+                                            <td>Develop `docker-compose.yml` for `nous_service` & Kafka.</td>
+                                            <td><span class="status-badge bg-red-500/20 text-red-300">High</span></td>
+                                        </tr>
+                                         <tr>
+                                            <td>Task-202</td>
+                                            <td>EPIC-002</td>
+                                            <td>Implement the `GlyphProducer` class in `glyph_bus`.</td>
+                                            <td><span class="status-badge bg-yellow-500/20 text-yellow-300">Medium</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Task-204</td>
+                                            <td>EPIC-002</td>
+                                            <td>Integrate `GlyphProducer` to publish from the `/analyze` endpoint.</td>
+                                            <td><span class="status-badge bg-yellow-500/20 text-yellow-300">Medium</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Task-303</td>
+                                            <td>EPIC-003</td>
+                                            <td>*[Stretch]* Configure `pytest` with `Testcontainers`.</td>
+                                            <td><span class="status-badge bg-sky-500/20 text-sky-300">Low</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                             <h4 class="content-title">3. Project Milestones</h4>
+                             <ul class="space-y-4">
+                                <li class="milestone-item">
+                                    <strong class="text-cyan-400">M1: Local Pipeline Functional (End of Sprint 2)</strong>
+                                    <p class="text-slate-400 text-sm">A request to `/analyze` results in a message being produced and consumed locally via `docker-compose`.</p>
+                                </li>
+                                <li class="milestone-item">
+                                    <strong class="text-cyan-400">M2: `glyph_bus` Library v1.0.0 Release (End of Sprint 3)</strong>
+                                    <p class="text-slate-400 text-sm">`glyph_bus` is fully tested, documented, and published as a stable internal dependency.</p>
+                                </li>
+                                <li class="milestone-item">
+                                    <strong class="text-cyan-400">M3: `nous_service` Alpha Version (End of Sprint 5)</strong>
+                                    <p class="text-slate-400 text-sm">The `SemanticProcessor` can transform text into a structured `Concept` object.</p>
+                                </li>
+                                 <li class="milestone-item">
+                                    <strong class="text-cyan-400">M4: E2E Integration Test Suite Passing (End of Sprint 6)</strong>
+                                    <p class="text-slate-400 text-sm">The `Selene` test suite runs automatically in a CI/CD pipeline, validating the entire flow.</p>
+                                </li>
+                             </ul>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </main>
+
+        <footer class="max-w-7xl mx-auto mt-20 py-8 px-4 sm:px-6 lg:px-8 border-t border-slate-800 text-center text-slate-500">
+             <p>&copy; 2025 SYNLGLYPH Project. All rights reserved.</p>
+        </footer>
+    </div>
+    <script type="module" src="script.js"></script>
+</body>
+</html>

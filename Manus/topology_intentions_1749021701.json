@@ -1,0 +1,143 @@
+[
+  {
+    "type": "CONNECT_ISOLATED_GLYPH",
+    "target_glyph_id": "test_glyph_1748858780",
+    "target_prompt": "Glyphe sans description",
+    "priority": "HIGH",
+    "rationale": "Glyphe complètement isolé dans le graphe",
+    "suggested_connections": []
+  },
+  {
+    "type": "ENRICH_HUB_GLYPH",
+    "target_glyph_id": "techglyph_202505140900_3",
+    "target_prompt": "Glyphe sans description",
+    "centrality": 5,
+    "priority": "MEDIUM",
+    "rationale": "Glyphe central avec 5 connexions",
+    "suggested_actions": [
+      "Enrichir la description avec plus de détails",
+      "Vérifier la qualité et la pertinence des connexions existantes",
+      "Considérer comme point focal pour l'organisation des connaissances"
+    ]
+  },
+  {
+    "type": "ENRICH_HUB_GLYPH",
+    "target_glyph_id": "techglyph_202505140910_3",
+    "target_prompt": "Glyphe sans description",
+    "centrality": 4,
+    "priority": "MEDIUM",
+    "rationale": "Glyphe central avec 4 connexions",
+    "suggested_actions": [
+      "Enrichir la description avec plus de détails",
+      "Vérifier la qualité et la pertinence des connexions existantes",
+      "Considérer comme point focal pour l'organisation des connaissances"
+    ]
+  },
+  {
+    "type": "CREATE_SOLUTION_FOR_PROBLEM_CLUSTER",
+    "target_cluster_id": "cluster_1",
+    "problems": [
+      {
+        "id": "techglyph_202505140900_1",
+        "prompt": "Glyphe sans description"
+      },
+      {
+        "id": "techglyph_202505140910_1",
+        "prompt": "Glyphe sans description"
+      }
+    ],
+    "cluster_size": 2,
+    "avg_similarity": 0.8,
+    "priority": "HIGH",
+    "rationale": "Cluster de 2 problèmes similaires sans solution commune",
+    "suggested_actions": [
+      "Créer un nouveau glyphe ProposedSolution",
+      "Établir des relations ADDRESSES_PROBLEM vers chaque problème du cluster",
+      "Considérer une approche unifiée qui résout tous les problèmes du cluster"
+    ]
+  },
+  {
+    "type": "CONNECT_SIMILAR_GLYPHS",
+    "source_glyph": {
+      "id": "techglyph_202505140900_1",
+      "prompt": "Glyphe sans description",
+      "concept_type": "PROBLEM"
+    },
+    "target_glyph": {
+      "id": "techglyph_202505140910_1",
+      "prompt": "Glyphe sans description",
+      "concept_type": "PROBLEM"
+    },
+    "similarity_score": 0.8,
+    "suggested_relation": "RELATED_TO_CONCEPT",
+    "priority": "MEDIUM",
+    "rationale": "Glyphes similaires (score: 0.80) sans relation sémantique directe",
+    "suggested_actions": [
+      "Créer une relation RELATED_TO_CONCEPT entre les glyphes",
+      "Vérifier la pertinence sémantique de la connexion"
+    ]
+  },
+  {
+    "type": "CONNECT_SIMILAR_GLYPHS",
+    "source_glyph": {
+      "id": "techglyph_202505140900_2",
+      "prompt": "Glyphe sans description",
+      "concept_type": "TECHNICALCONCEPT"
+    },
+    "target_glyph": {
+      "id": "techglyph_202505140910_2",
+      "prompt": "Glyphe sans description",
+      "concept_type": "TECHNICALCONCEPT"
+    },
+    "similarity_score": 0.8,
+    "suggested_relation": "RELATED_TO_CONCEPT",
+    "priority": "MEDIUM",
+    "rationale": "Glyphes similaires (score: 0.80) sans relation sémantique directe",
+    "suggested_actions": [
+      "Créer une relation RELATED_TO_CONCEPT entre les glyphes",
+      "Vérifier la pertinence sémantique de la connexion"
+    ]
+  },
+  {
+    "type": "CONNECT_SIMILAR_GLYPHS",
+    "source_glyph": {
+      "id": "techglyph_202505140900_3",
+      "prompt": "Glyphe sans description",
+      "concept_type": "PROPOSEDSOLUTION"
+    },
+    "target_glyph": {
+      "id": "techglyph_202505140910_3",
+      "prompt": "Glyphe sans description",
+      "concept_type": "PROPOSEDSOLUTION"
+    },
+    "similarity_score": 0.8,
+    "suggested_relation": "RELATED_TO_CONCEPT",
+    "priority": "MEDIUM",
+    "rationale": "Glyphes similaires (score: 0.80) sans relation sémantique directe",
+    "suggested_actions": [
+      "Créer une relation RELATED_TO_CONCEPT entre les glyphes",
+      "Vérifier la pertinence sémantique de la connexion"
+    ]
+  },
+  {
+    "type": "CONNECT_SIMILAR_GLYPHS",
+    "source_glyph": {
+      "id": "techglyph_202505140900_4",
+      "prompt": "Glyphe sans description",
+      "concept_type": "KEYCONTRIBUTION"
+    },
+    "target_glyph": {
+      "id": "techglyph_202505140910_4",
+      "prompt": "Glyphe sans description",
+      "concept_type": "KEYCONTRIBUTION"
+    },
+    "similarity_score": 0.8,
+    "suggested_relation": "RELATED_TO_CONCEPT",
+    "priority": "MEDIUM",
+    "rationale": "Glyphes similaires (score: 0.80) sans relation sémantique directe",
+    "suggested_actions": [
+      "Créer une relation RELATED_TO_CONCEPT entre les glyphes",
+      "Vérifier la pertinence sémantique de la connexion"
+    ]
+  }
+]

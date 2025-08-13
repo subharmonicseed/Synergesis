@@ -1,0 +1,69 @@
+[
+  {
+    "type": "GRAPH_STATISTICS",
+    "data": {
+      "node_count": 10,
+      "avg_degree": 2.2,
+      "max_degree": 5,
+      "min_degree": 0,
+      "isolated_count": 1
+    },
+    "severity": "INFO",
+    "timestamp": 1749021684.9953213
+  },
+  {
+    "type": "ISOLATED_GLYPHS_DETECTED",
+    "data": [
+      {
+        "g.id": "test_glyph_1748858780",
+        "g.natural_prompt": "Glyphe sans description",
+        "g.concept_type": "TEST_CONCEPT",
+        "g.degree_centrality": 0
+      }
+    ],
+    "severity": "WARNING",
+    "timestamp": 1749021685.000504,
+    "recommendation": "Ces glyphes devraient être connectés à d'autres concepts pertinents."
+  },
+  {
+    "type": "HUB_GLYPHS_DETECTED",
+    "data": [
+      {
+        "g.id": "techglyph_202505140900_3",
+        "g.natural_prompt": "Glyphe sans description",
+        "g.concept_type": "PROPOSEDSOLUTION",
+        "g.degree_centrality": 5
+      }
+    ],
+    "severity": "INFO",
+    "timestamp": 1749021685.0049064,
+    "recommendation": "Ces glyphes centraux pourraient bénéficier d'une attention particulière pour l'enrichissement."
+  },
+  {
+    "type": "PROBLEM_CLUSTERS_WITHOUT_SOLUTIONS",
+    "data": [
+      {
+        "cluster_id": "cluster_1",
+        "problem_ids": [
+          "techglyph_202505140910_1",
+          "techglyph_202505140900_1"
+        ],
+        "problems": [
+          {
+            "id": "techglyph_202505140900_1",
+            "prompt": "Glyphe sans description"
+          },
+          {
+            "id": "techglyph_202505140910_1",
+            "prompt": "Glyphe sans description"
+          }
+        ],
+        "size": 2,
+        "avg_similarity": 0.8
+      }
+    ],
+    "severity": "WARNING",
+    "timestamp": 1749021685.0128148,
+    "recommendation": "Ces clusters de problèmes similaires manquent de solutions associées."
+  }
+]

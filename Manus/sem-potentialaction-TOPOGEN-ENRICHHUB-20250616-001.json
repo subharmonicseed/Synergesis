@@ -1,0 +1,92 @@
+{
+  "id": "sem-potentialaction-TOPOGEN-ENRICHHUB-20250616-001",
+  "timestamp": 1750086684,
+  "source": "topology_aware_intention_generator",
+  "concept_type": "POTENTIAL_ACTION",
+  "action_type": "ENRICH_HUB_NODE",
+  "status": "PROPOSED",
+  "priority": 70,
+  "confidence": 0.95,
+  "tags": [
+    "topology_generated",
+    "hub_enrichment",
+    "quality_improvement",
+    "central_node_enhancement"
+  ],
+  "natural_prompt": "Enrichir le glyphe hub techglyph_202505140900_3 (centralité: 5) avec des détails supplémentaires et vérifier la qualité de ses connexions pour maximiser son impact dans le graphe de connaissances.",
+  "details_structured_json": {
+    "action_parameters": {
+      "target_glyph_id": "techglyph_202505140900_3",
+      "centrality": 5,
+      "enrichment_aspects": [
+        "detailed_description",
+        "connection_quality",
+        "knowledge_organization"
+      ],
+      "suggested_actions": [
+        "Enrichir la description avec plus de détails",
+        "Vérifier la qualité et la pertinence des connexions existantes",
+        "Considérer comme point focal pour l'organisation des connaissances"
+      ]
+    },
+    "source_metadata": {
+      "intention_type": "ENRICH_HUB_GLYPH",
+      "target_prompt": "Glyphe sans description",
+      "original_priority": "MEDIUM",
+      "rationale": "Glyphe central avec 5 connexions"
+    },
+    "enrichment_generation_parameters": {
+      "generation_method": "LLM_ENHANCEMENT",
+      "prompt_template": "Enrichir la description du glyphe hub suivant en tenant compte de son rôle central dans le graphe de connaissances :\n{current_description}\n\nCe glyphe a une centralité de {centrality} avec {connection_count} connexions. L'enrichissement doit améliorer sa clarté, sa précision et son utilité comme point focal pour l'organisation des connaissances.",
+      "required_enrichment_aspects": [
+        "clarity_improvement",
+        "precision_enhancement",
+        "contextual_relevance",
+        "connection_justification"
+      ]
+    },
+    "expected_impact": {
+      "structural_metrics": {
+        "connection_quality_delta": 0.2,
+        "knowledge_organization_delta": 0.25
+      },
+      "semantic_metrics": {
+        "information_richness_delta": 0.3,
+        "concept_clarity_delta": 0.25
+      }
+    },
+    "execution_requirements": {
+      "required_permissions": [
+        "MODIFY_NODE_CONTENT",
+        "EVALUATE_CONNECTIONS"
+      ],
+      "estimated_execution_time_ms": 4000,
+      "idempotency_key": "enrich_hub_techglyph_202505140900_3",
+      "preconditions": [
+        "target_glyph_exists",
+        "target_glyph_is_hub",
+        "llm_service_available"
+      ]
+    }
+  },
+  "details_text": "Cette action propose d'enrichir un glyphe hub identifié comme point focal dans le graphe de connaissances.\n\nGlyphe cible : techglyph_202505140900_3\nDescription actuelle : Glyphe sans description\nCentralité : 5\n\nJustification : Glyphe central avec 5 connexions\n\nActions suggérées :\n- Enrichir la description avec plus de détails\n- Vérifier la qualité et la pertinence des connexions existantes\n- Considérer comme point focal pour l'organisation des connaissances\n\nProcédure d'exécution :\n1. Analyser le contenu actuel du glyphe et ses connexions\n2. Générer une description enrichie via LLM\n3. Évaluer et améliorer la qualité des connexions existantes\n4. Optimiser le rôle du glyphe comme point focal pour l'organisation des connaissances\n\nImpact attendu :\n- Amélioration de la richesse informationnelle du glyphe hub\n- Renforcement de la clarté conceptuelle\n- Optimisation de l'organisation des connaissances autour de ce point focal\n\nCette action est générée automatiquement par le module d'enrichissement topologique pour maximiser l'impact des glyphes centraux dans le graphe de connaissances Synergesis.",
+  "metadata": {
+    "topology_metrics": {
+      "target_glyph_degree": 5,
+      "hub_importance_score": 1.0,
+      "connected_component_size": 15
+    },
+    "generation_context": {
+      "generator_version": "1.0.0",
+      "generation_timestamp": 1750086684,
+      "generation_parameters": {
+        "high_centrality_threshold": 5,
+        "priority_mapping": {
+          "HIGH": 90,
+          "MEDIUM": 70,
+          "LOW": 50
+        }
+      }
+    }
+  }
+}
