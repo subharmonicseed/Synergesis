@@ -1,0 +1,6 @@
+{
+  "llm_service": true,
+  "autonomous_agents": true,
+  "knowledge_storage": true,
+  "continuous_operation": true
+}

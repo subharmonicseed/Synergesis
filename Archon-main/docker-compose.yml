@@ -1,0 +1,219 @@
+services:
+  # Server Service (FastAPI + Socket.IO + Crawling)
+  archon-server:
+    build:
+      context: ./python
+      dockerfile: Dockerfile.server
+      args:
+        BUILDKIT_INLINE_CACHE: 1
+        ARCHON_SERVER_PORT: ${ARCHON_SERVER_PORT:-8181}
+    env_file:
+      - ./.env
+    container_name: Archon-Server
+    ports:
+      - "${ARCHON_SERVER_PORT:-8181}:${ARCHON_SERVER_PORT:-8181}"
+    environment:
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - LOGFIRE_TOKEN=${LOGFIRE_TOKEN:-}
+      - SERVICE_DISCOVERY_MODE=docker_compose
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - ARCHON_SERVER_PORT=${ARCHON_SERVER_PORT:-8181}
+      - ARCHON_MCP_PORT=${ARCHON_MCP_PORT:-8051}
+      - ARCHON_AGENTS_PORT=${ARCHON_AGENTS_PORT:-8052}
+    networks:
+      - app-network
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock  # Docker socket for MCP container control
+      - ./python/src:/app/src  # Mount source code for hot reload
+      - ./python/tests:/app/tests  # Mount tests for UI test execution
+    command: ["python", "-m", "uvicorn", "src.server.main:socket_app", "--host", "0.0.0.0", "--port", "${ARCHON_SERVER_PORT:-8181}", "--reload"]
+    healthcheck:
+      test: ["CMD", "sh", "-c", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:${ARCHON_SERVER_PORT:-8181}/health')\""]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Lightweight MCP Server Service (HTTP-based)
+  archon-mcp:
+    build:
+      context: ./python
+      dockerfile: Dockerfile.mcp
+      args:
+        BUILDKIT_INLINE_CACHE: 1
+        ARCHON_MCP_PORT: ${ARCHON_MCP_PORT:-8051}
+    env_file:
+      - ./.env
+    container_name: Archon-MCP
+    ports:
+      - "${ARCHON_MCP_PORT:-8051}:${ARCHON_MCP_PORT:-8051}"
+    environment:
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_KEY}
+      - LOGFIRE_TOKEN=${LOGFIRE_TOKEN:-}
+      - SERVICE_DISCOVERY_MODE=docker_compose
+      - TRANSPORT=sse
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      # MCP needs to know where to find other services
+      - API_SERVICE_URL=http://archon-server:${ARCHON_SERVER_PORT:-8181}
+      - AGENTS_SERVICE_URL=http://archon-agents:${ARCHON_AGENTS_PORT:-8052}
+      - ARCHON_MCP_PORT=${ARCHON_MCP_PORT:-8051}
+      - ARCHON_SERVER_PORT=${ARCHON_SERVER_PORT:-8181}
+      - ARCHON_AGENTS_PORT=${ARCHON_AGENTS_PORT:-8052}
+    networks:
+      - app-network
+    depends_on:
+      - archon-server
+      - archon-agents
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./python/src:/app/src  # Mount source for hot-reload
+    command: ["python", "-m", "uvicorn", "src.mcp.mcp_server:app", "--host", "0.0.0.0", "--port", "${ARCHON_MCP_PORT:-8051}", "--reload"]
+    healthcheck:
+      test: ["CMD", "sh", "-c", "python -c \"import socket; s=socket.socket(); s.connect(('localhost', ${ARCHON_MCP_PORT:-8051})); s.close()\""]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s  # Give dependencies time to start
+
+  # AI Agents Service (ML/Reranking)
+  archon-agents:
+    build:
+      context: ./python
+      dockerfile: Dockerfile.agents
+      args:
+        BUILDKIT_INLINE_CACHE: 1
+        ARCHON_AGENTS_PORT: ${ARCHON_AGENTS_PORT:-8052}
+    env_file:
+      - ./.env
+    container_name: Archon-Agents
+    ports:
+      - "${ARCHON_AGENTS_PORT:-8052}:${ARCHON_AGENTS_PORT:-8052}"
+    environment:
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - LOGFIRE_TOKEN=${LOGFIRE_TOKEN:-}
+      - SERVICE_DISCOVERY_MODE=docker_compose
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - ARCHON_AGENTS_PORT=${ARCHON_AGENTS_PORT:-8052}
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "sh", "-c", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:${ARCHON_AGENTS_PORT:-8052}/health')\""]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Autonomous Agent Service
+  archon-autonomous-agents:
+    build:
+      context: ./python
+      dockerfile: Dockerfile.agents
+    container_name: Archon-Autonomous-Agents
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_KEY}
+      - LLM_ENDPOINT=http://mistral:8080/v1/chat/completions
+      - LLM_PROVIDER=mistral
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=password
+    networks:
+      - app-network
+    depends_on:
+      mistral:
+        condition: service_healthy
+      neo4j:
+        condition: service_healthy
+    volumes:
+      - ./python/src:/app/src
+    command: ["python", "-m", "src.autonomous_agent_runner"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import time; time.sleep(1)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Frontend
+  frontend:
+    build: ./archon-ui-main
+    container_name: Archon-UI
+    ports:
+      - "${ARCHON_UI_PORT:-3737}:5173"
+    environment:
+      - VITE_API_URL=http://${HOST:-localhost}:${ARCHON_SERVER_PORT:-8181}
+      - ARCHON_SERVER_PORT=${ARCHON_SERVER_PORT:-8181}
+      - HOST=${HOST:-localhost}
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5173"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    volumes:
+      - ./archon-ui-main/src:/app/src
+      - ./archon-ui-main/public:/app/public
+    depends_on:
+      - archon-server
+
+  # Mistral LLM Service
+  mistral:
+    image: ghcr.io/ggerganov/llama.cpp:server
+    container_name: Mistral-LLM
+    ports:
+      - "8081:8080"
+    environment:
+      - MODEL=/models/Mistral-7B-Instruct-v0.3.Q4_K_M.gguf
+      - HOST=0.0.0.0
+      - PORT=8080
+    volumes:
+      - ./models:/models:ro
+    command: ["--model", "/models/Mistral-7B-Instruct-v0.3.Q4_K_M.gguf", "--host", "0.0.0.0", "--port", "8080", "--n-gpu-layers", "0"]
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Neo4j Knowledge Graph Database
+  neo4j:
+    image: neo4j:5.15
+    container_name: Archon-Neo4j
+    ports:
+      - "7475:7474"
+      - "7688:7687"
+    environment:
+      - NEO4J_AUTH=neo4j/password
+      - NEO4J_PLUGINS=["apoc"]
+      - NEO4J_dbms_security_procedures_unrestricted=apoc.*
+      - NEO4J_dbms_security_procedures_allowlist=apoc.*
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+      - neo4j_plugins:/plugins
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "cypher-shell -u neo4j -p password 'RETURN 1' | grep '1'"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  neo4j_data:
+  neo4j_logs:
+  neo4j_plugins:
