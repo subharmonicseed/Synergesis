@@ -65,8 +65,10 @@ services:
     networks:
       - app-network
     depends_on:
-      - archon-server
-      - archon-agents
+      archon-server:
+        condition: service_healthy
+      archon-agents:
+        condition: service_healthy
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./python/src:/app/src  # Mount source for hot-reload
@@ -99,6 +101,9 @@ services:
       - SERVICE_DISCOVERY_MODE=docker_compose
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
       - ARCHON_AGENTS_PORT=${ARCHON_AGENTS_PORT:-8052}
+    depends_on:
+      archon-server:
+        condition: service_healthy
     networks:
       - app-network
     healthcheck:

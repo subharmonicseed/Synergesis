@@ -84,6 +84,7 @@ class MCPClient:
                 "id": 1
             }
             
+            logger.debug(f"Sending MCP request: {json.dumps(init_data)}")
             response = await self.client.post(
                 f"{self.mcp_url}/mcp",
                 json=init_data,
@@ -131,7 +132,7 @@ class MCPClient:
             call_data = {
                 "jsonrpc": "2.0",
                 "method": "tools/call",
-                "params": params,
+                "params": {"name": tool_name, "arguments": kwargs},
                 "id": str(uuid.uuid4())
             }
 

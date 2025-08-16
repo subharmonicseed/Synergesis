@@ -1,7 +1,12 @@
 import asyncio
+import logging
 import os
 import sys
+import time
 from pathlib import Path
+
+# Configure logging to display DEBUG level messages
+logging.basicConfig(level=logging.DEBUG)
 
 # Add the project's 'python' directory to the path to allow imports
 project_root = Path(__file__).resolve().parent
@@ -23,6 +28,7 @@ async def main():
         client = MCPClient()
         
         print("Calling 'docker.list_containers' tool...")
+
         # We need to use the generic 'call_tool' method for our custom tool
         result = await client.call_tool("docker.list_containers", show_all=True)
         

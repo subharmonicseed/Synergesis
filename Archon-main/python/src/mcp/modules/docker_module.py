@@ -31,7 +31,7 @@ def register_docker_tools(mcp: FastMCP):
         List all Docker containers.
 
         Args:
-            all (bool): Show all containers (default True), or only running ones.
+            show_all (bool): Show all containers (default True), or only running ones.
 
         Returns:
             A dictionary containing a list of containers or an error message.

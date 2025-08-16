@@ -245,10 +245,15 @@ export const MCPPage = () => {
         }, null, 2);
         
       case 'windsurf':
+        // Windsurf expects an `uri` field pointing at the SSE endpoint.
+        // Use the canonical `/sse` path (matches docs) so users can paste
+        // this directly into Windsurf's MCP configuration.
         return JSON.stringify({
-          mcpServers: {
-            archon: {
-              serverUrl: mcpUrl
+          "mcp": {
+            "servers": {
+              "archon": {
+                "uri": `${mcpUrl.replace(/\/mcp\/?$/,'')}/sse`
+              }
             }
           }
         }, null, 2);
@@ -276,8 +281,8 @@ export const MCPPage = () => {
           steps: [
             '1. Open Windsurf and click the "MCP servers" button (hammer icon)',
             '2. Click "Configure" and then "View raw config"',
-            '3. Add the configuration shown below to the mcpServers object',
-            '4. Click "Refresh" to connect to the server'
+            '3. Paste the JSON shown below into the configuration (it will add an entry under mcp.servers)',
+            '4. Ensure the Archon MCP server is reachable (port and host), then click "Refresh" to connect'
           ]
         };
       case 'cursor':

@@ -196,9 +196,39 @@ try:
     )
 
     # Expose the underlying ASGI app for Uvicorn
-    app = mcp.app
+    # FastMCP API has changed across versions; try known accessors
+    app = None
+    tried = []
+    try:
+        # Preferred in newer implementation
+        app = mcp.streamable_http_app()
+        tried.append("streamable_http_app()")
+    except Exception:
+        tried.append("streamable_http_app() failed")
 
-    logger.info("FastMCP server instance created successfully")
+    if app is None:
+        # Try common attribute names used in different FastMCP versions
+        for attr in ("app", "asgi_app", "get_app", "asgi"):
+            try:
+                candidate = getattr(mcp, attr)
+                # If it's callable, call to get the app
+                if callable(candidate):
+                    candidate = candidate()
+                    tried.append(f"{attr}()")
+                else:
+                    tried.append(attr)
+
+                # Basic validation: is callable (ASGI app or factory)
+                if callable(candidate):
+                    app = candidate
+                    break
+            except Exception:
+                tried.append(f"{attr} failed")
+
+    if app is None:
+        raise RuntimeError(f"Unable to obtain ASGI app from FastMCP instance. Attempts: {tried}")
+
+    logger.info("FastMCP server instance created successfully using one of: %s", tried)
 
 except Exception as e:
     logger.error(f"Failed to create FastMCP server: {e}")

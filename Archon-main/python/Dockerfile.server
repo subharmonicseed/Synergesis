@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y \
 
 # Copy and install Python dependencies
 COPY requirements.server.txt .
-RUN pip install --user --no-cache-dir -r requirements.server.txt
+RUN pip install --no-cache-dir -r requirements.server.txt
 
 # Runtime stage
 FROM python:3.11-slim
@@ -46,10 +46,8 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Copy Python packages from builder
-COPY --from=builder /root/.local /root/.local
-
-# Install Playwright browsers
-ENV PATH=/root/.local/bin:$PATH
+COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+COPY --from=builder /usr/local/bin /usr/local/bin
 RUN playwright install chromium
 
 # Copy server code and tests
@@ -59,7 +57,7 @@ COPY src/__init__.py src/
 COPY tests/ tests/
 
 # Set environment variables
-ENV PYTHONPATH="/app:/root/.local/lib/python3.11/site-packages:$PYTHONPATH"
+ENV PYTHONPATH=/app
 ENV PYTHONUNBUFFERED=1
 
 # Expose Server port

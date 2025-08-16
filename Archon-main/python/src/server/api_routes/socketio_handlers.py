@@ -8,12 +8,16 @@ Keeps the main projects_api.py file focused on REST endpoints.
 # Removed direct logging import - using unified config
 import asyncio
 import time
+import traceback
+import urllib.parse
+from dataclasses import asdict, dataclass
+from typing import Any
 
-from server.config.logfire_config import get_logger
-from server.services.background_task_manager import get_task_manager
-from server.services.projects.project_service import ProjectService
-from server.services.projects.source_linking_service import SourceLinkingService
-from server.socketio_app import get_socketio_instance
+from src.server.config.logfire_config import get_logger
+from src.server.services.background_task_manager import get_task_manager
+from src.server.services.projects.project_service import ProjectService
+from src.server.services.projects.source_linking_service import SourceLinkingService
+from src.server.socketio_app import get_socketio_instance
 
 logger = get_logger(__name__)
 
@@ -250,7 +254,7 @@ async def connect(sid, environ):
                 for room_sids in namespace_rooms.values():
                     all_sids.update(room_sids)
             logger.debug(f"Total connected clients: {len(all_sids)}")
-    except:
+    except Exception:
         pass
 
 
@@ -401,7 +405,7 @@ async def crawl_subscribe(sid, data=None):
                 # Handle different return types from rooms()
                 if rooms_result is None:
                     client_rooms = []
-                elif isinstance(rooms_result, (list, set, tuple)):
+                elif isinstance(rooms_result, list | set | tuple):
                     client_rooms = list(rooms_result)
                 elif isinstance(rooms_result, dict):
                     client_rooms = list(rooms_result.keys())
@@ -602,8 +606,6 @@ async def crawl_stop(sid, data):
 # Document Synchronization Socket.IO Event Handlers
 # Real-time document collaboration with conflict resolution
 
-from dataclasses import asdict, dataclass
-from typing import Any
 
 
 @dataclass
