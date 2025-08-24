@@ -1,0 +1,37 @@
+nohup: ignoring input
+INFO:     Started server process [3129]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)
+INFO:     127.0.0.1:53610 - "GET /health HTTP/1.1" 200 OK
+DEBUG: Début de search_concepts
+DEBUG: Récupération de tous les concepts
+DEBUG: Nombre de concepts récupérés: 0
+INFO:     127.0.0.1:53622 - "GET /concepts HTTP/1.1" 200 OK
+DEBUG: Début de search_concepts
+DEBUG: Récupération de tous les concepts
+DEBUG: Nombre de concepts récupérés: 0
+INFO:     127.0.0.1:53634 - "GET /concepts HTTP/1.1" 200 OK
+DEBUG: Erreur lors de l'ajout du concept: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO concept (concept_id, natural_prompt, concept_type, source, timestamp, resonance, weight) VALUES (?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('concept_A', 'Description A', 'TYPE1', 'Test', 1753780821.087885, 0.1, 0.2)]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+INFO:     127.0.0.1:53644 - "POST /concepts HTTP/1.1" 500 Internal Server Error
+DEBUG: Début de search_concepts
+DEBUG: Récupération de tous les concepts
+DEBUG: Nombre de concepts récupérés: 0
+INFO:     127.0.0.1:53652 - "GET /concepts HTTP/1.1" 200 OK
+DEBUG: Erreur lors de l'ajout du concept: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO concept (concept_id, natural_prompt, concept_type, source, timestamp, resonance, weight) VALUES (?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('concept_Z', 'Description Z', 'TYPE1', 'Test', 1753780821.087885, 0.9, 0.8)]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+INFO:     127.0.0.1:53662 - "POST /concepts HTTP/1.1" 500 Internal Server Error
+DEBUG: Début de search_concepts
+DEBUG: Récupération de tous les concepts
+DEBUG: Nombre de concepts récupérés: 0
+INFO:     127.0.0.1:53664 - "GET /concepts HTTP/1.1" 200 OK
+DEBUG: Erreur lors de l'ajout du concept: (sqlite3.OperationalError) attempt to write a readonly database
+[SQL: INSERT INTO concept (concept_id, natural_prompt, concept_type, source, timestamp, resonance, weight) VALUES (?, ?, ?, ?, ?, ?, ?)]
+[parameters: ('concept_X', 'Description A', 'TYPE1', 'Test', 1753780821.087885, 0.5, 0.5)]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+INFO:     127.0.0.1:53670 - "POST /concepts HTTP/1.1" 500 Internal Server Error
