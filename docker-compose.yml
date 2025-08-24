@@ -1,4 +1,5 @@
-# === Neo4j Graph Database ===
+services:
+  # === Neo4j Graph Database ===
   neo4j:
     image: neo4j:5
     container_name: synergesis-neo4j
@@ -45,3 +46,8 @@
     depends_on:
       - neo4j
     restart: unless-stopped
+
+volumes:
+  neo4j_data:
+  neo4j_logs:
+  neo4j_import:
