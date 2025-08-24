@@ -1,0 +1,75 @@
+[
+  {
+    "id": "techglyph_202505140910_1",
+    "timestamp": 1747283500.0,
+    "source_document_id": "2503.07848v1",
+    "source_chunk_index": 0,
+    "natural_prompt": "Problème: Discordance entre les attentes des utilisateurs et les comportements planifiés des agents IA, sans considération adéquate de la sécurité.",
+    "polarité": "-",
+    "alignement": "Chthonic",
+    "fréquence": 75,
+    "poids": 8,
+    "tags": ["Problem", "human_ai_interaction", "user_expectations", "agent_safety", "explicable_behavior"],
+    "entropy_score": 0.7,
+    "status": "generated_from_llm",
+    "details_json": "{\"problem_statement\": \"Users form expectations of AI agents that may differ from the agent's planned behaviors, while safety considerations are insufficiently incorporated in explicable behavior generation, especially in learning settings.\", \"affected_components\": [\"human-AI teaming\", \"agent planning\", \"reinforcement learning\", \"safety mechanisms\"]}",
+    "llm_prompt_version": "tech_v1.2",
+    "relationships": []
+  },
+  {
+    "id": "techglyph_202505140910_2",
+    "timestamp": 1747283501.0,
+    "source_document_id": "2503.07848v1",
+    "source_chunk_index": 0,
+    "natural_prompt": "Concept Technique: Génération de comportements explicables avec contraintes de sécurité comme problème d'optimisation.",
+    "polarité": "0",
+    "alignement": "Void",
+    "fréquence": 100,
+    "poids": 7,
+    "tags": ["TechnicalConcept", "constrained_optimization", "explicable_behavior", "safety_constraints", "agent_modeling"],
+    "entropy_score": 0.65,
+    "status": "generated_from_llm",
+    "details_json": "{\"concept_name\": \"Safe Explicable Behavior Generation as Constrained Optimization\", \"definition\": \"Formulating the generation of behaviors that meet user expectations while maintaining safety as a constrained optimization problem with specific constraints.\", \"key_properties\": [\"constrained optimization formulation\", \"explicability maximization\", \"safety constraints\", \"performance requirements\"]}",
+    "llm_prompt_version": "tech_v1.2",
+    "relationships": []
+  },
+  {
+    "id": "techglyph_202505140910_3",
+    "timestamp": 1747283502.0,
+    "source_document_id": "2503.07848v1",
+    "source_chunk_index": 0,
+    "natural_prompt": "Solution Proposée: Safe Explicable Policy Search (SEPS), approche d'apprentissage pour comportements explicables et sûrs.",
+    "polarité": "+",
+    "alignement": "Elemental",
+    "fréquence": 110,
+    "poids": 9,
+    "tags": ["ProposedSolution", "SEPS", "safe_reinforcement_learning", "explicable_policy_search", "constrained_policy_optimization"],
+    "entropy_score": 0.8,
+    "status": "generated_from_llm",
+    "details_json": "{\"solution_name\": \"Safe Explicable Policy Search (SEPS)\", \"summary\": \"A learning approach to generate explicable agent behaviors while minimizing safety risks, formulated as a constrained optimization problem.\", \"key_mechanisms_or_components\": [\"Constrained Policy Optimization integration\", \"Explicable Policy Search techniques\", \"explicability score maximization\", \"safety constraints\"], \"addresses_problem_ids\": [\"techglyph_202505140910_1\"], \"novelty_or_improvement\": \"Innovative combination of safety with explicability in learning settings.\"}",
+    "llm_prompt_version": "tech_v1.2",
+    "relationships": [
+      {"type": "ADDRESSES_PROBLEM", "target_glyph_id": "techglyph_202505140910_1"},
+      {"type": "IMPLEMENTS_CONCEPT", "target_glyph_id": "techglyph_202505140910_2"}
+    ]
+  },
+  {
+    "id": "techglyph_202505140910_4",
+    "timestamp": 1747283503.0,
+    "source_document_id": "2503.07848v1",
+    "source_chunk_index": 0,
+    "natural_prompt": "Contribution Clé: SEPS génère des comportements sûrs et explicables tout en maintenant les performances, validé par des expérimentations.",
+    "polarité": "+",
+    "alignement": "Expansion",
+    "fréquence": 90,
+    "poids": 8,
+    "tags": ["KeyContribution", "safe_behavior", "explicable_behavior", "performance_maintenance", "experimental_validation"],
+    "entropy_score": 0.6,
+    "status": "generated_from_llm",
+    "details_json": "{\"contribution_summary\": \"SEPS successfully generates behaviors that are both safe and explicable while ensuring desired performance levels, validated in safety-gym and with physical robots.\", \"contribution_type\": \"empirical_result\", \"evidence_or_metric\": \"Results from safety-gym environments and physical robot experiments.\", \"implications\": \"Enables more trustworthy and effective human-AI collaboration by addressing both safety and expectation alignment.\"}",
+    "llm_prompt_version": "tech_v1.2",
+    "relationships": [
+      {"type": "RELATED_TO_CONCEPT", "target_glyph_id": "techglyph_202505140910_3"}
+    ]
+  }
+]
