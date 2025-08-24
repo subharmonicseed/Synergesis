@@ -40,7 +40,7 @@ def register_rag_tools(mcp: FastMCP):
     """Register all RAG tools with the MCP server."""
 
     @mcp.tool()
-    async def get_available_sources(ctx: Context) -> str:
+    async def get_available_sources(ctx: Context | None = None) -> str:
         """
         Get list of available sources in the knowledge base.
 
@@ -76,7 +76,7 @@ def register_rag_tools(mcp: FastMCP):
 
     @mcp.tool()
     async def perform_rag_query(
-        ctx: Context, query: str, source: str = None, match_count: int = 5
+        query: str, source: str = None, match_count: int = 5, ctx: Context | None = None
     ) -> str:
         """
         Perform a RAG (Retrieval Augmented Generation) query on stored content.
@@ -132,7 +132,7 @@ def register_rag_tools(mcp: FastMCP):
 
     @mcp.tool()
     async def search_code_examples(
-        ctx: Context, query: str, source_id: str = None, match_count: int = 5
+        query: str, source_id: str = None, match_count: int = 5, ctx: Context | None = None
     ) -> str:
         """
         Search for code examples relevant to the query.

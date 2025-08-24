@@ -50,7 +50,7 @@ from src.server.socketio_app import create_socketio_app
 try:
     from crawl4ai import AsyncWebCrawler, BrowserConfig
     from sentence_transformers import CrossEncoder
-except ImportError:
+except Exception:
     # These are optional dependencies for full functionality
     AsyncWebCrawler = None
     BrowserConfig = None

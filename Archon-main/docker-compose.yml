@@ -13,8 +13,6 @@ services:
     ports:
       - "${ARCHON_SERVER_PORT:-8181}:${ARCHON_SERVER_PORT:-8181}"
     environment:
-      - SUPABASE_URL=${SUPABASE_URL}
-      - SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_KEY}
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
       - LOGFIRE_TOKEN=${LOGFIRE_TOKEN:-}
       - SERVICE_DISCOVERY_MODE=docker_compose
@@ -50,8 +48,6 @@ services:
     ports:
       - "${ARCHON_MCP_PORT:-8051}:${ARCHON_MCP_PORT:-8051}"
     environment:
-      - SUPABASE_URL=${SUPABASE_URL}
-      - SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_KEY}
       - LOGFIRE_TOKEN=${LOGFIRE_TOKEN:-}
       - SERVICE_DISCOVERY_MODE=docker_compose
       - TRANSPORT=sse
@@ -62,6 +58,8 @@ services:
       - ARCHON_MCP_PORT=${ARCHON_MCP_PORT:-8051}
       - ARCHON_SERVER_PORT=${ARCHON_SERVER_PORT:-8181}
       - ARCHON_AGENTS_PORT=${ARCHON_AGENTS_PORT:-8052}
+      - GITHUB_TOKEN_B64=${GITHUB_TOKEN_B64}
+      - GLYPH_ENGINE_DIR=/app/external/GlyphTranslator
     networks:
       - app-network
     depends_on:
@@ -72,7 +70,8 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./python/src:/app/src  # Mount source for hot-reload
-    command: ["python", "-m", "uvicorn", "src.mcp.mcp_server:app", "--host", "0.0.0.0", "--port", "${ARCHON_MCP_PORT:-8051}", "--reload"]
+      - "../Syn/Glyph engine/Glyph translator:/app/external/GlyphTranslator:ro"
+    command: ["python", "-m", "uvicorn", "src.mcp.mcp_server:app", "--host", "0.0.0.0", "--port", "${ARCHON_MCP_PORT:-8051}"]
     healthcheck:
       test: ["CMD", "sh", "-c", "python -c \"import socket; s=socket.socket(); s.connect(('localhost', ${ARCHON_MCP_PORT:-8051})); s.close()\""]
       interval: 30s
@@ -94,8 +93,6 @@ services:
     ports:
       - "${ARCHON_AGENTS_PORT:-8052}:${ARCHON_AGENTS_PORT:-8052}"
     environment:
-      - SUPABASE_URL=${SUPABASE_URL}
-      - SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_KEY}
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
       - LOGFIRE_TOKEN=${LOGFIRE_TOKEN:-}
       - SERVICE_DISCOVERY_MODE=docker_compose
@@ -106,6 +103,10 @@ services:
         condition: service_healthy
     networks:
       - app-network
+    volumes:
+      - ./python/src:/app/src
+    working_dir: /app/src
+    command: ["python", "-m", "uvicorn", "agents.server:app", "--host", "0.0.0.0", "--port", "${ARCHON_AGENTS_PORT:-8052}", "--reload"]
     healthcheck:
       test: ["CMD", "sh", "-c", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:${ARCHON_AGENTS_PORT:-8052}/health')\""]
       interval: 30s
@@ -119,12 +120,13 @@ services:
       context: ./python
       dockerfile: Dockerfile.agents
     container_name: Archon-Autonomous-Agents
+    env_file:
+      - ./.env
     environment:
-      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
-      - SUPABASE_URL=${SUPABASE_URL}
-      - SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_KEY}
       - LLM_ENDPOINT=http://mistral:8080/v1/chat/completions
       - LLM_PROVIDER=mistral
+      - OPENAI_BASE_URL=http://mistral:8080/v1
+      - OPENAI_API_KEY=mistral
       - NEO4J_URI=bolt://neo4j:7687
       - NEO4J_USER=neo4j
       - NEO4J_PASSWORD=password
@@ -169,21 +171,29 @@ services:
 
   # Mistral LLM Service
   mistral:
-    image: ghcr.io/ggerganov/llama.cpp:server
+    build:
+      context: ./python
+      dockerfile: Dockerfile.mistral
     container_name: Mistral-LLM
     ports:
       - "8081:8080"
     environment:
-      - MODEL=/models/Mistral-7B-Instruct-v0.3.Q4_K_M.gguf
       - HOST=0.0.0.0
       - PORT=8080
     volumes:
       - ./models:/models:ro
-    command: ["--model", "/models/Mistral-7B-Instruct-v0.3.Q4_K_M.gguf", "--host", "0.0.0.0", "--port", "8080", "--n-gpu-layers", "0"]
+    command: [
+      "python", "-m", "llama_cpp.server",
+      "--model", "/models/Mistral-7B-Instruct-v0.3.Q4_K_M.gguf",
+      "--host", "0.0.0.0",
+      "--port", "8080",
+      "--chat_format", "mistral-instruct",
+      "--n_gpu_layers", "0"
+    ]
     networks:
       - app-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/v1/models"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -198,7 +208,7 @@ services:
       - "7688:7687"
     environment:
       - NEO4J_AUTH=neo4j/password
-      - NEO4J_PLUGINS=["apoc"]
+      - NEO4J_PLUGINS='["apoc"]'
       - NEO4J_dbms_security_procedures_unrestricted=apoc.*
       - NEO4J_dbms_security_procedures_allowlist=apoc.*
     volumes:
@@ -208,7 +218,7 @@ services:
     networks:
       - app-network
     healthcheck:
-      test: ["CMD-SHELL", "cypher-shell -u neo4j -p password 'RETURN 1' | grep '1'"]
+      test: ["CMD-SHELL", "wget --user=neo4j --password=password --spider -q http://localhost:7474 || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5

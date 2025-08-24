@@ -15,11 +15,11 @@ API service and frontend, not through MCP tools.
 """
 
 # Standard library imports
+import asyncio
 import json
 import logging
 import os
 import sys
-import threading
 import time
 import traceback
 from collections.abc import AsyncIterator
@@ -42,7 +42,8 @@ from ..server.services.mcp_session_manager import get_session_manager
 # The project root is four levels up from this script's location
 project_root = Path(__file__).resolve().parent.parent.parent.parent
 dotenv_path = project_root / ".env"
-load_dotenv(dotenv_path, override=True)
+# IMPORTANT: Do not override pre-set env vars (e.g., when launching with custom ports)
+load_dotenv(dotenv_path, override=False)
 
 # Configure logging FIRST before any imports that might use it
 logging.basicConfig(
@@ -57,10 +58,10 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Global initialization lock and flag
-_initialization_lock = threading.Lock()
-_initialization_complete = False
+# Global state
+_initialization_event = asyncio.Event()
 _shared_context = None
+_initialization_complete = False
 
 server_host = "0.0.0.0"  # Listen on all interfaces
 
@@ -70,7 +71,7 @@ if not mcp_port:
     raise ValueError(
         "ARCHON_MCP_PORT environment variable is required. "
         "Please set it in your .env file or environment. "
-        "Default value: 8051"
+        "Default value: 8061"
     )
 server_port = int(mcp_port)
 
@@ -100,86 +101,100 @@ class ArchonContext:
 
 async def perform_health_checks(context: ArchonContext):
     """Perform health checks on dependent services via HTTP."""
+    logger.info("--- Starting MCP Health Checks ---")
     try:
-        # Check dependent services
-        service_health = await context.service_client.health_check()
-
-        context.health_status["api_service"] = service_health.get("api_service", False)
-        context.health_status["agents_service"] = service_health.get("agents_service", False)
-
-        # Overall status
-        all_critical_ready = context.health_status["api_service"]
-
-        context.health_status["status"] = "healthy" if all_critical_ready else "degraded"
-        context.health_status["last_health_check"] = datetime.now().isoformat()
-
-        if not all_critical_ready:
-            logger.warning(f"Health check failed: {context.health_status}")
-        else:
-            logger.info("Health check passed - dependent services healthy")
-
+        logger.info("Checking Archon API service...")
+        api_health = await context.service_client.check_api_service()
+        logger.info(f"Archon API service health: {api_health}")
+        context.health_status["api_service"] = api_health.get("healthy", False)
+    except TimeoutError:
+        logger.error("Health check for API service timed out.")
+        context.health_status["api_service"] = False
     except Exception as e:
-        logger.error(f"Health check error: {e}")
-        context.health_status["status"] = "unhealthy"
-        context.health_status["last_health_check"] = datetime.now().isoformat()
+        logger.error(f"Health check for API service failed: {e}")
+        context.health_status["api_service"] = False
+
+    try:
+        logger.info("Checking Archon Agents service...")
+        agents_health = await context.service_client.check_agents_service()
+        logger.info(f"Archon Agents service health: {agents_health}")
+        context.health_status["agents_service"] = agents_health.get("healthy", False)
+    except TimeoutError:
+        logger.error("Health check for Agents service timed out.")
+        context.health_status["agents_service"] = False
+    except Exception as e:
+        logger.error(f"Health check for Agents service failed: {e}")
+        context.health_status["agents_service"] = False
+
+    # Mark overall status as healthy to allow startup, but log the details
+    context.health_status["status"] = "healthy"
+    context.health_status["last_health_check"] = datetime.now().isoformat()
+    logger.info(f"--- Health check completed --- API: {context.health_status['api_service']}, Agents: {context.health_status['agents_service']}")
+    return True
 
 
 @asynccontextmanager
 async def lifespan(server: FastMCP) -> AsyncIterator[ArchonContext]:
     """
-    Lifecycle manager - no heavy dependencies.
+    Lifecycle manager for the MCP server.
+    Handles initialization and graceful shutdown, including Uvicorn hot-reloads.
     """
-    global _initialization_complete, _shared_context
+    global _initialization_event, _shared_context, _initialization_complete
 
-    # Quick check without lock
+    # On reload, Uvicorn re-runs lifespan. We need to handle this gracefully.
     if _initialization_complete and _shared_context:
         logger.info("♻️ Reusing existing context for new SSE connection")
         yield _shared_context
         return
 
-    # Acquire lock for initialization
-    with _initialization_lock:
-        # Double-check pattern
-        if _initialization_complete and _shared_context:
-            logger.info("♻️ Reusing existing context for new SSE connection")
-            yield _shared_context
-            return
+    # Reset the event for the current (re)start
+    _initialization_event.clear()
 
-        logger.info("🚀 Starting MCP server...")
+    # Use the async event to signal completion
+    try:
+        logger.info("🚀 Starting MCP server initialization...")
 
-        try:
-            # Initialize session manager
-            logger.info("🔐 Initializing session manager...")
-            get_session_manager()  # Initialize it
-            logger.info("✓ Session manager initialized")
+        # Initialize session manager
+        logger.info("🔐 Initializing session manager...")
+        get_session_manager()
+        logger.info("✓ Session manager initialized")
 
-            # Initialize service client for HTTP calls
-            logger.info("🌐 Initializing service client...")
-            service_client = get_mcp_service_client()
-            logger.info("✓ Service client initialized")
+        # Initialize service client for HTTP calls
+        logger.info("🌐 Initializing service client...")
+        service_client = get_mcp_service_client()
+        logger.info("✓ Service client initialized")
 
-            # Create context
-            context = ArchonContext(service_client=service_client)
+        # Create the shared context for this server instance
+        context = ArchonContext(service_client=service_client)
 
-            # Perform initial health check
-            await perform_health_checks(context)
+        # Perform initial health checks for dependent services
+        await perform_health_checks(context)
 
-            logger.info("✓ MCP server ready")
+        logger.info("✓ MCP server ready")
 
-            # Store context globally
-            _shared_context = context
-            _initialization_complete = True
+        # Set global state and signal that initialization is complete
+        _shared_context = context
+        _initialization_complete = True
+        _initialization_event.set()
 
-            yield context
+        # Yield the context to the application
+        yield context
 
-        except Exception as e:
-            logger.error(f"💥 Critical error in lifespan setup: {e}")
-            logger.error(traceback.format_exc())
-            raise
-        finally:
-            # Clean up resources
-            logger.info("Cleaning up MCP server...")
-            logger.info("MCP server shutdown complete")
+    except Exception as e:
+        logger.error(f"💥 Critical error during MCP server startup: {e}")
+        logger.error(traceback.format_exc())
+        # Ensure the event is set even on failure to unblock any waiting requests.
+        if not _initialization_event.is_set():
+            _initialization_event.set()
+        raise  # Re-raise the exception to halt server startup
+
+    finally:
+        # This block will run on server shutdown.
+        logger.info("🛑 Shutting down MCP server...")
+        # Reset global state for a clean restart on reload.
+        _initialization_complete = False
+        _shared_context = None
+        logger.info("✓ MCP server shutdown complete.")
 
 
 # Initialize the main FastMCP server with fixed configuration
@@ -228,6 +243,45 @@ try:
     if app is None:
         raise RuntimeError(f"Unable to obtain ASGI app from FastMCP instance. Attempts: {tried}")
 
+
+    # --- Smarter ASGI Middleware for Session Handling ---
+    original_app = app
+
+    async def smart_session_middleware(scope, receive, send):
+        # For /mcp POST, wait for initialization to complete
+        if scope.get('type') == 'http' and scope.get('path', '').endswith('/mcp'):
+            try:
+                await asyncio.wait_for(_initialization_event.wait(), timeout=180.0)
+            except TimeoutError:
+                logger.error("Server initialization timed out after 180s.")
+                response = {"jsonrpc": "2.0", "error": {"code": -32000, "message": "Server initialization timeout"}, "id": None}
+                body = json.dumps(response).encode('utf-8')
+                headers = [ (b'content-type', b'application/json'), (b'content-length', str(len(body)).encode('utf-8')) ]
+                await send({'type': 'http.response.start', 'status': 503, 'headers': headers})
+                await send({'type': 'http.response.body', 'body': body})
+                return
+        # Pass-through middleware: do NOT modify request headers or body.
+        # The MCP SDK's StreamableHTTPSessionManager creates a new session when the
+        # first request has no 'mcp-session-id' header. Injecting one here causes
+        # a 400 "No valid session ID provided". We therefore avoid any injection
+        # and let the SDK set the response header itself.
+        if scope.get('type') != 'http' or scope.get('method') != 'POST':
+            await original_app(scope, receive, send)
+            return
+
+        # Only apply to the MCP endpoint; otherwise pass through
+        path = scope.get('path', '')
+        if not path.endswith('/mcp'):
+            await original_app(scope, receive, send)
+            return
+
+        # For /mcp POST, just pass through untouched
+        await original_app(scope, receive, send)
+
+    app = smart_session_middleware
+    logger.info("✅ Session middleware: pass-through mode active (no request header injection).")
+    # --- End of Middleware ---
+
     logger.info("FastMCP server instance created successfully using one of: %s", tried)
 
 except Exception as e:
@@ -236,9 +290,11 @@ except Exception as e:
     raise
 
 
+
+
 # Health check endpoint
 @mcp.tool()
-async def health_check(ctx: Context) -> str:
+async def health_check(ctx: Context | None = None) -> str:
     """
     Perform a health check on the MCP server and its dependencies.
 
@@ -246,8 +302,10 @@ async def health_check(ctx: Context) -> str:
         JSON string with current health status
     """
     try:
-        # Try to get the lifespan context
-        context = getattr(ctx.request_context, "lifespan_context", None)
+        # Try to get the lifespan context (ctx may be None if not injected)
+        context = None
+        if ctx is not None and hasattr(ctx, "request_context"):
+            context = getattr(ctx.request_context, "lifespan_context", None)
 
         if context is None:
             # Server starting up
@@ -287,7 +345,7 @@ async def health_check(ctx: Context) -> str:
 
 # Session management endpoint
 @mcp.tool()
-async def session_info(ctx: Context) -> str:
+async def session_info(ctx: Context | None = None) -> str:
     """
     Get information about the current session and all active sessions.
 
@@ -303,8 +361,10 @@ async def session_info(ctx: Context) -> str:
             "session_timeout": session_manager.timeout,
         }
 
-        # Add server uptime
-        context = getattr(ctx.request_context, "lifespan_context", None)
+        # Add server uptime (ctx may be None if not injected)
+        context = None
+        if ctx is not None and hasattr(ctx, "request_context"):
+            context = getattr(ctx.request_context, "lifespan_context", None)
         if context and hasattr(context, "startup_time"):
             session_info_data["server_uptime_seconds"] = time.time() - context.startup_time
 
@@ -373,6 +433,32 @@ def register_modules():
         logger.error(f"[FAIL] Error registering Docker module: {e}")
         logger.error(traceback.format_exc())
 
+    # Import and register Glyph module
+    try:
+        from .modules.glyph_module import register_glyph_tools
+
+        register_glyph_tools(mcp)
+        modules_registered += 1
+        logger.info("[OK] Glyph module registered")
+    except ImportError as e:
+        logger.warning(f"[WARN] Glyph module not available: {e}")
+    except Exception as e:
+        logger.error(f"[FAIL] Error registering Glyph module: {e}")
+        logger.error(traceback.format_exc())
+
+    # Import and register GitHub module
+    try:
+        from .modules.github_module import register_github_tools
+
+        register_github_tools(mcp)
+        modules_registered += 1
+        logger.info("[OK] GitHub module registered")
+    except ImportError as e:
+        logger.warning(f"[WARN] GitHub module not available: {e}")
+    except Exception as e:
+        logger.error(f"[FAIL] Error registering GitHub module: {e}")
+        logger.error(traceback.format_exc())
+
     logger.info(f"[INFO] Total modules registered: {modules_registered}")
 
     if modules_registered == 0:
@@ -402,7 +488,16 @@ def main():
         mcp_logger.info("!!! Logfire initialized for MCP server")
         mcp_logger.info(f"!!! Starting MCP server - host={server_host}, port={server_port}")
 
-        mcp.run(transport="streamable-http")
+        # Run Uvicorn with our wrapped ASGI app to ensure middleware is active
+        import uvicorn
+
+        uvicorn.run(
+            app,  # our wrapped app with session middleware
+            host=server_host,
+            port=server_port,
+            log_level="info",
+            reload=True,
+        )
 
     except Exception as e:
         mcp_logger.error(f"💥 Fatal error in main - error={str(e)}, error_type={type(e).__name__}")

@@ -17,7 +17,7 @@ from typing import Any
 
 try:
     from sentence_transformers import CrossEncoder
-except ImportError:
+except Exception:
     CrossEncoder = None
 
 from ...config.logfire_config import get_logger, safe_span

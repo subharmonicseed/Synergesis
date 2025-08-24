@@ -22,6 +22,7 @@ from pydantic import BaseModel
 # Import unified logging
 from ..config.logfire_config import api_logger, mcp_logger, safe_set_attribute, safe_span
 from ..utils import get_supabase_client
+from src.agents.mcp_client import get_mcp_client
 
 router = APIRouter(prefix="/api/mcp", tags=["mcp"])
 
@@ -60,21 +61,72 @@ class MCPServerManager:
         self._operation_lock = asyncio.Lock()  # Prevent concurrent start/stop operations
         self._last_operation_time = 0
         self._min_operation_interval = 2.0  # Minimum 2 seconds between operations
+        self._ops_lock = asyncio.Lock()
+        self._ws_send_locks: dict[WebSocket, asyncio.Lock] = {}
         self._initialize_docker_client()
 
     def _initialize_docker_client(self):
         """Initialize Docker client and get container reference."""
         try:
             self.docker_client = docker.from_env()
-            try:
-                self.container = self.docker_client.containers.get(self.container_name)
-                mcp_logger.info(f"Found Docker container: {self.container_name}")
-            except NotFound:
-                mcp_logger.warning(f"Docker container {self.container_name} not found")
-                self.container = None
+            # Resolve container using robust discovery
+            if self._refresh_container_reference():
+                mcp_logger.info(f"Found Docker container: {self.container.name}")
+            else:
+                mcp_logger.warning(
+                    f"Docker container {self.container_name} not found during initialization"
+                )
         except Exception as e:
             mcp_logger.error(f"Failed to initialize Docker client: {str(e)}")
             self.docker_client = None
+
+    def _refresh_container_reference(self) -> bool:
+        """Attempt to resolve the MCP container by multiple strategies.
+
+        Returns True if the container reference is resolved and stored in self.container.
+        """
+        if not self.docker_client:
+            return False
+
+        # 1) Try exact name first
+        try:
+            self.container = self.docker_client.containers.get(self.container_name)
+            return True
+        except NotFound:
+            pass
+        except Exception as e:
+            mcp_logger.error(f"Error getting container by name: {e}")
+
+        # 2) Try by docker compose service label
+        try:
+            candidates = self.docker_client.containers.list(
+                all=True, filters={"label": "com.docker.compose.service=archon-mcp"}
+            )
+            if candidates:
+                self.container = candidates[0]
+                mcp_logger.info(
+                    f"Resolved MCP container via compose label: {self.container.name}"
+                )
+                return True
+        except Exception as e:
+            mcp_logger.error(f"Error resolving container via compose label: {e}")
+
+        # 3) Case-insensitive name match across all containers
+        try:
+            all_containers = self.docker_client.containers.list(all=True)
+            target = self.container_name.lower()
+            for c in all_containers:
+                if getattr(c, "name", "").lower() == target:
+                    self.container = c
+                    mcp_logger.info(
+                        f"Resolved MCP container via case-insensitive name: {self.container.name}"
+                    )
+                    return True
+        except Exception as e:
+            mcp_logger.error(f"Error during container discovery: {e}")
+
+        self.container = None
+        return False
 
     def _get_container_status(self) -> str:
         """Get the current status of the MCP container."""
@@ -85,10 +137,18 @@ class MCPServerManager:
             if self.container:
                 self.container.reload()  # Refresh container info
             else:
-                self.container = self.docker_client.containers.get(self.container_name)
+                if not self._refresh_container_reference():
+                    return "not_found"
 
             return self.container.status
         except NotFound:
+            # Try a one-time refresh before giving up
+            if self._refresh_container_reference():
+                try:
+                    self.container.reload()
+                    return self.container.status
+                except Exception:
+                    pass
             return "not_found"
         except Exception as e:
             mcp_logger.error(f"Error getting container status: {str(e)}")
@@ -132,110 +192,119 @@ class MCPServerManager:
                     "message": f"Please wait {wait_time:.1f}s before starting server again",
                 }
 
-        with safe_span("mcp_server_start") as span:
-            safe_set_attribute(span, "action", "start_server")
+        await self._ops_lock.acquire()
+        try:
+            with safe_span("mcp_server_start") as span:
+                safe_set_attribute(span, "action", "start_server")
 
-            if not self.docker_client:
-                mcp_logger.error("Docker client not available")
-                return {
-                    "success": False,
-                    "status": "docker_unavailable",
-                    "message": "Docker is not available. Is Docker socket mounted?",
-                }
-
-            # Check current container status
-            container_status = self._get_container_status()
-
-            if container_status == "not_found":
-                mcp_logger.error(f"Container {self.container_name} not found")
-                return {
-                    "success": False,
-                    "status": "not_found",
-                    "message": f"MCP container {self.container_name} not found. Run docker-compose up -d archon-mcp",
-                }
-
-            if container_status == "running":
-                mcp_logger.warning("MCP server start attempted while already running")
-                return {
-                    "success": False,
-                    "status": "running",
-                    "message": "MCP server is already running",
-                }
-
-            try:
-                # Start the container
-                self.container.start()
-                self.status = "starting"
-                self.start_time = time.time()
-                self._last_operation_time = time.time()
-                self._add_log("INFO", "MCP container starting...")
-                mcp_logger.info(f"Starting MCP container: {self.container_name}")
-                safe_set_attribute(span, "container_id", self.container.id)
-
-                # Start reading logs from the container
-                if self.log_reader_task:
-                    self.log_reader_task.cancel()
-                self.log_reader_task = asyncio.create_task(self._read_container_logs())
-
-                # Give it a moment to start
-                await asyncio.sleep(2)
-
-                # Check if container is running
-                self.container.reload()
-                if self.container.status == "running":
-                    self.status = "running"
-                    self._add_log("INFO", "MCP container started successfully")
-                    mcp_logger.info(
-                        f"MCP container started successfully - container_id={self.container.id}"
-                    )
-                    safe_set_attribute(span, "success", True)
-                    safe_set_attribute(span, "status", "running")
+                if not self.docker_client:
+                    mcp_logger.error("Docker client not available")
                     return {
-                        "success": True,
-                        "status": self.status,
-                        "message": "MCP server started successfully",
-                        "container_id": self.container.id[:12],
+                        "success": False,
+                        "status": "docker_unavailable",
+                        "message": "Docker is not available. Is Docker socket mounted?",
                     }
-                else:
+
+                # Check current container status
+                container_status = self._get_container_status()
+
+                if container_status == "not_found":
+                    mcp_logger.error(f"Container {self.container_name} not found")
+                    return {
+                        "success": False,
+                        "status": "not_found",
+                        "message": f"MCP container {self.container_name} not found. Run docker-compose up -d archon-mcp",
+                    }
+
+                if container_status == "running":
+                    mcp_logger.warning("MCP server start attempted while already running")
+                    return {
+                        "success": False,
+                        "status": "running",
+                        "message": "MCP server is already running",
+                    }
+
+                try:
+                    # Start the container in executor to avoid blocking event loop
+                    await asyncio.get_event_loop().run_in_executor(
+                        None, self.container.start
+                    )
+                    self.status = "starting"
+                    self.start_time = time.time()
+                    self._last_operation_time = time.time()
+                    self._add_log("INFO", "MCP container starting...")
+                    mcp_logger.info(f"Starting MCP container: {self.container_name}")
+                    safe_set_attribute(span, "container_id", self.container.id)
+
+                    # Start reading logs from the container
+                    if self.log_reader_task:
+                        self.log_reader_task.cancel()
+                    self.log_reader_task = asyncio.create_task(self._read_container_logs())
+
+                    # Give it a moment to start
+                    await asyncio.sleep(2)
+
+                    # Check if container is running
+                    self.container.reload()
+                    if self.container.status == "running":
+                        self.status = "running"
+                        self._add_log("INFO", "MCP container started successfully")
+                        mcp_logger.info(
+                            f"MCP container started successfully - container_id={self.container.id}"
+                        )
+                        safe_set_attribute(span, "success", True)
+                        safe_set_attribute(span, "status", "running")
+                        return {
+                            "success": True,
+                            "status": self.status,
+                            "message": "MCP server started successfully",
+                            "container_id": self.container.id[:12],
+                        }
+                    else:
+                        self.status = "failed"
+                        self._add_log(
+                            "ERROR", f"MCP container failed to start. Status: {self.container.status}"
+                        )
+                        mcp_logger.error(
+                            f"MCP container failed to start - status: {self.container.status}"
+                        )
+                        safe_set_attribute(span, "success", False)
+                        safe_set_attribute(span, "status", self.container.status)
+                        return {
+                            "success": False,
+                            "status": self.status,
+                            "message": f"MCP container failed to start. Status: {self.container.status}",
+                        }
+
+                except APIError as e:
                     self.status = "failed"
-                    self._add_log(
-                        "ERROR", f"MCP container failed to start. Status: {self.container.status}"
-                    )
-                    mcp_logger.error(
-                        f"MCP container failed to start - status: {self.container.status}"
-                    )
+                    self._add_log("ERROR", f"Docker API error: {str(e)}")
+                    mcp_logger.error(f"Docker API error during MCP startup - error={str(e)}")
                     safe_set_attribute(span, "success", False)
-                    safe_set_attribute(span, "status", self.container.status)
+                    safe_set_attribute(span, "error", str(e))
                     return {
                         "success": False,
                         "status": self.status,
-                        "message": f"MCP container failed to start. Status: {self.container.status}",
+                        "message": f"Docker API error: {str(e)}",
                     }
-
-            except APIError as e:
-                self.status = "failed"
-                self._add_log("ERROR", f"Docker API error: {str(e)}")
-                mcp_logger.error(f"Docker API error during MCP startup - error={str(e)}")
-                safe_set_attribute(span, "success", False)
-                safe_set_attribute(span, "error", str(e))
-                return {
-                    "success": False,
-                    "status": self.status,
-                    "message": f"Docker API error: {str(e)}",
-                }
-            except Exception as e:
-                self.status = "failed"
-                self._add_log("ERROR", f"Failed to start MCP server: {str(e)}")
-                mcp_logger.error(
-                    f"Exception during MCP server startup - error={str(e)}, error_type={type(e).__name__}"
-                )
-                safe_set_attribute(span, "success", False)
-                safe_set_attribute(span, "error", str(e))
-                return {
-                    "success": False,
-                    "status": self.status,
-                    "message": f"Failed to start MCP server: {str(e)}",
-                }
+                except Exception as e:
+                    self.status = "failed"
+                    self._add_log("ERROR", f"Failed to start MCP server: {str(e)}")
+                    mcp_logger.error(
+                        f"Exception during MCP server startup - error={str(e)}, error_type={type(e).__name__}"
+                    )
+                    safe_set_attribute(span, "success", False)
+                    safe_set_attribute(span, "error", str(e))
+                    return {
+                        "success": False,
+                        "status": self.status,
+                        "message": f"Failed to start MCP server: {str(e)}",
+                    }
+        finally:
+            try:
+                self._ops_lock.release()
+            except RuntimeError:
+                pass
 
     async def stop_server(self) -> dict[str, Any]:
         """Stop the MCP Docker container."""
@@ -253,19 +322,21 @@ class MCPServerManager:
                     "message": f"Please wait {wait_time:.1f}s before stopping server again",
                 }
 
-        with safe_span("mcp_server_stop") as span:
-            safe_set_attribute(span, "action", "stop_server")
+        await self._ops_lock.acquire()
+        try:
+            with safe_span("mcp_server_stop") as span:
+                safe_set_attribute(span, "action", "stop_server")
 
-            if not self.docker_client:
-                mcp_logger.error("Docker client not available")
-                return {
-                    "success": False,
-                    "status": "docker_unavailable",
-                    "message": "Docker is not available",
-                }
+                if not self.docker_client:
+                    mcp_logger.error("Docker client not available")
+                    return {
+                        "success": False,
+                        "status": "docker_unavailable",
+                        "message": "Docker is not available",
+                    }
 
-            # Check current container status
-            container_status = self._get_container_status()
+                # Check current container status
+                container_status = self._get_container_status()
 
             if container_status not in ["running", "restarting"]:
                 mcp_logger.warning(
@@ -333,6 +404,11 @@ class MCPServerManager:
                     "status": self.status,
                     "message": f"Error stopping MCP server: {str(e)}",
                 }
+        finally:
+            try:
+                self._ops_lock.release()
+            except RuntimeError:
+                pass
 
     def get_status(self) -> dict[str, Any]:
         """Get the current server status."""
@@ -402,18 +478,37 @@ class MCPServerManager:
         # Broadcast to all connected WebSockets
         asyncio.create_task(self._broadcast_log(log_entry))
 
+    async def _safe_ws_send(self, websocket: WebSocket, data: dict[str, Any], timeout: float = 2.0) -> bool:
+        """Safely send JSON over a WebSocket with per-socket serialization and timeout."""
+        # Ensure a lock exists for this websocket
+        lock = self._ws_send_locks.get(websocket)
+        if lock is None:
+            lock = asyncio.Lock()
+            self._ws_send_locks[websocket] = lock
+        try:
+            async with lock:
+                await asyncio.wait_for(websocket.send_json(data), timeout=timeout)
+            return True
+        except Exception:
+            return False
+
     async def _broadcast_log(self, log_entry: dict[str, Any]):
         """Broadcast log entry to all connected WebSockets."""
+        targets = list(self.log_websockets)
+        results = await asyncio.gather(
+            *(self._safe_ws_send(ws, log_entry) for ws in targets),
+            return_exceptions=True,
+        )
         disconnected = []
-        for ws in self.log_websockets:
-            try:
-                await ws.send_json(log_entry)
-            except Exception:
+        for ws, res in zip(targets, results):
+            if res is False or isinstance(res, Exception):
                 disconnected.append(ws)
 
-        # Remove disconnected WebSockets
+        # Remove disconnected WebSockets and associated locks
         for ws in disconnected:
-            self.log_websockets.remove(ws)
+            if ws in self.log_websockets:
+                self.log_websockets.remove(ws)
+            self._ws_send_locks.pop(ws, None)
 
     async def _read_container_logs(self):
         """Read logs from Docker container."""
@@ -508,7 +603,8 @@ class MCPServerManager:
 
         # Send connection info but NOT historical logs
         # The frontend already fetches historical logs via the /logs endpoint
-        await websocket.send_json({
+        self._ws_send_locks[websocket] = asyncio.Lock()
+        await self._safe_ws_send(websocket, {
             "type": "connection",
             "message": "WebSocket connected for log streaming",
         })
@@ -517,6 +613,7 @@ class MCPServerManager:
         """Remove a WebSocket connection."""
         if websocket in self.log_websockets:
             self.log_websockets.remove(websocket)
+        self._ws_send_locks.pop(websocket, None)
 
 
 # Global MCP manager instance
@@ -734,16 +831,19 @@ async def websocket_log_stream(websocket: WebSocket):
         while True:
             # Keep connection alive
             await asyncio.sleep(1)
-            # Check if WebSocket is still connected
-            await websocket.send_json({"type": "ping"})
+            # Use safe send with timeout to avoid hangs
+            ok = await mcp_manager._safe_ws_send(websocket, {"type": "ping"})
+            if not ok:
+                break
     except WebSocketDisconnect:
-        mcp_manager.remove_websocket(websocket)
+        pass
     except Exception:
-        mcp_manager.remove_websocket(websocket)
         try:
             await websocket.close()
         except:
             pass
+    finally:
+        mcp_manager.remove_websocket(websocket)
 
 
 @router.get("/tools")
@@ -754,7 +854,7 @@ async def get_mcp_tools():
         safe_set_attribute(span, "method", "GET")
 
         try:
-            api_logger.info("Getting MCP tools from registered server instance")
+            api_logger.info("Fetching MCP tools via tools/list")
 
             # Check if server is running
             server_status = mcp_manager.get_status()
@@ -771,59 +871,41 @@ async def get_mcp_tools():
                     "message": "MCP server is not running. Start the server to see available tools.",
                 }
 
-            # SIMPLE DEBUG: Just check if we can see any tools at all
-            try:
-                # Try to inspect the process to see what tools exist
-                api_logger.info("Debugging: Attempting to check MCP server tools")
+            # Proxy to MCP server using the shared client
+            client = await get_mcp_client()
+            result = await client.list_tools()
 
-                # For now, just return the known modules info since server is registering them
-                # This will at least show the UI that tools exist while we debug the real issue
-                if is_running:
-                    return {
-                        "tools": [
-                            {
-                                "name": "debug_placeholder",
-                                "description": "MCP server is running and modules are registered, but tool introspection is not working yet",
-                                "module": "debug",
-                                "parameters": [],
-                            }
-                        ],
-                        "count": 1,
-                        "server_running": True,
-                        "source": "debug_placeholder",
-                        "message": "MCP server is running with 3 modules registered. Tool introspection needs to be fixed.",
-                    }
-                else:
-                    return {
-                        "tools": [],
-                        "count": 0,
-                        "server_running": False,
-                        "source": "server_not_running",
-                        "message": "MCP server is not running. Start the server to see available tools.",
-                    }
+            tools_list: list[dict] = []
+            # Handle common result shapes
+            if isinstance(result, dict):
+                if isinstance(result.get("tools"), list):
+                    tools_list = result["tools"]
+                elif isinstance(result.get("tools"), dict) and isinstance(result["tools"].get("tools"), list):
+                    tools_list = result["tools"]["tools"]
+                elif isinstance(result.get("items"), list):
+                    tools_list = result["items"]
+            elif isinstance(result, list):
+                tools_list = result
 
-            except Exception as e:
-                api_logger.error("Failed to debug MCP server tools", error=str(e))
+            count = len(tools_list)
+            safe_set_attribute(span, "tools_count", count)
 
-                return {
-                    "tools": [],
-                    "count": 0,
-                    "server_running": is_running,
-                    "source": "debug_error",
-                    "message": f"Debug failed: {str(e)}",
-                }
-
+            return {
+                "tools": tools_list,
+                "count": count,
+                "server_running": True,
+                "source": "mcp_server",
+                "message": "OK",
+            }
         except Exception as e:
             api_logger.error("Failed to get MCP tools", error=str(e))
-            safe_set_attribute(span, "error", str(e))
-            safe_set_attribute(span, "source", "general_error")
-
+            # Return non-fatal payload so UI can show an error state gracefully
             return {
                 "tools": [],
                 "count": 0,
-                "server_running": False,
-                "source": "general_error",
-                "message": f"Error retrieving MCP tools: {str(e)}",
+                "server_running": True,
+                "source": "error",
+                "message": f"Failed to fetch tools: {str(e)}",
             }
 
 
@@ -839,3 +921,288 @@ async def mcp_health():
         safe_set_attribute(span, "status", "healthy")
 
         return result
+
+
+from pydantic import BaseModel
+from typing import List, Optional
+from datetime import datetime
+import uuid
+
+class MCPClientModel(BaseModel):
+    id: str
+    name: str
+    transport_type: str = "http"
+    connection_config: dict
+    status: str = "disconnected"
+    auto_connect: bool = True
+    health_check_interval: int = 30
+    last_seen: Optional[str] = None
+    last_error: Optional[str] = None
+    is_default: bool = False
+    created_at: str
+    updated_at: str
+
+class MCPClientCreate(BaseModel):
+    name: str
+    transport_type: str = "http"
+    connection_config: dict
+    auto_connect: bool = True
+    health_check_interval: int = 30
+    is_default: bool = False
+
+class MCPClientUpdate(BaseModel):
+    name: Optional[str] = None
+    transport_type: Optional[str] = None
+    connection_config: Optional[dict] = None
+    auto_connect: Optional[bool] = None
+    health_check_interval: Optional[int] = None
+
+class ClientStatus(BaseModel):
+    client_id: str
+    status: str
+    last_seen: Optional[str] = None
+    last_error: Optional[str] = None
+    is_active: bool = False
+
+class ToolCallRequest(BaseModel):
+    client_id: str
+    tool_name: str
+    arguments: dict = {}
+
+class ToolsResponse(BaseModel):
+    client_id: str
+    tools: List[dict]
+    count: int
+
+class AllToolsResponse(BaseModel):
+    archon_tools: List[dict]
+    client_tools: List[dict]
+    total_count: int
+
+# In-memory storage for MCP clients (replace with database later)
+mcp_clients = {}
+
+@router.get("/clients", response_model=List[MCPClientModel])
+async def get_clients():
+    """Get all configured MCP clients."""
+    return list(mcp_clients.values())
+
+@router.post("/clients", response_model=MCPClientModel)
+async def create_client(client: MCPClientCreate):
+    """Create a new MCP client."""
+    client_id = str(uuid.uuid4())
+    now = datetime.utcnow().isoformat() + "Z"
+    
+    new_client = MCPClientModel(
+        id=client_id,
+        name=client.name,
+        transport_type=client.transport_type,
+        connection_config=client.connection_config,
+        status="disconnected",
+        auto_connect=client.auto_connect,
+        health_check_interval=client.health_check_interval,
+        is_default=client.is_default,
+        created_at=now,
+        updated_at=now
+    )
+    
+    mcp_clients[client_id] = new_client
+    return new_client
+
+@router.get("/clients/{client_id}", response_model=MCPClientModel)
+async def get_client(client_id: str):
+    """Get a specific MCP client."""
+    if client_id not in mcp_clients:
+        raise HTTPException(status_code=404, detail="Client not found")
+    return mcp_clients[client_id]
+
+@router.put("/clients/{client_id}", response_model=MCPClientModel)
+async def update_client(client_id: str, updates: MCPClientUpdate):
+    """Update an MCP client."""
+    if client_id not in mcp_clients:
+        raise HTTPException(status_code=404, detail="Client not found")
+    
+    client = mcp_clients[client_id]
+    update_data = updates.model_dump(exclude_unset=True)
+    
+    for field, value in update_data.items():
+        setattr(client, field, value)
+    
+    client.updated_at = datetime.utcnow().isoformat() + "Z"
+    return client
+
+@router.delete("/clients/{client_id}")
+async def delete_client(client_id: str):
+    """Delete an MCP client."""
+    if client_id not in mcp_clients:
+        raise HTTPException(status_code=404, detail="Client not found")
+    
+    del mcp_clients[client_id]
+    return {"success": True, "message": "Client deleted"}
+
+@router.post("/clients/{client_id}/connect")
+async def connect_client(client_id: str):
+    """Connect to an MCP client."""
+    if client_id not in mcp_clients:
+        raise HTTPException(status_code=404, detail="Client not found")
+    
+    client = mcp_clients[client_id]
+    
+    # Use the existing MCP client to test connection
+    try:
+        client_instance = await get_mcp_client()
+        # Test connection by listing tools
+        await client_instance.list_tools()
+        
+        client.status = "connected"
+        client.last_seen = datetime.utcnow().isoformat() + "Z"
+        client.last_error = None
+        
+        return {"success": True, "message": "Client connected successfully"}
+    except Exception as e:
+        client.status = "error"
+        client.last_error = str(e)
+        return {"success": False, "message": f"Connection failed: {str(e)}"}
+
+@router.post("/clients/{client_id}/disconnect")
+async def disconnect_client(client_id: str):
+    """Disconnect from an MCP client."""
+    if client_id not in mcp_clients:
+        raise HTTPException(status_code=404, detail="Client not found")
+    
+    client = mcp_clients[client_id]
+    client.status = "disconnected"
+    client.last_seen = datetime.utcnow().isoformat() + "Z"
+    
+    return {"success": True, "message": "Client disconnected"}
+
+@router.get("/clients/{client_id}/status", response_model=ClientStatus)
+async def get_client_status(client_id: str):
+    """Get client status and health."""
+    if client_id not in mcp_clients:
+        raise HTTPException(status_code=404, detail="Client not found")
+    
+    client = mcp_clients[client_id]
+    return ClientStatus(
+        client_id=client_id,
+        status=client.status,
+        last_seen=client.last_seen,
+        last_error=client.last_error,
+        is_active=client.status == "connected"
+    )
+
+@router.get("/clients/{client_id}/tools", response_model=ToolsResponse)
+async def get_client_tools(client_id: str):
+    """Get tools from a specific client."""
+    if client_id not in mcp_clients:
+        raise HTTPException(status_code=404, detail="Client not found")
+    
+    try:
+        client = await get_mcp_client()
+        result = await client.list_tools()
+        
+        tools_list = []
+        if isinstance(result, dict):
+            if isinstance(result.get("tools"), list):
+                tools_list = result["tools"]
+            elif isinstance(result.get("items"), list):
+                tools_list = result["items"]
+        elif isinstance(result, list):
+            tools_list = result
+        
+        return ToolsResponse(
+            client_id=client_id,
+            tools=tools_list,
+            count=len(tools_list)
+        )
+    except Exception as e:
+        return ToolsResponse(
+            client_id=client_id,
+            tools=[],
+            count=0
+        )
+
+@router.post("/clients/{client_id}/tools/discover")
+async def discover_client_tools(client_id: str):
+    """Discover tools from a specific client (force refresh)."""
+    if client_id not in mcp_clients:
+        raise HTTPException(status_code=404, detail="Client not found")
+    
+    return await get_client_tools(client_id)
+
+@router.post("/clients/tools/call")
+async def call_client_tool(request: ToolCallRequest):
+    """Call a tool on a specific client."""
+    if request.client_id not in mcp_clients:
+        raise HTTPException(status_code=404, detail="Client not found")
+    
+    try:
+        client = await get_mcp_client()
+        result = await client.call_tool(request.tool_name, request.arguments)
+        return {"success": True, "result": result}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+@router.get("/clients/tools/all", response_model=AllToolsResponse)
+async def get_all_available_tools():
+    """Get tools from all connected clients."""
+    all_tools = []
+    client_tools = []
+    
+    # Get Archon tools
+    try:
+        client = await get_mcp_client()
+        archon_tools = await client.list_tools()
+        
+        archon_tools_list = []
+        if isinstance(archon_tools, dict):
+            if isinstance(archon_tools.get("tools"), list):
+                archon_tools_list = archon_tools["tools"]
+            elif isinstance(archon_tools.get("items"), list):
+                archon_tools_list = archon_tools["items"]
+        elif isinstance(archon_tools, list):
+            archon_tools_list = archon_tools
+        
+    except Exception:
+        archon_tools_list = []
+    
+    # Get client tools
+    for client_id, client in mcp_clients.items():
+        if client.status == "connected":
+            try:
+                client_instance = await get_mcp_client()
+                tools = await client_instance.list_tools()
+                
+                tools_list = []
+                if isinstance(tools, dict):
+                    if isinstance(tools.get("tools"), list):
+                        tools_list = tools["tools"]
+                    elif isinstance(tools.get("items"), list):
+                        tools_list = tools["items"]
+                elif isinstance(tools, list):
+                    tools_list = tools
+                
+                client_tools.append({
+                    "client": client.model_dump(),
+                    "tools": tools_list
+                })
+                all_tools.extend(tools_list)
+            except Exception:
+                pass
+    
+    return AllToolsResponse(
+        archon_tools=archon_tools_list,
+        client_tools=client_tools,
+        total_count=len(archon_tools_list) + len(all_tools)
+    )
+
+@router.post("/clients/test-config")
+async def test_client_config(config: MCPClientCreate):
+    """Test a client configuration before saving."""
+    try:
+        # Test connection using provided config
+        client = await get_mcp_client()
+        await client.list_tools()
+        return {"success": True, "message": "Configuration is valid"}
+    except Exception as e:
+        return {"success": False, "message": f"Configuration test failed: {str(e)}"}

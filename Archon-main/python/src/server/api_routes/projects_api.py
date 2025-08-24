@@ -39,6 +39,21 @@ from .socketio_handlers import broadcast_project_update
 router = APIRouter(prefix="/api", tags=["projects"])
 
 
+# Graceful Supabase fallback helper (mirrors knowledge_api pattern for read-only checks)
+def _get_supabase_if_configured():
+    """Return Supabase client if configured; otherwise None with an info log.
+
+    Prevents 500s during health checks when SUPABASE env vars are missing.
+    """
+    try:
+        return get_supabase_client()
+    except Exception as e:
+        logfire.info(
+            f"Supabase not configured; using empty fallback for projects health | reason={str(e)}"
+        )
+        return None
+
+
 class CreateProjectRequest(BaseModel):
     title: str
     description: str | None = None
@@ -195,7 +210,18 @@ async def projects_health():
     """Health check for projects API and database schema validation."""
     try:
         logfire.info("Projects health check requested")
-        supabase_client = get_supabase_client()
+        supabase_client = _get_supabase_if_configured()
+        if not supabase_client:
+            # Return safe fallback without raising to avoid 500s when Supabase is not configured
+            result = {
+                "status": "schema_missing",
+                "service": "projects",
+                "schema": {"projects_table": False, "tasks_table": False, "valid": False},
+            }
+            logfire.info(
+                f"Projects health check completed | status={result['status']} | schema_valid={result['schema']['valid']}"
+            )
+            return result
 
         # Check if projects table exists by testing ProjectService
         try:

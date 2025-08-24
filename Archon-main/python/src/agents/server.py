@@ -24,6 +24,8 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
 # Import our PydanticAI agents
+from server.config.service_discovery import get_api_url, get_mcp_url
+
 from .document_agent import DocumentAgent
 from .rag_agent import RagAgent
 
@@ -69,15 +71,15 @@ async def fetch_credentials_from_server():
     for attempt in range(max_retries):
         try:
             async with httpx.AsyncClient() as client:
-                # Call the server's internal credentials endpoint
-                server_port = os.getenv("ARCHON_SERVER_PORT")
-                if not server_port:
-                    raise ValueError(
-                        "ARCHON_SERVER_PORT environment variable is required. "
-                        "Please set it in your .env file or environment."
-                    )
+                # Resolve API base URL via service discovery; fall back to localhost
+                try:
+                    api_url = get_api_url()
+                except Exception:
+                    server_port = os.getenv("ARCHON_SERVER_PORT", "8181")
+                    api_url = f"http://localhost:{server_port}"
+
                 response = await client.get(
-                    f"http://archon-server:{server_port}/internal/credentials/agents", timeout=10.0
+                    f"{api_url}/internal/credentials/agents", timeout=10.0
                 )
                 response.raise_for_status()
                 credentials = response.json()
@@ -104,7 +106,7 @@ async def fetch_credentials_from_server():
                 await asyncio.sleep(retry_delay)
             else:
                 logger.error(f"Failed to fetch credentials after {max_retries} attempts")
-                raise Exception("Could not fetch credentials from server")
+                raise Exception("Could not fetch credentials from server") from e
 
 
 # Lifespan context manager
@@ -174,10 +176,18 @@ async def run_agent(request: AgentRequest):
         agent = app.state.agents[request.agent_type]
 
         # Prepare dependencies for the agent
+        # Resolve MCP endpoint via service discovery; allow explicit override
+        mcp_url = os.getenv("MCP_SERVICE_URL")
+        if not mcp_url:
+            try:
+                mcp_url = get_mcp_url()
+            except Exception:
+                mcp_url = f"http://localhost:{os.getenv('ARCHON_MCP_PORT', '8051')}"
+
         deps = {
             "context": request.context or {},
             "options": request.options or {},
-            "mcp_endpoint": os.getenv("MCP_SERVICE_URL", "http://archon-mcp:8051"),
+            "mcp_endpoint": mcp_url,
         }
 
         # Run the agent
@@ -295,7 +305,7 @@ if __name__ == "__main__":
     port = int(agents_port)
 
     uvicorn.run(
-        "server:app",
+        "src.agents.server:app",
         host="0.0.0.0",
         port=port,
         log_level="info",

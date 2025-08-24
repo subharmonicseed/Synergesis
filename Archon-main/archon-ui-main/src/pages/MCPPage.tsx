@@ -50,7 +50,7 @@ export const MCPPage = () => {
   const [selectedIDE, setSelectedIDE] = useState<SupportedIDE>('windsurf');
   const logsEndRef = useRef<HTMLDivElement>(null);
   const logsContainerRef = useRef<HTMLDivElement>(null);
-  const statusPollInterval = useRef<NodeJS.Timeout | null>(null);
+  const statusPollInterval = useRef<ReturnType<typeof setInterval> | null>(null);
   const { showToast } = useToast();
 
   // Tab state for switching between Server Control and Clients
@@ -83,13 +83,13 @@ export const MCPPage = () => {
   useEffect(() => {
     if (serverStatus.status === 'running') {
       // Fetch historical logs first (last 100 entries)
-      mcpServerService.getLogs({ limit: 100 }).then(historicalLogs => {
+      mcpServerService.getLogs({ limit: 100 }).then((historicalLogs: LogEntry[]) => {
         setLogs(historicalLogs);
       }).catch(console.error);
 
       // Then start streaming new logs via WebSocket
-      mcpServerService.streamLogs((log) => {
-        setLogs(prev => [...prev, log]);
+      mcpServerService.streamLogs((log: LogEntry) => {
+        setLogs((prev: LogEntry[]) => [...prev, log]);
       }, { autoReconnect: true });
       
       // Ensure configuration is loaded when server is running
@@ -458,7 +458,7 @@ export const MCPPage = () => {
                 <div className="flex items-center justify-between">
                   <div 
                     className="flex items-center gap-3 cursor-help" 
-                    title={process.env.NODE_ENV === 'development' ? 
+                    title={import.meta.env.DEV ? 
                       `Debug Info:\nStatus: ${serverStatus.status}\nConfig: ${config ? 'loaded' : 'null'}\n${config ? `Details: ${JSON.stringify(config, null, 2)}` : ''}` : 
                       undefined
                     }

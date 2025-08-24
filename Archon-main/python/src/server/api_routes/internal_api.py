@@ -12,6 +12,7 @@ from typing import Any
 from fastapi import APIRouter, HTTPException, Request
 
 from ..services.credential_service import credential_service
+from ..config.service_discovery import get_mcp_url
 
 logger = logging.getLogger(__name__)
 
@@ -72,6 +73,13 @@ async def get_agent_credentials(request: Request) -> dict[str, Any]:
 
     try:
         # Get credentials needed by agents
+        # Resolve MCP URL via service discovery; fallback to localhost for local dev
+        try:
+            mcp_url = get_mcp_url()
+        except Exception:
+            mcp_port = os.getenv("ARCHON_MCP_PORT", "8051")
+            mcp_url = f"http://localhost:{mcp_port}"
+
         credentials = {
             # OpenAI credentials
             "OPENAI_API_KEY": await credential_service.get_credential(
@@ -98,7 +106,7 @@ async def get_agent_credentials(request: Request) -> dict[str, Any]:
                 "AGENT_MAX_RETRIES", default="3"
             ),
             # MCP endpoint
-            "MCP_SERVICE_URL": f"http://archon-mcp:{os.getenv('ARCHON_MCP_PORT')}",
+            "MCP_SERVICE_URL": mcp_url,
             # Additional settings
             "LOG_LEVEL": await credential_service.get_credential("LOG_LEVEL", default="INFO"),
         }

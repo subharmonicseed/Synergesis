@@ -4,11 +4,6 @@ interface ImportMetaEnv {
   readonly VITE_HOST: string;
   readonly VITE_PORT: string;
   readonly ARCHON_MCP_PORT: string;
-  // Vite built-ins (declared here to avoid transient TS errors before vite/client types are available)
-  readonly DEV: boolean;
-  readonly PROD: boolean;
-  readonly MODE: string;
-  readonly SSR?: boolean;
   // Add other environment variables here as needed
 }
 

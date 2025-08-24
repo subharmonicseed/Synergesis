@@ -4,14 +4,12 @@ Credential management service for Archon backend
 Handles loading, storing, and accessing credentials with encryption for sensitive values.
 Credentials include API keys, service credentials, and application configuration.
 """
-
 import base64
 import os
 import re
 import time
+import traceback
 from dataclasses import dataclass
-
-# Removed direct logging import - using unified config
 from typing import Any
 
 from cryptography.fernet import Fernet
@@ -47,7 +45,7 @@ class CredentialService:
         self._rag_cache_timestamp: float | None = None
         self._rag_cache_ttl = 300  # 5 minutes TTL for RAG settings cache
 
-    def _get_supabase_client(self) -> Client:
+    def _get_supabase_client(self) -> Client | None:
         """
         Get or create a properly configured Supabase client using environment variables.
         Uses the standard Supabase client initialization.
@@ -57,11 +55,27 @@ class CredentialService:
             key = os.getenv("SUPABASE_SERVICE_KEY")
 
             if not url or not key:
-                raise ValueError(
-                    "SUPABASE_URL and SUPABASE_SERVICE_KEY must be set in environment variables"
+                logger.warning(
+                    "Supabase not configured (SUPABASE_URL/SUPABASE_SERVICE_KEY missing); running without credential DB"
                 )
+                self._supabase = None
+                return self._supabase
 
             try:
+                # Validate Supabase URL to avoid using dashboard/studio URLs
+                # Expected format: https://<project-ref>.supabase.co (no path suffixes)
+                if url:
+                    # Trim whitespace and accidental surrounding quotes
+                    url = url.strip().strip('\"\'')
+                if not re.match(r"^https://([^.]+)\.supabase\.co/?$", url or ""):
+                    logger.error(
+                        "Invalid SUPABASE_URL detected: %s. Expected format: https://<project-ref>.supabase.co (no paths, not dashboard URL).",
+                        url,
+                    )
+                    raise ValueError(
+                        "Invalid SUPABASE_URL. Use https://<project-ref>.supabase.co (no paths)."
+                    )
+
                 # Initialize with standard Supabase client - no need for custom headers
                 self._supabase = create_client(url, key)
 
@@ -74,7 +88,9 @@ class CredentialService:
                     logger.info("Supabase client initialized successfully")
 
             except Exception as e:
+                tb = traceback.format_exc()
                 logger.error(f"Error initializing Supabase client: {e}")
+                logger.error(f"Supabase initialization traceback: {tb}")
                 raise
 
         return self._supabase
@@ -125,6 +141,13 @@ class CredentialService:
         """Load all credentials from database and cache them."""
         try:
             supabase = self._get_supabase_client()
+
+            # If Supabase is not configured, run in env-only mode
+            if supabase is None:
+                self._cache = {}
+                self._cache_initialized = True
+                logger.info("Supabase not configured; loaded 0 credentials (env-only mode)")
+                return {}
 
             # Fetch all credentials
             result = supabase.table("archon_settings").select("*").execute()
@@ -195,8 +218,6 @@ class CredentialService:
     ) -> bool:
         """Set a credential value."""
         try:
-            supabase = self._get_supabase_client()
-
             if is_encrypted:
                 encrypted_value = self._encrypt_value(value)
                 data = {
@@ -226,15 +247,23 @@ class CredentialService:
                 # Update cache with plain value
                 self._cache[key] = value
 
-            # Upsert to database with proper conflict handling
-            result = (
-                supabase.table("archon_settings")
-                .upsert(
-                    data,
-                    on_conflict="key",  # Specify the unique column for conflict resolution
+            # Only attempt DB upsert if Supabase is configured
+            supabase = self._get_supabase_client()
+            if supabase is None:
+                logger.info(
+                    f"Supabase not configured; stored credential '{key}' in memory only"
                 )
-                .execute()
-            )
+                # Invalidate any dependent caches as needed
+                if category == "rag_strategy":
+                    self._rag_settings_cache = None
+                    self._rag_cache_timestamp = None
+                    logger.debug(
+                        f"Invalidated RAG settings cache due to update of {key} (in-memory)"
+                    )
+                return True
+
+            # Upsert to database with proper conflict handling
+            supabase.table("archon_settings").upsert(data, on_conflict="key").execute()
 
             # Invalidate RAG settings cache if this is a rag_strategy setting
             if category == "rag_strategy":
@@ -255,8 +284,23 @@ class CredentialService:
         """Delete a credential."""
         try:
             supabase = self._get_supabase_client()
+            if supabase is None:
+                # Remove from cache and return success without touching DB
+                if key in self._cache:
+                    del self._cache[key]
+                # Invalidate RAG cache if relevant
+                if self._rag_settings_cache is not None and key in self._rag_settings_cache:
+                    self._rag_settings_cache = None
+                    self._rag_cache_timestamp = None
+                    logger.debug(
+                        f"Invalidated RAG settings cache due to deletion of {key} (in-memory)"
+                    )
+                logger.info(
+                    f"Supabase not configured; deleted credential '{key}' from in-memory cache only"
+                )
+                return True
 
-            result = supabase.table("archon_settings").delete().eq("key", key).execute()
+            supabase.table("archon_settings").delete().eq("key", key).execute()
 
             # Remove from cache
             if key in self._cache:
@@ -296,6 +340,12 @@ class CredentialService:
 
         try:
             supabase = self._get_supabase_client()
+            if supabase is None:
+                logger.debug(
+                    "Supabase not configured; returning empty credentials for category '%s'",
+                    category,
+                )
+                return {}
             result = (
                 supabase.table("archon_settings").select("*").eq("category", category).execute()
             )
@@ -328,6 +378,9 @@ class CredentialService:
         """Get all credentials as a list of CredentialItem objects (for Settings UI)."""
         try:
             supabase = self._get_supabase_client()
+            if supabase is None:
+                logger.debug("Supabase not configured; returning empty credential list")
+                return []
             result = supabase.table("archon_settings").select("*").execute()
 
             credentials = []

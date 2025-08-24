@@ -49,13 +49,14 @@ def register_project_tools(mcp: FastMCP):
 
     @mcp.tool()
     async def manage_project(
-        ctx: Context,
         action: str,
         project_id: str = None,
         title: str = None,
         prd: dict[str, Any] = None,
         github_repo: str = None,
+        ctx: Context | None = None,
     ) -> str:
+        logger.info(f"[MANAGE_PROJECT] Received action: '{action}' with project_id: '{project_id}'")
         """
         Unified tool for Archon project lifecycle management with integrated PRP support.
 
@@ -246,12 +247,11 @@ def register_project_tools(mcp: FastMCP):
                 })
 
         except Exception as e:
-            logger.error(f"Error in manage_project: {e}")
+            logger.error(f"[MANAGE_PROJECT] Unhandled exception for action '{action}': {e}", exc_info=True)
             return json.dumps({"success": False, "error": str(e)})
 
     @mcp.tool()
     async def manage_task(
-        ctx: Context,
         action: str,
         task_id: str = None,
         project_id: str = None,
@@ -268,6 +268,7 @@ def register_project_tools(mcp: FastMCP):
         include_closed: bool = False,
         page: int = 1,
         per_page: int = 50,
+        ctx: Context | None = None,
     ) -> str:
         """
         Unified tool for task management operations within PRP-driven projects.
@@ -594,7 +595,6 @@ def register_project_tools(mcp: FastMCP):
 
     @mcp.tool()
     async def manage_document(
-        ctx: Context,
         action: str,
         project_id: str,
         doc_id: str = None,
@@ -602,6 +602,7 @@ def register_project_tools(mcp: FastMCP):
         title: str = None,
         content: dict[str, Any] = None,
         metadata: dict[str, Any] = None,
+        ctx: Context | None = None,
     ) -> str:
         """
         Unified tool for document management within projects with AUTOMATIC VERSION CONTROL.
@@ -1038,7 +1039,6 @@ def register_project_tools(mcp: FastMCP):
 
     @mcp.tool()
     async def manage_versions(
-        ctx: Context,
         action: str,
         project_id: str,
         field_name: str,
@@ -1047,6 +1047,7 @@ def register_project_tools(mcp: FastMCP):
         change_summary: str = None,
         document_id: str = None,
         created_by: str = "system",
+        ctx: Context | None = None,
     ) -> str:
         """
         Unified tool for IMMUTABLE document version management and complete change history.
@@ -1293,7 +1294,7 @@ def register_project_tools(mcp: FastMCP):
             return json.dumps({"success": False, "error": str(e)})
 
     @mcp.tool()
-    async def get_project_features(ctx: Context, project_id: str) -> str:
+    async def get_project_features(project_id: str, ctx: Context | None = None) -> str:
         """
         Get features from a project's features JSONB field.
 

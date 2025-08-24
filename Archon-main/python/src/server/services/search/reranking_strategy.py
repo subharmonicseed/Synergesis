@@ -13,9 +13,8 @@ from typing import Any
 
 try:
     from sentence_transformers import CrossEncoder
-
     CROSSENCODER_AVAILABLE = True
-except ImportError:
+except Exception:
     CrossEncoder = None
     CROSSENCODER_AVAILABLE = False
 

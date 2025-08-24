@@ -5,7 +5,7 @@ This module handles the complex project creation workflow including
 AI-assisted documentation generation and progress tracking.
 """
 
-import datetime
+from datetime import datetime
 import os
 from typing import Any
 

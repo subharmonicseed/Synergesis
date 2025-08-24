@@ -31,7 +31,7 @@ from src.server.api_routes.socketio_handlers import (
 )
 from src.server.services.storage import DocumentStorageService
 from src.server.services.search.rag_service import RAGService
-from src.utils import get_supabase_client
+from src.server.utils import get_supabase_client
 from src.server.services.source_management_service import SourceManagementService
 from src.server.utils.document_processing import extract_text_from_document
 
@@ -51,6 +51,21 @@ crawl_semaphore = asyncio.Semaphore(CONCURRENT_CRAWL_LIMIT)
 
 # Track active async crawl tasks for cancellation support
 active_crawl_tasks: dict[str, asyncio.Task] = {}
+
+
+def _get_supabase_if_configured():
+    """Return Supabase client if configured; otherwise None with an info log.
+
+    This prevents endpoints from failing with 500 when SUPABASE env vars are missing
+    by allowing the API layer to return safe empty responses for read-only routes.
+    """
+    try:
+        return get_supabase_client()
+    except Exception as e:
+        safe_logfire_info(
+            f"Supabase not configured; using empty fallback for request | reason={str(e)}"
+        )
+        return None
 
 
 # Request Models
@@ -133,8 +148,18 @@ async def get_knowledge_items(
 ):
     """Get knowledge items with pagination and filtering."""
     try:
-        # Use KnowledgeItemService
-        service = KnowledgeItemService(get_supabase_client())
+        # Use KnowledgeItemService (graceful fallback when Supabase not configured)
+        supabase = _get_supabase_if_configured()
+        if not supabase:
+            # Return empty list with pagination metadata so UI renders without 500
+            return {
+                "items": [],
+                "total": 0,
+                "page": page,
+                "per_page": per_page,
+                "pages": 0,
+            }
+        service = KnowledgeItemService(supabase)
         result = await service.list_items(
             page=page, per_page=per_page, knowledge_type=knowledge_type, search=search
         )
@@ -222,7 +247,14 @@ async def get_knowledge_item_code_examples(source_id: str):
         safe_logfire_info(f"Fetching code examples for source_id: {source_id}")
 
         # Query code examples with full content for this specific source
-        supabase = get_supabase_client()
+        supabase = _get_supabase_if_configured()
+        if not supabase:
+            return {
+                "success": True,
+                "source_id": source_id,
+                "code_examples": [],
+                "count": 0,
+            }
         result = (
             supabase.from_("archon_code_examples")
             .select("id, source_id, content, summary, metadata")
@@ -804,8 +836,11 @@ async def search_code_examples_simple(request: RagQueryRequest):
 async def get_available_sources():
     """Get all available sources for RAG queries."""
     try:
-        # Use KnowledgeItemService
-        service = KnowledgeItemService(get_supabase_client())
+        # Use KnowledgeItemService (graceful fallback when Supabase not configured)
+        supabase = _get_supabase_if_configured()
+        if not supabase:
+            return {"success": True, "sources": [], "count": 0}
+        service = KnowledgeItemService(supabase)
         result = await service.get_available_sources()
 
         # Parse result if it's a string
