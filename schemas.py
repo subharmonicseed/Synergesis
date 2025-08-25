@@ -8,7 +8,7 @@ from datetime import datetime
 import time
 import json
 import logging
-from pydantic import BaseModel, Field, validator, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 # Configuration du logging
 logger = logging.getLogger('schemas')
@@ -51,18 +51,18 @@ class GlyphData(BaseModel):
     source: Optional[str] = Field("topology_engine", description="Source du glyphe")
     tags: Optional[List[str]] = Field(default_factory=list, description="Tags associés au glyphe")
     
-    @validator('id')
-    def validate_id_format(cls, v):
+    @field_validator('id')
+    def validate_id_format(v):
         """Valide le format de l'identifiant."""
         if not v or not isinstance(v, str):
             raise ValueError("L'identifiant doit être une chaîne non vide")
         return v
     
-    class Config:
-        """Configuration du modèle Pydantic."""
-        extra = "allow"  # Permet des champs supplémentaires
-        validate_assignment = True  # Valide les assignations après l'initialisation
-        arbitrary_types_allowed = True  # Permet des types arbitraires
+    model_config = {
+        "extra": "allow",
+        "validate_assignment": True,
+        "arbitrary_types_allowed": True
+    }
 
 
 class ActionParameters(BaseModel):
@@ -82,9 +82,7 @@ class ActionParameters(BaseModel):
     # Paramètres pour ENRICH_HUB_NODE
     enrichment_aspects: Optional[List[str]] = Field(None, description="Aspects à enrichir")
     
-    class Config:
-        """Configuration du modèle Pydantic."""
-        extra = "allow"  # Permet des champs supplémentaires
+    model_config = {"extra": "allow"}
 
 
 class SourceMetadata(BaseModel):
@@ -96,9 +94,7 @@ class SourceMetadata(BaseModel):
     observation_ids: Optional[List[str]] = Field(None, description="IDs des observations liées")
     target_prompt: Optional[str] = Field(None, description="Prompt cible pour l'action")
     
-    class Config:
-        """Configuration du modèle Pydantic."""
-        extra = "allow"  # Permet des champs supplémentaires
+    model_config = {"extra": "allow"}
 
 
 class DetailsStructuredJson(BaseModel):
@@ -111,9 +107,7 @@ class DetailsStructuredJson(BaseModel):
     expected_impact: Optional[Dict[str, Any]] = Field(None, description="Impact attendu de l'action")
     rollback_procedure: Optional[Dict[str, Any]] = Field(None, description="Procédure de rollback en cas d'échec")
     
-    class Config:
-        """Configuration du modèle Pydantic."""
-        extra = "allow"  # Permet des champs supplémentaires
+    model_config = {"extra": "allow"}
 
 
 class PotentialActionGlyph(GlyphData):
@@ -125,8 +119,8 @@ class PotentialActionGlyph(GlyphData):
     details_structured_json: DetailsStructuredJson = Field(..., description="Détails structurés de l'action")
     details_text: Optional[str] = Field(None, description="Description textuelle de l'action")
     
-    @validator('action_type')
-    def validate_action_type(cls, v):
+    @field_validator('action_type')
+    def validate_action_type(v):
         """Valide que le type d'action est supporté."""
         if v not in ActionType:
             raise ValueError(f"Type d'action non supporté: {v}")
@@ -183,9 +177,7 @@ class ExecutionResultData(BaseModel):
     original_prompt: Optional[str] = None
     enriched_prompt: Optional[str] = None
     
-    class Config:
-        """Configuration du modèle Pydantic."""
-        extra = "allow"  # Permet des champs supplémentaires
+    model_config = {"extra": "allow"}
 
 
 class ExecutionResult(BaseModel):
@@ -198,9 +190,7 @@ class ExecutionResult(BaseModel):
     data: Optional[ExecutionResultData] = Field(None, description="Données du résultat")
     timestamp: int = Field(default_factory=lambda: int(time.time()), description="Horodatage de l'exécution")
     
-    class Config:
-        """Configuration du modèle Pydantic."""
-        extra = "allow"  # Permet des champs supplémentaires
+    model_config = {"extra": "allow"}
 
 
 def convert_dict_to_glyph(data: Dict[str, Any]) -> Union[GlyphData, PotentialActionGlyph]:

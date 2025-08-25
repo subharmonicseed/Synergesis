@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 from datetime import datetime
 from typing import Optional, List, Dict, Any
 import uuid
@@ -71,18 +71,19 @@ class Glyph(BaseModel):
         """Set parent document ID in metadata."""
         self.metadata["parent_doc_id"] = value
 
-    @validator('polarité')
-    def validate_polarite(cls, v):
+    @field_validator('polarité')
+    def validate_polarite(v):
         """Ensure polarité is normalized"""
         return v.lower()
 
-    @validator('alignement')
-    def validate_alignement(cls, v):
+    @field_validator('alignement')
+    def validate_alignement(v):
         """Ensure alignement is normalized"""
         return v.lower()
 
-    class Config:
-        allow_population_by_field_name = True
-        json_encoders = {
+    model_config = {
+        "populate_by_name": True,
+        "json_encoders": {
             datetime: lambda dt: int(dt.timestamp())
         }
+    }

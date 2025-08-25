@@ -77,8 +77,8 @@ class KnowledgeItemRequest(BaseModel):
     max_depth: int = 2  # Maximum crawl depth (1-5)
     extract_code_examples: bool = True  # Whether to extract code examples
 
-    class Config:
-        schema_extra = {
+    model_config = {
+        "json_schema_extra": {
             "example": {
                 "url": "https://example.com",
                 "knowledge_type": "technical",
@@ -88,6 +88,7 @@ class KnowledgeItemRequest(BaseModel):
                 "extract_code_examples": True,
             }
         }
+    }
 
 
 class CrawlRequest(BaseModel):

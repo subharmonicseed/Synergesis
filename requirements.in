@@ -1,0 +1,73 @@
+# Core Dependencies
+aiohttp
+aiokafka
+apscheduler
+beautifulsoup4
+celery
+cryptography
+google-search-results
+html2text
+httpx
+litellm
+logfire
+neo4j
+numpy
+openai
+pandas
+pandas-ta
+Pillow
+psutil
+pydantic
+python-dotenv
+python-socketio[asyncio]
+requests
+schedule
+scikit-learn
+scipy
+spacy
+supabase
+whoosh
+PyYAML
+
+# Web & API Frameworks
+fastapi
+uvicorn
+sqlmodel
+
+# Monitoring
+prometheus-client
+
+# Streamlit Dashboard
+streamlit
+streamlit-aggrid
+plotly
+dash
+
+# AI & Machine Learning
+crawl4ai
+graphdatascience
+langgraph
+matplotlib
+networkx
+pydantic-ai-slim
+qiskit
+qiskit-machine-learning
+scikit-optimize
+slack-sdk
+tensorflow
+torch
+vaderSentiment
+
+# Testing & Development Tools
+setuptools
+Cython
+bandit
+docker
+fpdf
+playwright
+pytest
+pytest-asyncio
+pytest-mock
+qrcode
+ruff
+testcontainers

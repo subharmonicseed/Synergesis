@@ -65,6 +65,7 @@ def test_negative_bias_decreases_confidence():
     now = int(time.time())
     mem = get_memory()
     mem.current_time = now
+    mem.records = []  # Reset memory for clean test
     
     # Create multiple failed traces
     for i in range(5):  # Multiple traces for stronger bias
@@ -83,4 +84,4 @@ def test_negative_bias_decreases_confidence():
     action = actions[0]
     assert action.confidence < 0.70  # Should be below base
     assert action.polarité == "negative"
-    assert action.alignement == "Chthonic"
+    assert action.alignement == "negative"

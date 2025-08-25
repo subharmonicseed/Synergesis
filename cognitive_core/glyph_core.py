@@ -31,8 +31,7 @@ class GlyphData(BaseModel):
         """Set parent document ID in metadata."""
         self.metadata["parent_doc_id"] = value
     
-    class Config:
-        extra = "allow"  # Allow additional fields from Neo4j
+    model_config = {"extra": "allow"}  # Allow additional fields from Neo4j
 
     @classmethod
     def from_neo4j(cls, data: Dict[str, Any]) -> "GlyphData":

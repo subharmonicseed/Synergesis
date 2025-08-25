@@ -11,7 +11,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Any
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 
 
 class DocumentType(str, Enum):
@@ -114,8 +114,8 @@ class ProjectRequirementsDocument(BaseModel):
         default_factory=list, description="Overall project success criteria"
     )
 
-    @validator("last_updated", pre=True, always=True)
-    def set_last_updated(cls, v):
+    @field_validator("last_updated", mode="before")
+    def set_last_updated(v):
         return v or datetime.now()
 
 
@@ -146,8 +146,8 @@ class GeneralDocument(BaseModel):
     created_at: datetime | None = Field(None, description="Creation timestamp")
     updated_at: datetime | None = Field(None, description="Last update timestamp")
 
-    @validator("created_at", "updated_at", pre=True, always=True)
-    def set_timestamps(cls, v):
+    @field_validator("created_at", "updated_at", mode="before")
+    def set_timestamps(v):
         return v or datetime.now()
 
 
