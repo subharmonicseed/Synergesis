@@ -14,6 +14,9 @@ import xml.etree.ElementTree as ET
 from typing import Dict, List, Any, Optional
 from datetime import datetime, timedelta
 import re
+import io
+import PyPDF2
+import litellm
 
 logger = logging.getLogger(__name__)
 
@@ -141,69 +144,61 @@ class ArXivResearcher:
         }
     
     def act(self, decision: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-        """Effectuer la recherche ArXiv et créer des glyphs de sagesse"""
+        """Effectuer la recherche ArXiv, résumer les papiers et créer des glyphes de sagesse"""
         if decision['type'] != 'arxiv_search':
             return None
-        
+
         try:
-            # Effectuer la recherche ArXiv
             papers = self._search_arxiv(
                 domain=decision['domain'],
                 keywords=decision['keywords'],
                 max_results=decision['max_results']
             )
-            
+
             if not papers:
-                return {
-                    'type': 'research_result',
-                    'status': 'no_results',
-                    'domain': decision['domain']
-                }
-            
-            # Transformer les papers en sagesse pour le Jardin
+                return {'type': 'research_result', 'status': 'no_results', 'domain': decision['domain']}
+
+            summaries = {}
+            for paper in papers:
+                arxiv_id = paper.get('raw_id')
+                if arxiv_id:
+                    summary_data = self.summarize_paper(arxiv_id)
+                    if summary_data:
+                        summaries[arxiv_id] = summary_data.get('summary')
+
             wisdom_glyphs = []
             for paper in papers:
-                wisdom = self._extract_wisdom_from_paper(paper, decision['domain'])
+                arxiv_id = paper.get('raw_id')
+                summary = summaries.get(arxiv_id, "Summary not available.")
+                wisdom = self._extract_wisdom_from_paper(paper, decision['domain'], summary)
                 if wisdom:
                     wisdom_glyphs.append(wisdom)
-            
-            # Mettre à jour le temps de dernière recherche
+
             self.last_search_time = time.time()
-            
-            # Ajouter à l'état partagé
             if 'arxiv_discoveries' not in self.ctx.shared_state:
                 self.ctx.shared_state['arxiv_discoveries'] = []
-            
             self.ctx.shared_state['arxiv_discoveries'].extend(papers)
-            
+
             self.logger.info(f"🔬 Discovered {len(papers)} papers in {decision['domain']}, created {len(wisdom_glyphs)} wisdom glyphs")
-            
+
             return {
                 'type': 'research_result',
                 'status': 'success',
                 'domain': decision['domain'],
                 'papers_found': len(papers),
                 'wisdom_glyphs': wisdom_glyphs,
-                'papers': papers[:3]  # Retourner seulement les 3 premiers pour éviter surcharge
+                'papers': papers[:3]
             }
-            
+
         except Exception as e:
             self.logger.error(f"ArXiv search failed: {e}")
-            return {
-                'type': 'research_result',
-                'status': 'error',
-                'error': str(e)
-            }
-    
+            return {'type': 'research_result', 'status': 'error', 'error': str(e)}
+
     def _search_arxiv(self, domain: str, keywords: List[str], max_results: int = 5) -> List[Dict[str, Any]]:
         """Rechercher sur ArXiv avec les mots-clés donnés"""
         try:
-            # Construire la requête de recherche
-            # Utiliser les mots-clés les plus pertinents
-            search_terms = keywords[:3]  # Limiter à 3 termes pour éviter requêtes trop complexes
+            search_terms = keywords[:3]
             query = " OR ".join([f'all:"{term}"' for term in search_terms])
-            
-            # Paramètres de la requête
             params = {
                 'search_query': query,
                 'start': 0,
@@ -211,22 +206,11 @@ class ArXivResearcher:
                 'sortBy': 'submittedDate',
                 'sortOrder': 'descending'
             }
-            
-            # Effectuer la requête
             response = requests.get(self.arxiv_base_url, params=params, timeout=10)
             response.raise_for_status()
-            
-            # Parser la réponse XML
             root = ET.fromstring(response.content)
-            
-            papers = []
-            for entry in root.findall('{http://www.w3.org/2005/Atom}entry'):
-                paper = self._parse_arxiv_entry(entry, domain)
-                if paper:
-                    papers.append(paper)
-            
-            return papers
-            
+            papers = [self._parse_arxiv_entry(entry, domain) for entry in root.findall('{http://www.w3.org/2005/Atom}entry')]
+            return [p for p in papers if p]
         except requests.RequestException as e:
             self.logger.error(f"ArXiv API request failed: {e}")
             return []
@@ -236,67 +220,38 @@ class ArXivResearcher:
         except Exception as e:
             self.logger.error(f"Unexpected error in ArXiv search: {e}")
             return []
-    
+
     def _parse_arxiv_entry(self, entry, domain: str) -> Optional[Dict[str, Any]]:
         """Parser une entrée ArXiv XML"""
         try:
-            # Extraire les informations de base
-            title_elem = entry.find('{http://www.w3.org/2005/Atom}title')
-            title = title_elem.text.strip() if title_elem is not None else "Unknown Title"
-            
-            summary_elem = entry.find('{http://www.w3.org/2005/Atom}summary')
-            summary = summary_elem.text.strip() if summary_elem is not None else ""
-            
-            # Nettoyer le résumé
-            summary = re.sub(r'\s+', ' ', summary)  # Normaliser les espaces
-            
-            # Extraire les auteurs
-            authors = []
-            for author in entry.findall('{http://www.w3.org/2005/Atom}author'):
-                name_elem = author.find('{http://www.w3.org/2005/Atom}name')
-                if name_elem is not None:
-                    authors.append(name_elem.text)
-            
-            # Extraire l'ID ArXiv
-            id_elem = entry.find('{http://www.w3.org/2005/Atom}id')
-            arxiv_id = id_elem.text if id_elem is not None else ""
-            
-            # Extraire la date de publication
-            published_elem = entry.find('{http://www.w3.org/2005/Atom}published')
-            published = published_elem.text if published_elem is not None else ""
+            ns = '{http://www.w3.org/2005/Atom}'
+            title = entry.find(f'{ns}title').text.strip()
+            summary = re.sub(r'\s+', ' ', entry.find(f'{ns}summary').text.strip())
+            authors = [author.find(f'{ns}name').text for author in entry.findall(f'{ns}author')]
+            arxiv_id_url = entry.find(f'{ns}id').text
+            raw_id = arxiv_id_url.split('/')[-1]
+            published = entry.find(f'{ns}published').text
             
             return {
                 'title': title,
                 'summary': summary,
                 'authors': authors,
-                'arxiv_id': arxiv_id,
+                'arxiv_id': arxiv_id_url,
+                'raw_id': raw_id,
                 'published': published,
                 'domain': domain,
                 'discovered_at': time.time()
             }
-            
         except Exception as e:
             self.logger.warning(f"Failed to parse ArXiv entry: {e}")
             return None
-    
-    def _extract_wisdom_from_paper(self, paper: Dict[str, Any], domain: str) -> Optional[Dict[str, Any]]:
+
+    def _extract_wisdom_from_paper(self, paper: Dict[str, Any], domain: str, summary: str) -> Optional[Dict[str, Any]]:
         """Extraire la sagesse d'un paper pour le Jardin"""
         try:
             title = paper.get('title', '')
-            summary = paper.get('summary', '')
             
-            # Créer une sagesse condensée
-            wisdom_content = f"Découverte scientifique en {domain}: {title}. "
-            
-            # Extraire les concepts clés du résumé
-            key_concepts = self._extract_key_concepts(summary)
-            if key_concepts:
-                wisdom_content += f"Concepts clés: {', '.join(key_concepts[:3])}. "
-            
-            # Ajouter une insight philosophique basée sur le domaine
-            philosophical_insight = self._generate_philosophical_insight(title, summary, domain)
-            if philosophical_insight:
-                wisdom_content += philosophical_insight
+            wisdom_content = f"Découverte scientifique en {domain}: {title}.\n\nRésumé: {summary}"
             
             return {
                 'type': 'glyph',
@@ -306,11 +261,10 @@ class ArXivResearcher:
                 'source': 'arxiv',
                 'paper_title': title,
                 'arxiv_id': paper.get('arxiv_id', ''),
-                'wisdom_weight': 0.8,  # Haute valeur pour la sagesse scientifique
+                'wisdom_weight': 0.8,
                 'practical_impact': True,
                 'recursive_potential': True
             }
-            
         except Exception as e:
             self.logger.warning(f"Failed to extract wisdom from paper: {e}")
             return None
@@ -357,3 +311,65 @@ class ArXivResearcher:
             'research_domains': list(self.research_domains.keys()),
             'next_search_available': time.time() - self.last_search_time >= self.search_cooldown
         }
+
+    def _download_pdf(self, url: str) -> Optional[bytes]:
+        """Downloads the PDF content from a given URL."""
+        try:
+            response = requests.get(url, timeout=30)
+            response.raise_for_status()
+            return response.content
+        except requests.RequestException as e:
+            self.logger.error(f"Failed to download PDF from {url}: {e}")
+            return None
+
+    def _extract_text_from_pdf(self, pdf_content: bytes) -> str:
+        """Extracts text from PDF content."""
+        text = ""
+        try:
+            with io.BytesIO(pdf_content) as f:
+                reader = PyPDF2.PdfReader(f)
+                for page in reader.pages:
+                    text += page.extract_text() or ""
+        except Exception as e:
+            self.logger.error(f"Failed to extract text from PDF: {e}")
+        return text
+
+    def _summarize_text(self, text: str, model: str = "claude-3-haiku-20240307") -> str:
+        """Summarizes text using an LLM."""
+        try:
+            # Truncate text to avoid exceeding token limits
+            max_chars = 15000
+            if len(text) > max_chars:
+                text = text[:max_chars]
+
+            messages = [
+                {"role": "system", "content": "You are an expert academic researcher. Summarize the following text from a research paper, focusing on the key findings and their implications."},
+                {"role": "user", "content": text}
+            ]
+            response = litellm.completion(model=model, messages=messages)
+            summary = response.choices[0].message.content
+            return summary
+        except Exception as e:
+            self.logger.error(f"Failed to summarize text: {e}")
+            return "Summary could not be generated."
+
+    def summarize_paper(self, arxiv_id: str) -> Optional[Dict[str, Any]]:
+        """Downloads, extracts text, and summarizes an arXiv paper."""
+        try:
+            pdf_url = f"https://arxiv.org/pdf/{arxiv_id}.pdf"
+            self.logger.info(f"Summarizing paper: {pdf_url}")
+
+            pdf_content = self._download_pdf(pdf_url)
+            if not pdf_content:
+                return None
+
+            text = self._extract_text_from_pdf(pdf_content)
+            if not text:
+                return {"arxiv_id": arxiv_id, "summary": "Failed to extract text from PDF."}
+
+            summary = self._summarize_text(text)
+
+            return {"arxiv_id": arxiv_id, "summary": summary}
+        except Exception as e:
+            self.logger.error(f"Failed to summarize paper {arxiv_id}: {e}")
+            return None
