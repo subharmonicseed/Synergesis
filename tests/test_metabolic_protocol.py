@@ -2,7 +2,7 @@
 
 import pytest
 from synergesis.protocols.metabolic_protocol import MetabolicProtocol, ActionThresholds
-from cognitive_core.glyph_core import GlyphData
+from synergesis.cognitive_core.glyph_core import GlyphData
 
 def test_gate_action_low_confidence():
     """Test gating with low confidence."""

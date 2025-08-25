@@ -64,7 +64,7 @@ class MemorySystem:
         """
         status_factor = self._status_factor(glyph.status)
         if self.decay_rate == 1.0:
-            return 1.5 * status_factor  # Keep original weight
+            return status_factor  # Keep original weight
         decay = self.decay_rate ** self._age_hours(glyph.timestamp)
         return 1.0 * status_factor * decay
 

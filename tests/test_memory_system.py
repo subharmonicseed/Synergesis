@@ -1,7 +1,7 @@
 import pytest
 from datetime import datetime, timedelta
-from cognitive_core.memory_system import MemorySystem
-from cognitive_core.glyph_core import GlyphData
+from synergesis.cognitive_core.memory_system import MemorySystem
+from synergesis.cognitive_core.glyph_core import GlyphData
 
 def test_memory_decay():
     """Test memory decay over time."""

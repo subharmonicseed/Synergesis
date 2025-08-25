@@ -1,8 +1,8 @@
 """Tests for the simulation engine."""
 
 import pytest
-from cognitive_core.simulation_engine import SimulationEngine
-from cognitive_core.glyph_core import GlyphData
+from synergesis.cognitive_core.simulation_engine import SimulationEngine
+from synergesis.cognitive_core.glyph_core import GlyphData
 
 def test_simulate_action_entropy():
     """Test entropy damping simulation."""

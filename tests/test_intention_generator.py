@@ -10,8 +10,8 @@ import time
 # Add the project root to Python path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from cognitive_core.intention_generator import IntentionGenerator
-from cognitive_core.glyph_core import GlyphData
+from synergesis.cognitive_core.intention_generator import IntentionGenerator
+from synergesis.cognitive_core.glyph_core import GlyphData
 from synergesis.cognitive_core import get_memory
 
 def _make_action(confidence: float, ent_delta: float, res_delta: float, tags: List[str]) -> GlyphData:

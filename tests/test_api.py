@@ -7,7 +7,7 @@ from unittest.mock import MagicMock
 from fastapi.testclient import TestClient
 from synergesis.api.app import app
 from synergesis.api.dependencies import get_neo
-from cognitive_core.glyph_core import GlyphData
+from synergesis.cognitive_core.glyph_core import GlyphData
 
 @pytest.fixture
 def mock_neo4j_storage(mocker):

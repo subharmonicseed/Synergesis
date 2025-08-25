@@ -5,8 +5,8 @@ Integration test for the full learning loop: Memory -> Intention -> Action.
 import pytest
 import time
 
-from cognitive_core.intention_generator import IntentionGenerator
-from cognitive_core.glyph_core import GlyphData
+from synergesis.cognitive_core.intention_generator import IntentionGenerator
+from synergesis.cognitive_core.glyph_core import GlyphData
 from synergesis.cognitive_core import get_memory
 from synergesis.protocols.metabolic_protocol import MetabolicProtocol, ActionThresholds
 from synergesis.storage.neo4j_interface import Neo4jStorage
