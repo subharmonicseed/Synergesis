@@ -26,7 +26,7 @@ class FileTool:
                 return f.read()
         except FileNotFoundError:
             return f"Error: File not found: {path}"
-        except Exception as e:
+        except (IOError, OSError) as e:
             logger.error(f"Read failed: {str(e)}")
             return f"Error reading file: {str(e)}"
 
@@ -37,6 +37,6 @@ class FileTool:
             with open(safe_path, 'w', encoding='utf-8') as f:
                 f.write(content)
             return f"Successfully wrote to {path}"
-        except Exception as e:
+        except (IOError, OSError) as e:
             logger.error(f"Write failed: {str(e)}")
             return f"Error writing file: {str(e)}"
