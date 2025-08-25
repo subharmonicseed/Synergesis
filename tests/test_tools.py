@@ -31,6 +31,6 @@ def test_shell_tool_blocks_disallowed(shell_tool):
     assert "not allowed" in result
 
 def test_shell_tool_timeout():
-    slow_tool = ShellTool(timeout=1)
+    slow_tool = ShellTool(allowed_commands=["sleep"], timeout=1)
     result = slow_tool.run("sleep 5")
     assert "timed out" in result.lower()
