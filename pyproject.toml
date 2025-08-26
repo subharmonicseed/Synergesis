@@ -18,9 +18,11 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
 ]
 keywords = ["ai", "agents", "llm", "autonomous"]
+requires-python = ">=3.9"
 
 [project.scripts]
 synergesis = "main:main"
+synergesis-chat = "synergesis.cli.chat_cli:main"
 
 [tool.setuptools.packages.find]
-where = ["."]
+include = ["synergesis*", "cognitive_core*"]
