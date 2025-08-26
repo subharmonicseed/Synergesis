@@ -1,12 +1,7 @@
-import os
-import sys
 import pytest
 import time
 from datetime import datetime
 from synergesis.cognitive_core import get_memory
-
-# Add the project root to Python path
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from synergesis.protocols.metabolic_protocol import run_cycle
 from cognitive_core.glyph_core import GlyphData

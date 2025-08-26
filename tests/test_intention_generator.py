@@ -3,12 +3,7 @@
 import pytest
 from datetime import datetime
 from typing import List
-import sys
-import os
 import time
-
-# Add the project root to Python path
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from cognitive_core.intention_generator import IntentionGenerator
 from cognitive_core.glyph_core import GlyphData

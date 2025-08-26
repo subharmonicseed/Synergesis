@@ -12,7 +12,7 @@ logger = logging.getLogger("synergesis.metabolic_protocol")
 
 from synergesis.cognitive_core import get_memory
 from synergesis.cognitive_core.glyph_core import GlyphData
-from storage.neo4j_interface import Neo4jStorage
+from synergesis.storage.neo4j_interface import Neo4jStorage
 
 _MEMORY = get_memory()
 

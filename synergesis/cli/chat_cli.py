@@ -9,12 +9,8 @@ Plus de gadgets - juste une conversation authentique !
 import asyncio
 import json
 import sys
-import os
 from typing import Dict, Any
 from datetime import datetime
-
-# Ajouter le chemin du projet pour les imports
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
 
 try:
     from synergesis.core.conversation_engine import conversation_engine
