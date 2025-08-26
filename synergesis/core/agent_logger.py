@@ -3,9 +3,13 @@
 
 import time
 import json
+import logging
 from typing import Dict, Any, List, Optional
 from contextlib import contextmanager
 import threading
+
+
+logger = logging.getLogger(__name__)
 
 class AgentCommunicationLogger:
     """
@@ -22,7 +26,7 @@ class AgentCommunicationLogger:
             from synergesis.core.persistent_storage import get_persistent_storage
             self.storage = get_persistent_storage()
         except ImportError:
-            print("⚠️ Stockage persistant non disponible pour AgentLogger")
+            logger.warning("⚠️ Stockage persistant non disponible pour AgentLogger")
     
     def log_agent_communication(self, 
                                source_agent: str, 
@@ -53,14 +57,13 @@ class AgentCommunicationLogger:
                     )
                     
                     if success:
-                        print(f"📡 Communication loggée: {source_agent} → {target_agent}")
+                        logger.info("📡 Communication loggée: %s → %s", source_agent, target_agent)
                         return True
                 
                 return False
                 
         except Exception as e:
-            logging.error(f"Agent logger error: {e}")
-            print(f"❌ Erreur logging communication: {str(e)}")
+            logger.error("❌ Erreur logging communication: %s", e)
             return False
     
     def log_glyph_generation(self, 
@@ -88,8 +91,7 @@ class AgentCommunicationLogger:
             )
             
         except Exception as e:
-            logging.error(f"Agent logger error: {e}")
-            print(f"❌ Erreur logging glyph: {str(e)}")
+            logger.error("❌ Erreur logging glyph: %s", e)
             return False
     
     def log_agent_activation(self, 
@@ -117,8 +119,7 @@ class AgentCommunicationLogger:
             )
             
         except Exception as e:
-            logging.error(f"Agent logger error: {e}")
-            print(f"❌ Erreur logging activation: {str(e)}")
+            logger.error("❌ Erreur logging activation: %s", e)
             return False
     
     def log_nous_update(self, 
@@ -144,8 +145,7 @@ class AgentCommunicationLogger:
             )
             
         except Exception as e:
-            logging.error(f"Agent logger error: {e}")
-            print(f"❌ Erreur logging NOUS: {str(e)}")
+            logger.error("❌ Erreur logging NOUS: %s", e)
             return False
     
     def log_quantum_processing(self, 
@@ -171,8 +171,7 @@ class AgentCommunicationLogger:
             )
             
         except Exception as e:
-            logging.error(f"Agent logger error: {e}")
-            print(f"❌ Erreur logging quantum: {str(e)}")
+            logger.error("❌ Erreur logging quantum: %s", e)
             return False
     
     def log_deepresearch_query(self, 
@@ -199,8 +198,7 @@ class AgentCommunicationLogger:
             )
             
         except Exception as e:
-            logging.error(f"Agent logger error: {e}")
-            print(f"❌ Erreur logging research: {str(e)}")
+            logger.error("❌ Erreur logging research: %s", e)
             return False
     
     def get_recent_communications(self, limit: int = 50) -> List[Dict[str, Any]]:
@@ -229,8 +227,7 @@ class AgentCommunicationLogger:
             return communications
             
         except Exception as e:
-            logging.error(f"Agent logger error: {e}")
-            print(f"❌ Erreur récupération communications: {str(e)}")
+            logger.error("❌ Erreur récupération communications: %s", e)
             return []
     
     def get_agent_activity_summary(self, agent_name: str = None) -> Dict[str, Any]:
@@ -276,8 +273,7 @@ class AgentCommunicationLogger:
                 }
                 
         except Exception as e:
-            logging.error(f"Agent logger error: {e}")
-            print(f"❌ Erreur résumé activité: {str(e)}")
+            logger.error("❌ Erreur résumé activité: %s", e)
             return {}
 
 # Instance globale
