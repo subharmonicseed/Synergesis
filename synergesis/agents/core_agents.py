@@ -8,8 +8,9 @@ Each agent follows a minimal life-cycle:
 
     perceive()  →  decide()  →  act()
 
-`BaseAgent` orchestrates the cycle through `__call__`. Concrete agents override
-`perceive`, `decide`, and `act`.
+The `agent_loop.py` script orchestrates the agent lifecycle by calling the
+`perceive`, `decide`, and `act` methods in scheduled tasks. Concrete agents
+override these methods to implement their specific behaviors.
 
 How to extend
 -------------
@@ -112,34 +113,6 @@ class ReflexiveCortex(BaseAgent):
         return min(1.0, len(glyphs) / 150.0)
 
 
-class Nous(BaseAgent):
-    """Collective reasoning agent."""
-
-    name = "nous"
-
-    def perceive(self, data: Any):
-        return data
-
-    def decide(self, data: Any):
-        return None
-
-    def act(self, decision: Any):
-        return None
-
-
-class Thales(BaseAgent):
-    """Formal verification & logical consistency agent."""
-
-    name = "thales"
-
-    def perceive(self, data: Any):
-        return data
-
-    def decide(self, data: Any):
-        return None
-
-    def act(self, decision: Any):
-        return None
 
 
 class Aura(BaseAgent):
@@ -1189,8 +1162,6 @@ __all__ = [
     "AgentContext",
     "BaseAgent",
     "ReflexiveCortex",
-    "Nous",
-    "Thales",
     "Aura",
     "Selene",
     "Vyra",
