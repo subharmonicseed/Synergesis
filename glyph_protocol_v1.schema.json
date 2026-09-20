@@ -1,0 +1,221 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://synergesis.local/schema/glyph-protocol-v1.json",
+  "title": "Synergesis Glyph Protocol v1",
+  "type": "object",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/glyph"
+    },
+    {
+      "$ref": "#/$defs/edge"
+    },
+    {
+      "$ref": "#/$defs/ledgerEvent"
+    }
+  ],
+  "$defs": {
+    "glyphType": {
+      "type": "string",
+      "enum": [
+        "observation",
+        "evidence",
+        "fact",
+        "hypothesis",
+        "decision",
+        "policy",
+        "action",
+        "outcome",
+        "learning",
+        "goal",
+        "plan",
+        "step",
+        "concept",
+        "critique",
+        "inference",
+        "cycle"
+      ]
+    },
+    "relationType": {
+      "type": "string",
+      "enum": [
+        "observes",
+        "derived_from",
+        "supports",
+        "contradicts",
+        "motivates",
+        "proposes",
+        "authorizes",
+        "denies",
+        "produces",
+        "evaluates",
+        "updates",
+        "supersedes",
+        "critiques",
+        "part_of",
+        "targets"
+      ]
+    },
+    "glyph": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "glyph_id",
+        "glyph_type",
+        "schema_version",
+        "created_at",
+        "actor",
+        "content",
+        "external_refs",
+        "confidence",
+        "metadata"
+      ],
+      "properties": {
+        "glyph_id": {
+          "type": "string",
+          "pattern": "^g:[0-9a-f]{32}$"
+        },
+        "glyph_type": {
+          "$ref": "#/$defs/glyphType"
+        },
+        "schema_version": {
+          "const": "synergesis.glyph.v1"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "actor": {
+          "type": "string",
+          "minLength": 1
+        },
+        "content": {
+          "type": "object"
+        },
+        "external_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "confidence": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 1.0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "metadata": {
+          "type": "object"
+        }
+      }
+    },
+    "edge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "edge_id",
+        "source",
+        "target",
+        "relation",
+        "created_at",
+        "actor",
+        "metadata"
+      ],
+      "properties": {
+        "edge_id": {
+          "type": "string",
+          "pattern": "^e:[0-9a-f]{32}$"
+        },
+        "source": {
+          "type": "string",
+          "pattern": "^g:[0-9a-f]{32}$"
+        },
+        "target": {
+          "type": "string",
+          "pattern": "^g:[0-9a-f]{32}$"
+        },
+        "relation": {
+          "$ref": "#/$defs/relationType"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "actor": {
+          "type": "string",
+          "minLength": 1
+        },
+        "metadata": {
+          "type": "object"
+        }
+      }
+    },
+    "ledgerEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sequence",
+        "event_id",
+        "event_type",
+        "created_at",
+        "previous_digest",
+        "payload",
+        "digest"
+      ],
+      "properties": {
+        "sequence": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "event_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{24}$"
+        },
+        "event_type": {
+          "type": "string",
+          "enum": [
+            "glyph",
+            "edge"
+          ]
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "previous_digest": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "payload": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/glyph"
+            },
+            {
+              "$ref": "#/$defs/edge"
+            }
+          ]
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    }
+  }
+}
