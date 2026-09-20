@@ -1,0 +1,136 @@
+--- a/test_glyph_protocol_schema.py
++++ b/test_glyph_protocol_schema.py
+@@ -1,5 +1,5 @@
+ import json
+-from dataclasses import asdict
++from pathlib import Path
+ 
+ import jsonschema
+ import pytest
+@@ -9,7 +9,7 @@
+ 
+ def load_schema():
+     return json.loads(
+-        open("/mnt/data/glyph_protocol_v1.schema.json", encoding="utf-8").read()
++        Path(__file__).with_name("glyph_protocol_v1.schema.json").read_text(encoding="utf-8")
+     )
+ 
+ 
+--- a/test_synergesis_reality_runtime.py
++++ b/test_synergesis_reality_runtime.py
+@@ -3,6 +3,7 @@
+ import sys
+ import threading
+ import time
++from uuid import uuid4
+ from pathlib import Path
+ 
+ import pytest
+@@ -16,45 +17,53 @@
+ 
+ 
+ def test_process_probe_finds_real_marked_process():
+-    marker = "syn-reality-process-test-marker"
++    # Popen's PID and the observer's PID can belong to different namespaces.
++    # A unique marker plus absent/live/terminated observations proves lifecycle
++    # correlation without interpreting the observer PID as a local kill target.
++    marker = "syn-reality-process-test-" + uuid4().hex
++    executable = str(Path(sys.executable).resolve())
++    probe = ProcessMarkerProbe(
++        observer_id="os:process",
++        policy=ProcessMarkerPolicy(
++            marker_parameter="marker",
++            allowed_executable_basenames=frozenset({Path(executable).name}),
++        ),
++    )
++
++    def observe(selected_probe=probe):
++        return selected_probe.observe(
++            action_type="process.spawn",
++            resource="action:process.spawn",
++            parameters={"marker": marker},
++        )[0]
++
++    assert observe().facts["marker_found"] is False
+     proc = subprocess.Popen(
+-        [
+-            sys.executable,
+-            "-c",
+-            "import time; time.sleep(10)",
+-            marker,
+-        ],
++        [executable, "-c", "import time; time.sleep(10)", marker],
+         stdout=subprocess.DEVNULL,
+         stderr=subprocess.DEVNULL,
+     )
+     try:
+-        probe = ProcessMarkerProbe(
+-            observer_id="os:process",
++        deadline = time.monotonic() + 2.0
++        while True:
++            observation = observe()
++            if observation.facts["marker_found"] or time.monotonic() >= deadline:
++                break
++            time.sleep(0.02)
++        assert proc.poll() is None
++        assert observation.facts["marker_found"] is True
++        assert observation.facts["match_count"] == 1
++        match = observation.facts["matches"][0]
++        assert isinstance(match["pid"], int) and match["pid"] > 0
++        assert match["exe_basename"] == Path(executable).name
++        denied_probe = ProcessMarkerProbe(
++            observer_id="os:denied-process",
+             policy=ProcessMarkerPolicy(
+                 marker_parameter="marker",
+-                allowed_executable_basenames=frozenset({
+-                    Path(sys.executable).name,
+-                }),
++                allowed_executable_basenames=frozenset({"not-the-test-executable"}),
+             ),
+         )
+-        deadline = time.time() + 2.0
+-        found = False
+-        while time.time() < deadline:
+-            observation = probe.observe(
+-                action_type="process.spawn",
+-                resource="action:process.spawn",
+-                parameters={"marker": marker},
+-            )[0]
+-            if observation.facts["marker_found"]:
+-                found = True
+-                break
+-            time.sleep(0.02)
+-        assert found is True
+-        assert observation.facts["match_count"] >= 1
+-        assert any(
+-            match["pid"] == proc.pid
+-            for match in observation.facts["matches"]
+-        )
++        assert observe(denied_probe).facts["marker_found"] is False
+     finally:
+         proc.terminate()
+         try:
+@@ -63,6 +72,14 @@
+             proc.kill()
+             proc.wait(timeout=2)
+ 
++    deadline = time.monotonic() + 2.0
++    while True:
++        stopped = observe()
++        if not stopped.facts["marker_found"] or time.monotonic() >= deadline:
++            break
++        time.sleep(0.02)
++    assert stopped.facts["marker_found"] is False
++
+ 
+ def test_process_probe_does_not_match_wrong_marker():
+     probe = ProcessMarkerProbe(
+@@ -70,7 +87,7 @@
+         policy=ProcessMarkerPolicy(
+             marker_parameter="marker",
+             allowed_executable_basenames=frozenset({
+-                Path(sys.executable).name,
++                Path(sys.executable).resolve().name,
+             }),
+         ),
+     )
