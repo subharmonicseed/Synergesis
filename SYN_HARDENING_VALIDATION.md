@@ -25,7 +25,7 @@ Validation date: 2026-09-21. This is an incremental review branch; main is uncha
 - Packaging: explicit maintained modules, test extras, a CPython 3.12 dependency
   constraint snapshot, current README and a Python 3.11/3.12 CI workflow. The
   legacy prototype that downloads spaCy at import is excluded from the package.
-- The first remote Python 3.11 run exposed two pre-existing multiline f-strings
+- Remote Python 3.11 runs exposed three pre-existing multiline f-strings
   requiring Python 3.12. Their equivalent string concatenations now preserve the
   event IDs while parsing on Python 3.11. Matrix jobs run independently.
 

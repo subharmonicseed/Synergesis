@@ -351,7 +351,7 @@ class RiskBudgetManager:
             )
             raise ValueError("cumulative risk budget exhausted")
 
-        reservation_id = f"rbr:{_digest({
+        reservation_id = "rbr:" + _digest({
             'epoch_id': self.policy.epoch_id,
             'directive_id': directive_id,
             'amount': amount,
@@ -359,7 +359,7 @@ class RiskBudgetManager:
             'strategy_key': strategy_key,
             'intervention': intervention,
             'sequence': len(self.ledger.events()) + 1,
-        })[:32]}"
+        })[:32]
         event = self.ledger.append(
             event_type="reserved",
             epoch_id=self.policy.epoch_id,
