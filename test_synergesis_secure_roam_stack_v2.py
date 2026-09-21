@@ -203,6 +203,7 @@ def build(
     enable_fusion=False,
     provisional_belief_policy=None,
     belief_research_policy=None,
+    stack_overrides=None,
 ):
     cfg = config(tmp_path)
     runtime_root = tmp_path / "runtime"
@@ -333,7 +334,7 @@ def build(
         ),
     ) if include_reality_profile else ()
 
-    stack = build_secure_roam_reality_stack(
+    stack_kwargs = dict(
         config=cfg,
         reasoner=Reasoner(),
         planning_provider=Planner(),
@@ -494,6 +495,8 @@ def build(
             else None
         ),
     )
+    stack_kwargs.update(stack_overrides or {})
+    stack = build_secure_roam_reality_stack(**stack_kwargs)
     if enable_transport:
         return stack, transport_bundle
     return stack

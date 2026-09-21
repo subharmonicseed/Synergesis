@@ -527,11 +527,21 @@ class MultisourcePerceptionFusion:
         if not records:
             raise ValueError("fusion requires at least one perception record")
 
+        # A fusion represents an evidence set, not the order or multiplicity
+        # of a caller's list. Validate every entry before deduplication so a
+        # forged record cannot hide behind a valid normalized glyph ID.
+        validated = {}
+        for record in records:
+            details = self._record_details(record)
+            validated[record.normalized_glyph_id] = (record, details)
+        ordered = tuple(validated[key] for key in sorted(validated))
+        records = tuple(record for record, _ in ordered)
+
         subjects = set()
         times = []
         contributions: list[SourceContribution] = []
-        for record in records:
-            normalized, content, facts, rank, profile = self._record_details(record)
+        for record, details in ordered:
+            normalized, content, facts, rank, profile = details
             subject = _value(facts[self.policy.subject_fact])
             claim = _value(facts[self.policy.object_fact])
             subjects.add(subject)

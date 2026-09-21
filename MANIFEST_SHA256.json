@@ -13,6 +13,7 @@
   "SYN_CAUSAL_EXPERIMENT_VALIDATION.md": "729307e9cd225c2d12d474dd5b7771022435e65f6e775eeb4c848fdfa5f32c0d",
   "SYN_CAUSAL_PLANNING_VALIDATION.md": "427523c3409b492bbce7c599396fe6c082b8d4e7114f962316278ddf11bcb38c",
   "SYN_EXPERIMENT_UTILITY_VALIDATION.md": "601ad9749e3ebde067d953d4faffc5e4d58159f6bcff7e21a890764758dca2fb",
+  "SYN_FUSION_REPLAY_VALIDATION.md": "ec582709d7186a0e6d42ce7ad0d665f753bbac99c948c2c0d07c9f4761ccce66",
   "SYN_ITERATION_447_VALIDATION.md": "5aa3c598b136c7a316531464ff4e563e6dea2a5ff029739e19d7471d04ded6c1",
   "SYN_MULTISOURCE_FUSION_VALIDATION.md": "27a9ec1a5c239f08d9ea9e7e0f84802693e2bcd89a6a278c9c40a70a22121d8b",
   "SYN_PERCEPTION_KNOWLEDGE_VALIDATION.md": "27c1339222f4c6f473a8adb7a0b378b1af19fb210e03feee07b85f6a926f90b2",
@@ -67,7 +68,7 @@
   "synergesis_life.py": "89d0fdde7d59aa7b433d0c89a67e9f82f7aa1f80958d9b057911a04d1cabc538",
   "synergesis_live_sources.py": "8edd5731bce186e99b2d915c4cad6a5db525d5884624113655fd4affbe3508a9",
   "synergesis_math.py": "2088c93a5ff93801e24c63075821f94c57ea86747d51dd12e3051a2dbdfe274f",
-  "synergesis_multisource_fusion.py": "a63baf0dd60f85ff65c47ae617f23eba7b78be3eb885c25af9a2b03e5ab8b95f",
+  "synergesis_multisource_fusion.py": "73c93e9431bc477d5631c84f8553775081f244cf53a725017ba4d91f9dfa3f29",
   "synergesis_perception_bus.py": "44c0e12635598090bf69ab117de63bcc56a5b2bc57e78eb4760c97f224017e22",
   "synergesis_perception_knowledge.py": "9bc1db1303ccdbcdeb31e526c1c9718512d2250d0e2f72558c041ba16761cdb5",
   "synergesis_planner.py": "968744942a6191f797aaeb72327d7337030775ae0b0e35c68714c855fc5e5a1c",
@@ -113,6 +114,7 @@
   "test_synergesis_cognitive_core.py": "9a2266b2e52516e38cece9287fb2aa884d7c643086213b38415c6cbd62f6cd78",
   "test_synergesis_context.py": "7809762cbe8066f2fa17734115316093f66044098017152d8b40bb324c16a8f3",
   "test_synergesis_core_math_verified.py": "46c167eb6e4e3e53c9a848b7e78da8401c711c706e6a6928e769609d22a480dd",
+  "test_synergesis_document_lineage.py": "3e31d0ff9ca5c4b1f7ffb28897d0b3d47072cda50c49cab873acf9af786295a9",
   "test_synergesis_experiment_utility.py": "d711fe8d71c52ae7223aad5b4715bac2d973b5f61479ce32a24acd76bac2e163",
   "test_synergesis_glyph_agent.py": "7a9e467f0225ca724ea6468b8eefa74375f357e91490508674608cdc5f800339",
   "test_synergesis_glyph_cognitive.py": "cc672d6a7773f6ff4137b64545d4f534457d634101d1d0e93af2eae21035ac1a",
@@ -149,7 +151,7 @@
   "test_synergesis_roam_evolution.py": "cb413bcb79d49a56c5eff4c33f6dd93137f7e2fc798bd26ec081120cdd1aff36",
   "test_synergesis_roam_service.py": "93ec2c5c0a29271217d6d87fdfa324189877c1bc8a28fd971a17bcce758a5696",
   "test_synergesis_secure_roam_stack.py": "696f1463474e6c81c300f4be6fceaeba6335bb5428ddf84df995bb9153e55c66",
-  "test_synergesis_secure_roam_stack_v2.py": "7de9d19fb1739f26530fbe7be049bc02244e1677bc1cdfa09c251fdf962ade8d",
+  "test_synergesis_secure_roam_stack_v2.py": "530aa443024aae1d290b3ce56bc9af820d5decb800dd50aab0feab4e36ca4e53",
   "test_synergesis_world_belief_view.py": "d6d218b3131549192759edea620d752c5b50ad48d8cb67e80cdb1c2f1ca6cdd3",
   "test_synergesis_world_revision.py": "0db565fe7e369e5d306127cc913980c1c3b3474b0a08722cf816a0b084803763"
 }
