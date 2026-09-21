@@ -24,6 +24,7 @@ import base64
 import html
 from html.parser import HTMLParser
 import json
+import math
 import os
 from pathlib import Path
 import re
@@ -61,10 +62,22 @@ class HttpTransport(Protocol):
 
 
 class RequestsTransport:
-    """Small requests-based transport with redirects disabled."""
+    """Small requests-based transport with redirects disabled and bounded reads."""
 
-    def __init__(self, session: Optional[requests.Session] = None):
+    def __init__(
+        self,
+        session: Optional[requests.Session] = None,
+        *,
+        max_response_bytes: int = 10 * 1024 * 1024,
+        chunk_size: int = 64 * 1024,
+    ):
+        if isinstance(max_response_bytes, bool) or max_response_bytes < 1:
+            raise ValueError("max_response_bytes must be >= 1")
+        if isinstance(chunk_size, bool) or chunk_size < 1:
+            raise ValueError("chunk_size must be >= 1")
         self.session = session or requests.Session()
+        self.max_response_bytes = int(max_response_bytes)
+        self.chunk_size = int(chunk_size)
 
     def get(
         self,
@@ -73,18 +86,43 @@ class RequestsTransport:
         headers: Mapping[str, str],
         timeout_seconds: float,
     ) -> HttpResponse:
+        # Start before session.get: connection setup itself is part of the
+        # logical request budget.  The requests timeout remains an
+        # inactivity timeout; the cooperative monotonic checks below cannot
+        # interrupt a blocking socket read already inside requests.
+        deadline = time.monotonic() + timeout_seconds
         response = self.session.get(
             url,
             headers=dict(headers),
             timeout=timeout_seconds,
             allow_redirects=False,
+            stream=True,
         )
-        return HttpResponse(
-            status_code=int(response.status_code),
-            headers={str(k).lower(): str(v) for k, v in response.headers.items()},
-            body=bytes(response.content),
-            url=str(response.url),
-        )
+        try:
+            chunks = []
+            total = 0
+            # iter_content yields decoded content, so the in-memory cap also
+            # applies after decompression.  The check bounds cooperative
+            # chunk delivery; it cannot interrupt a blocking socket read.
+            for chunk in response.iter_content(
+                chunk_size=min(self.chunk_size, self.max_response_bytes + 1)
+            ):
+                if time.monotonic() >= deadline:
+                    raise TimeoutError("HTTP response exceeded timeout")
+                if not chunk:
+                    continue
+                total += len(chunk)
+                if total > self.max_response_bytes:
+                    raise ValueError("response exceeds max_response_bytes")
+                chunks.append(bytes(chunk))
+            return HttpResponse(
+                status_code=int(response.status_code),
+                headers={str(k).lower(): str(v) for k, v in response.headers.items()},
+                body=b"".join(chunks),
+                url=str(response.url),
+            )
+        finally:
+            response.close()
 
 
 class Clock(Protocol):
@@ -120,6 +158,8 @@ class HttpPolicy:
     retry_backoff_seconds: float
     max_redirects: int
     cache_ttl_seconds: float
+    max_retry_after_seconds: float = 60.0
+    max_total_seconds: float = 60.0
 
     def __post_init__(self):
         if not self.allowed_hosts or any(not h.strip() for h in self.allowed_hosts):
@@ -130,8 +170,13 @@ class HttpPolicy:
             "retry_backoff_seconds": self.retry_backoff_seconds,
             "cache_ttl_seconds": self.cache_ttl_seconds,
         }
+        numeric.update({
+            "max_retry_after_seconds": self.max_retry_after_seconds,
+            "max_total_seconds": self.max_total_seconds,
+        })
         for name, value in numeric.items():
-            if not isinstance(value, (int, float)) or isinstance(value, bool):
+            if (not isinstance(value, (int, float)) or isinstance(value, bool)
+                    or not math.isfinite(value)):
                 raise ValueError(f"{name} must be numeric")
             if value < 0:
                 raise ValueError(f"{name} must be >= 0")
@@ -139,6 +184,8 @@ class HttpPolicy:
             raise ValueError("timeout_seconds must be > 0")
         if self.max_response_bytes < 1:
             raise ValueError("max_response_bytes must be >= 1")
+        if self.max_retry_after_seconds <= 0 or self.max_total_seconds <= 0:
+            raise ValueError("request budgets must be > 0")
         if self.max_retries < 0 or self.max_redirects < 0:
             raise ValueError("retry/redirect limits must be >= 0")
 
@@ -221,7 +268,9 @@ class PoliteHttpClient:
         clock: Optional[Clock] = None,
     ):
         self.policy = policy
-        self.transport = transport or RequestsTransport()
+        self.transport = transport or RequestsTransport(
+            max_response_bytes=policy.max_response_bytes
+        )
         self.clock = clock or SystemClock()
         self.cache = cache
         self._next_allowed: dict[str, float] = {}
@@ -237,11 +286,35 @@ class PoliteHttpClient:
             raise ValueError("userinfo in URLs is forbidden")
         return host
 
-    def _pace(self, host: str) -> None:
+    @staticmethod
+    def _origin(url: str) -> tuple[str, str, int]:
+        parsed = urlparse(url)
+        scheme = parsed.scheme.lower()
+        host = (parsed.hostname or "").lower()
+        # urlparse.port rejects malformed/non-numeric ports.  Validation has
+        # already happened, so map omitted ports to their scheme defaults.
+        port = parsed.port
+        if port is None:
+            port = 443 if scheme == "https" else 80
+        return scheme, host, port
+
+    def _transport_has_sensitive_defaults(self) -> bool:
+        """Whether a requests session could re-add credentials on redirect."""
+        if not isinstance(self.transport, RequestsTransport):
+            return False
+        session = self.transport.session
+        if getattr(session, "auth", None) is not None:
+            return True
+        sensitive = {"authorization", "cookie", "proxy-authorization"}
+        if any(str(key).lower() in sensitive for key in session.headers):
+            return True
+        return bool(session.cookies)
+
+    def _pace(self, host: str, *, max_sleep: Optional[float] = None) -> None:
         now = self.clock.monotonic()
         delay = self._next_allowed.get(host, now) - now
         if delay > 0:
-            self.clock.sleep(delay)
+            self.clock.sleep(delay if max_sleep is None else min(delay, max_sleep))
         self._next_allowed[host] = (
             self.clock.monotonic() + self.policy.min_interval_seconds
         )
@@ -251,11 +324,17 @@ class PoliteHttpClient:
         retry_after = headers.get("retry-after")
         if retry_after:
             try:
-                return max(0.0, float(retry_after))
+                value = float(retry_after)
+                if not math.isfinite(value):
+                    return None
+                return min(max(0.0, value), self.policy.max_retry_after_seconds)
             except ValueError:
                 try:
                     dt = parsedate_to_datetime(retry_after)
-                    return max(0.0, dt.timestamp() - self.clock.epoch())
+                    value = dt.timestamp() - self.clock.epoch()
+                    if not math.isfinite(value):
+                        return None
+                    return min(max(0.0, value), self.policy.max_retry_after_seconds)
                 except Exception:
                     pass
 
@@ -264,11 +343,13 @@ class PoliteHttpClient:
             and headers.get("x-ratelimit-reset")
         ):
             try:
-                return max(
+                value = max(
                     0.0,
                     float(headers["x-ratelimit-reset"]) - self.clock.epoch(),
                 )
-            except ValueError:
+                if math.isfinite(value):
+                    return min(value, self.policy.max_retry_after_seconds)
+            except (TypeError, ValueError, OverflowError):
                 pass
 
         if response.status_code in {429, 403} or 500 <= response.status_code <= 599:
@@ -282,6 +363,7 @@ class PoliteHttpClient:
         headers: Optional[Mapping[str, str]] = None,
     ) -> HttpResponse:
         request_headers = dict(headers or {})
+        original_headers = dict(request_headers)
         # Validate before cache access as well: a stale cache entry must never
         # bypass a tightened network allowlist.
         self._validate_url(url)
@@ -302,30 +384,57 @@ class PoliteHttpClient:
         current_url = url
         redirects = 0
         attempt = 0
+        started = self.clock.monotonic()
 
         while True:
+            elapsed = self.clock.monotonic() - started
+            remaining = self.policy.max_total_seconds - elapsed
+            if remaining <= 0:
+                raise TimeoutError("HTTP request exceeded max_total_seconds")
             host = self._validate_url(current_url)
-            self._pace(host)
+            self._pace(host, max_sleep=remaining)
+            remaining = self.policy.max_total_seconds - (
+                self.clock.monotonic() - started
+            )
+            if remaining <= 0:
+                raise TimeoutError("HTTP request exceeded max_total_seconds")
             response = self.transport.get(
                 url=current_url,
                 headers=request_headers,
-                timeout_seconds=self.policy.timeout_seconds,
+                timeout_seconds=min(self.policy.timeout_seconds, remaining),
             )
+
+            if self.clock.monotonic() - started >= self.policy.max_total_seconds:
+                raise TimeoutError("HTTP request exceeded max_total_seconds")
 
             if len(response.body) > self.policy.max_response_bytes:
                 raise ValueError("response exceeds max_response_bytes")
 
             if response.status_code in self.REDIRECT_CODES:
-                location = (
-                    response.headers.get("location")
-                    or response.headers.get("Location")
-                )
+                response_headers = {
+                    str(key).lower(): value for key, value in response.headers.items()
+                }
+                location = response_headers.get("location")
                 if not location:
                     raise ValueError("redirect response missing Location")
                 if redirects >= self.policy.max_redirects:
                     raise ValueError("redirect limit exceeded")
                 next_url = urljoin(current_url, location)
                 self._validate_url(next_url)
+                if self._origin(current_url) != self._origin(next_url):
+                    if self._transport_has_sensitive_defaults():
+                        raise ValueError(
+                            "cross-origin redirect blocked for credentialed session"
+                        )
+                    request_headers = {
+                        key: value
+                        for key, value in request_headers.items()
+                        if key.lower() not in {
+                            "authorization",
+                            "cookie",
+                            "proxy-authorization",
+                        }
+                    }
                 current_url = next_url
                 redirects += 1
                 continue
@@ -334,14 +443,19 @@ class PoliteHttpClient:
                 if self.cache:
                     self.cache.put(
                         request_url=url,
-                        request_headers=request_headers,
+                        request_headers=original_headers,
                         response=response,
                     )
                 return response
 
             delay = self._retry_delay(response, attempt)
             if delay is not None and attempt < self.policy.max_retries:
-                self.clock.sleep(delay)
+                remaining = self.policy.max_total_seconds - (
+                    self.clock.monotonic() - started
+                )
+                if remaining <= 0:
+                    raise TimeoutError("HTTP request exceeded max_total_seconds")
+                self.clock.sleep(min(delay, remaining))
                 attempt += 1
                 continue
 
@@ -368,6 +482,8 @@ def arxiv_documented_http_policy(
     retry_backoff_seconds: float,
     max_redirects: int,
     cache_ttl_seconds: float,
+    max_retry_after_seconds: float = 60.0,
+    max_total_seconds: float = 60.0,
 ) -> HttpPolicy:
     """arXiv API policy using its documented 3-second inter-call courtesy delay."""
     return HttpPolicy(
@@ -379,6 +495,8 @@ def arxiv_documented_http_policy(
         retry_backoff_seconds=retry_backoff_seconds,
         max_redirects=max_redirects,
         cache_ttl_seconds=cache_ttl_seconds,
+        max_retry_after_seconds=max_retry_after_seconds,
+        max_total_seconds=max_total_seconds,
     )
 
 
@@ -390,6 +508,8 @@ def crossref_polite_http_policy(
     retry_backoff_seconds: float,
     max_redirects: int,
     cache_ttl_seconds: float,
+    max_retry_after_seconds: float = 60.0,
+    max_total_seconds: float = 60.0,
 ) -> HttpPolicy:
     """Sequential Crossref polite-pool list-query policy.
 
@@ -406,6 +526,8 @@ def crossref_polite_http_policy(
         retry_backoff_seconds=retry_backoff_seconds,
         max_redirects=max_redirects,
         cache_ttl_seconds=cache_ttl_seconds,
+        max_retry_after_seconds=max_retry_after_seconds,
+        max_total_seconds=max_total_seconds,
     )
 
 
@@ -418,6 +540,8 @@ def github_http_policy(
     retry_backoff_seconds: float,
     max_redirects: int,
     cache_ttl_seconds: float,
+    max_retry_after_seconds: float = 60.0,
+    max_total_seconds: float = 60.0,
 ) -> HttpPolicy:
     """GitHub policy.
 
@@ -433,6 +557,8 @@ def github_http_policy(
         retry_backoff_seconds=retry_backoff_seconds,
         max_redirects=max_redirects,
         cache_ttl_seconds=cache_ttl_seconds,
+        max_retry_after_seconds=max_retry_after_seconds,
+        max_total_seconds=max_total_seconds,
     )
 
 
@@ -446,6 +572,8 @@ def rss_http_policy(
     retry_backoff_seconds: float,
     max_redirects: int,
     cache_ttl_seconds: float,
+    max_retry_after_seconds: float = 60.0,
+    max_total_seconds: float = 60.0,
 ) -> HttpPolicy:
     """Explicit policy for configured RSS/Atom feed hosts."""
     return HttpPolicy(
@@ -457,6 +585,8 @@ def rss_http_policy(
         retry_backoff_seconds=retry_backoff_seconds,
         max_redirects=max_redirects,
         cache_ttl_seconds=cache_ttl_seconds,
+        max_retry_after_seconds=max_retry_after_seconds,
+        max_total_seconds=max_total_seconds,
     )
 
 

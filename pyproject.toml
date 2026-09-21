@@ -1,0 +1,95 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "synergesis"
+version = "0.0.0"
+description = "Flat-module Synergesis quantitative, provenance, and policy components"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [{name = "Synergesis contributors"}]
+dependencies = [
+    "cryptography>=41",
+    "fastapi>=0.100",
+    "numpy>=1.24",
+    "psutil>=5.9",
+    "requests>=2.31",
+]
+
+[project.optional-dependencies]
+test = [
+    "httpx>=0.24",
+    "jsonschema>=4.18",
+    "pytest>=7.4",
+]
+
+[tool.setuptools]
+# The project intentionally remains a flat-module distribution. Keep this list
+# explicit so retired prototypes and one-off scripts are never installed as the
+# advertised API by an import glob.
+py-modules = [
+    "synergesis_aegis",
+    "synergesis_agent_loop",
+    "synergesis_agent_loop_v2",
+    "synergesis_agent_loop_v3",
+    "synergesis_agent_loop_v4",
+    "synergesis_agent_loop_v5",
+    "synergesis_ai_bridge",
+    "synergesis_audit_service",
+    "synergesis_audit_service_v2",
+    "synergesis_audited_stack",
+    "synergesis_belief_research",
+    "synergesis_canonical",
+    "synergesis_causal_credit",
+    "synergesis_causal_experiment",
+    "synergesis_causal_planning",
+    "synergesis_cognitive_core",
+    "synergesis_context",
+    "synergesis_experiment_utility",
+    "synergesis_glyph_agent",
+    "synergesis_glyph_agent_v2",
+    "synergesis_glyph_cognitive",
+    "synergesis_glyph_planning",
+    "synergesis_glyph_protocol",
+    "synergesis_glyph_research",
+    "synergesis_goal_manager",
+    "synergesis_life",
+    "synergesis_live_sources",
+    "synergesis_math",
+    "synergesis_multisource_fusion",
+    "synergesis_perception_bus",
+    "synergesis_perception_knowledge",
+    "synergesis_planner",
+    "synergesis_planning_bridge",
+    "synergesis_prediction",
+    "synergesis_prediction_curiosity",
+    "synergesis_production",
+    "synergesis_provenance_receipts",
+    "synergesis_provenance_stress",
+    "synergesis_provenance_transport",
+    "synergesis_provisional_beliefs",
+    "synergesis_quantum_engine",
+    "synergesis_reality",
+    "synergesis_reality_runtime",
+    "synergesis_reality_state",
+    "synergesis_research_layer",
+    "synergesis_risk_budget",
+    "synergesis_risk_learning",
+    "synergesis_roam",
+    "synergesis_roam_adaptive",
+    "synergesis_roam_attention",
+    "synergesis_roam_evolution",
+    "synergesis_roam_service",
+    "synergesis_secure_roam_stack",
+    "synergesis_secure_roam_stack_v2",
+    "synergesis_world_belief_view",
+    "synergesis_world_revision",
+    # Compatibility API modules retained for existing FastAPI imports.
+    "SynergesisCore_MathVerified",
+    "SynergesisCore_Production",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["."]
+addopts = "-ra"

@@ -206,14 +206,14 @@ class RiskBudgetLedger:
         previous = self._events[-1].digest if self._events else None
         body = {
             "sequence": len(self._events) + 1,
-            "event_id": f"rbe:{_digest({
+            "event_id": "rbe:" + _digest({
                 'sequence': len(self._events) + 1,
                 'directive_id': directive_id,
                 'reservation_id': reservation_id,
                 'event_type': event_type,
                 'amount': amount,
                 'previous': previous,
-            })[:32]}",
+            })[:32],
             "event_type": event_type,
             "epoch_id": epoch_id,
             "directive_id": directive_id,
@@ -351,7 +351,7 @@ class RiskBudgetManager:
             )
             raise ValueError("cumulative risk budget exhausted")
 
-        reservation_id = f"rbr:{_digest({
+        reservation_id = "rbr:" + _digest({
             'epoch_id': self.policy.epoch_id,
             'directive_id': directive_id,
             'amount': amount,
@@ -359,7 +359,7 @@ class RiskBudgetManager:
             'strategy_key': strategy_key,
             'intervention': intervention,
             'sequence': len(self.ledger.events()) + 1,
-        })[:32]}"
+        })[:32]
         event = self.ledger.append(
             event_type="reserved",
             epoch_id=self.policy.epoch_id,
