@@ -235,6 +235,28 @@ class PredictionLedger:
         assert settlement.surprise_bits is not None
 
         self._load()
+        # A ledger replay is safe to retry.  The prediction id is the stable
+        # identity of a scored settlement; a different result for that id is
+        # a conflict, rather than a second learning event.
+        for existing in self._records:
+            if existing.prediction_id != settlement.prediction_id:
+                continue
+            candidate = {
+                "proposal_id": settlement.proposal_id,
+                "action_type": settlement.action_type,
+                "strategy_key": settlement.strategy_key,
+                "probability_effect_success": settlement.probability_effect_success,
+                "observed_effect": bool(settlement.observed_effect),
+                "brier_score": float(settlement.brier_score),
+                "absolute_error": float(settlement.absolute_error),
+                "surprise_bits": float(settlement.surprise_bits),
+            }
+            recorded = {
+                key: getattr(existing, key) for key in candidate
+            }
+            if recorded != candidate:
+                raise ValueError("conflicting prediction settlement")
+            return existing
         previous = self._records[-1].digest if self._records else None
         body = {
             "sequence": len(self._records) + 1,
@@ -431,10 +453,159 @@ class PredictionEngine:
         self.actor = actor
         self._predictions: dict[str, ActionPrediction] = {}
         self._prediction_glyph_ids: dict[str, str] = {}
+        self._prediction_action_glyphs: dict[str, str] = {}
         self._settlements: dict[str, PredictionSettlement] = {}
+        self._settlements_by_prediction: dict[str, PredictionSettlement] = {}
         self._settlement_sinks: list[PredictionSettlementSink] = list(
             settlement_sinks
         )
+        self._delivered_sinks: dict[str, set[int]] = {}
+        self._durable_delivered_sinks: dict[str, set[str]] = {}
+        self._recovered_settlements: set[str] = set()
+        self._recover_persisted_state()
+
+    @staticmethod
+    def _sink_key(index: int, sink: PredictionSettlementSink) -> str:
+        cls = type(sink)
+        return f"{index}:{cls.__module__}.{cls.__qualname__}"
+
+    def _validate_action_link(
+        self,
+        *,
+        proposal: ActionProposal,
+        action_glyph_id: str,
+    ) -> None:
+        action = self.graph.ledger.get(action_glyph_id)
+        if action.glyph_type != "action":
+            raise ValueError("prediction action link must target an action glyph")
+        if not (
+            proposal.proposal_id in action.external_refs
+            or action.content.get("proposal_id") == proposal.proposal_id
+        ):
+            raise ValueError("prediction action link mismatch")
+        recorded_action_type = action.content.get("action_type")
+        if recorded_action_type is not None and recorded_action_type != proposal.action_type:
+            raise ValueError("prediction action type mismatch")
+
+    def _recover_persisted_state(self) -> None:
+        """Rebuild pending predictions and completed settlements from glyphs.
+
+        The graph is the durable source for the pre-action hypothesis and its
+        learning glyph.  Recovery deliberately requires the hypothesis to be
+        linked to one action glyph carrying the same proposal id; an orphaned
+        hypothesis must never become an executable settlement after restart.
+        """
+        predictions = [
+            glyph for glyph in self.graph.ledger.glyphs()
+            if glyph.glyph_type == "hypothesis"
+            and glyph.content.get("kind") == "action_prediction"
+        ]
+        for glyph in predictions:
+            content = glyph.content
+            proposal_id = str(content.get("proposal_id", ""))
+            prediction_id = str(content.get("prediction_id", ""))
+            if not proposal_id or not prediction_id:
+                raise ValueError("persisted prediction is missing identity")
+            action_parents = [
+                edge.target for edge in self.graph.ledger.edges_from(
+                    glyph.glyph_id, relation="derived_from"
+                )
+                if self.graph.ledger.get(edge.target).glyph_type == "action"
+            ]
+            if len(action_parents) != 1:
+                raise ValueError("persisted prediction has invalid action link")
+            action = self.graph.ledger.get(action_parents[0])
+            linked_proposal = (
+                proposal_id in action.external_refs
+                or action.content.get("proposal_id") == proposal_id
+            )
+            if not linked_proposal:
+                raise ValueError("persisted prediction action link mismatch")
+            action_type = str(content.get("action_type", ""))
+            recorded_action_type = action.content.get("action_type")
+            if recorded_action_type is not None and recorded_action_type != action_type:
+                raise ValueError("persisted prediction action type mismatch")
+            prediction = ActionPrediction(
+                prediction_id=prediction_id,
+                proposal_id=proposal_id,
+                action_type=action_type,
+                strategy_key=str(content.get("strategy_key", "")),
+                probability_effect_success=float(content["probability_effect_success"]),
+                basis=dict(content.get("basis", {})),
+                created_at=str(content.get("created_at", glyph.created_at)),
+            )
+            # A proposal id is deterministic in some callers and can be
+            # reused for a later action instance.  The last valid action link
+            # is the pending prediction for that proposal; each prediction id
+            # remains independently settled in the ledger.
+            self._predictions[proposal_id] = prediction
+            self._prediction_glyph_ids[proposal_id] = glyph.glyph_id
+            self._prediction_action_glyphs[proposal_id] = action_parents[0]
+
+        learning = [
+            glyph for glyph in self.graph.ledger.glyphs()
+            if glyph.glyph_type == "learning"
+            and glyph.content.get("kind") == "prediction_error"
+        ]
+        for glyph in learning:
+            content = glyph.content
+            proposal_id = str(content.get("proposal_id", ""))
+            prediction_id = str(content.get("prediction_id", ""))
+            prediction = self._predictions.get(proposal_id)
+            if prediction is None or prediction.prediction_id != prediction_id:
+                continue
+            parents = [
+                self.graph.ledger.get(edge.target)
+                for edge in self.graph.ledger.edges_from(
+                    glyph.glyph_id, relation="derived_from"
+                )
+            ]
+            prediction_parents = [
+                parent for parent in parents
+                if parent.glyph_type == "hypothesis"
+                and parent.glyph_id == self._prediction_glyph_ids[proposal_id]
+            ]
+            reality_parents = [
+                parent for parent in parents if parent.glyph_id not in {
+                    x.glyph_id for x in prediction_parents
+                }
+            ]
+            if len(prediction_parents) != 1 or len(reality_parents) != 1:
+                raise ValueError("persisted prediction settlement has invalid links")
+            observed = content.get("observed_effect")
+            status = str(content.get("status", "unscored"))
+            settlement = PredictionSettlement(
+                prediction_id=prediction_id,
+                proposal_id=proposal_id,
+                action_type=str(content.get("action_type", prediction.action_type)),
+                strategy_key=str(content.get("strategy_key", prediction.strategy_key)),
+                probability_effect_success=float(content.get("probability_effect_success", prediction.probability_effect_success)),
+                observed_effect=observed,
+                status=status,
+                brier_score=content.get("brier_score"),
+                absolute_error=content.get("absolute_error"),
+                surprise_bits=content.get("surprise_bits"),
+                reality_verdict_glyph_id=reality_parents[0].glyph_id,
+                prediction_glyph_id=prediction_parents[0].glyph_id,
+                learning_glyph_id=glyph.glyph_id,
+                settled_at=str(content.get("settled_at", glyph.created_at)),
+            )
+            prior = self._settlements.get(proposal_id)
+            if prior is not None and prior != settlement:
+                raise ValueError("conflicting persisted prediction settlement")
+            self._settlements[proposal_id] = settlement
+            self._settlements_by_prediction[prediction_id] = settlement
+            self._recovered_settlements.add(prediction_id)
+            if status == "scored":
+                # Repair the durable calibration journal if the process died
+                # after committing the learning glyph and before appending it.
+                self.ledger.append(settlement)
+            for index, sink in enumerate(self._settlement_sinks):
+                marker = f"prediction-sink:{prediction_id}:{self._sink_key(index, sink)}"
+                if self.graph.ledger.find_by_external_ref(marker, glyph_type="learning"):
+                    self._durable_delivered_sinks.setdefault(prediction_id, set()).add(
+                        self._sink_key(index, sink)
+                    )
 
     def add_settlement_sink(
         self,
@@ -450,6 +621,17 @@ class PredictionEngine:
         proposal: ActionProposal,
         action_glyph_id: str,
     ) -> ActionPrediction:
+        self._validate_action_link(
+            proposal=proposal,
+            action_glyph_id=action_glyph_id,
+        )
+        prior = self._predictions.get(proposal.proposal_id)
+        if (prior is not None
+                and prior.prediction_id not in self._settlements_by_prediction
+                and self._prediction_action_glyphs.get(proposal.proposal_id) == action_glyph_id):
+            if prior.action_type != proposal.action_type or prior.strategy_key != proposal.strategy_key:
+                raise ValueError("conflicting prediction for action")
+            return prior
         prediction = self.provider.predict(
             context=context,
             proposal=proposal,
@@ -483,6 +665,7 @@ class PredictionEngine:
         )
         self._predictions[proposal.proposal_id] = prediction
         self._prediction_glyph_ids[proposal.proposal_id] = glyph.glyph_id
+        self._prediction_action_glyphs[proposal.proposal_id] = action_glyph_id
         return prediction
 
     def settle(
@@ -495,6 +678,27 @@ class PredictionEngine:
         prediction_glyph_id = self._prediction_glyph_ids.get(proposal.proposal_id)
         if prediction is None or prediction_glyph_id is None:
             raise ValueError("missing pre-action prediction")
+        if (prediction.action_type != proposal.action_type
+                or prediction.strategy_key != proposal.strategy_key
+                or reality.proposal_id != proposal.proposal_id
+                or reality.action_type != proposal.action_type):
+            raise ValueError("prediction/reality identity mismatch")
+
+        existing = self._settlements_by_prediction.get(prediction.prediction_id)
+        if existing is not None:
+            same = (
+                existing.prediction_id == prediction.prediction_id
+                and existing.action_type == proposal.action_type
+                and existing.strategy_key == proposal.strategy_key
+                and existing.reality_verdict_glyph_id == reality.verdict_glyph_id
+                and existing.observed_effect == reality.effect_observed
+            )
+            if same:
+                if existing.status == "scored":
+                    self.ledger.append(existing)
+                self._deliver_settlement(existing)
+                return existing
+            raise ValueError("conflicting prediction settlement")
 
         observed = reality.effect_observed
         if observed is None:
@@ -561,11 +765,67 @@ class PredictionEngine:
             settled_at=settled_at,
         )
         self._settlements[proposal.proposal_id] = settlement
+        self._settlements_by_prediction[prediction.prediction_id] = settlement
         if status == "scored":
             self.ledger.append(settlement)
-        for sink in tuple(self._settlement_sinks):
-            sink.on_prediction_settlement(settlement)
+        self._deliver_settlement(settlement)
         return settlement
+
+    def _deliver_settlement(self, settlement: PredictionSettlement) -> None:
+        delivered = self._delivered_sinks.setdefault(settlement.prediction_id, set())
+        for index, sink in enumerate(tuple(self._settlement_sinks)):
+            if index in delivered:
+                continue
+            sink_key = self._sink_key(index, sink)
+            receipt_ref = f"prediction-sink:{settlement.prediction_id}:{sink_key}"
+            receipts = self.graph.ledger.find_by_external_ref(receipt_ref, glyph_type="learning")
+            if receipts:
+                receipt = receipts[-1]
+                if (receipt.content.get("kind") != "prediction_sink_delivery"
+                        or receipt.content.get("prediction_id") != settlement.prediction_id
+                        or receipt.content.get("sink_key") != sink_key):
+                    raise ValueError("invalid prediction sink receipt")
+                delivered.add(index)
+                continue
+            start_ref = receipt_ref + ":started"
+            if (settlement.prediction_id in self._recovered_settlements
+                    or self.graph.ledger.find_by_external_ref(start_ref)):
+                raise RuntimeError(
+                    "prediction sink delivery status uncertain; recovery required"
+                )
+            # The intent is durable before calling outside the local journal.
+            # An exception or crash without a completion receipt is ambiguous:
+            # do not repeat potentially completed side effects automatically.
+            self.graph.create(
+                "learning", actor=self.actor,
+                content={"kind": "prediction_sink_delivery_started",
+                         "prediction_id": settlement.prediction_id,
+                         "sink_key": sink_key},
+                external_refs=(start_ref,),
+                derived_from=(settlement.learning_glyph_id,),
+                dedupe_external_ref=start_ref,
+            )
+            sink.on_prediction_settlement(settlement)
+            self.graph.create(
+                "learning",
+                actor=self.actor,
+                content={
+                    "kind": "prediction_sink_delivery",
+                    "prediction_id": settlement.prediction_id,
+                    "proposal_id": settlement.proposal_id,
+                    "sink_key": sink_key,
+                    "settled_at": settlement.settled_at,
+                },
+                external_refs=(
+                    f"prediction-sink:{settlement.prediction_id}:{sink_key}",
+                ),
+                derived_from=(settlement.learning_glyph_id,),
+                dedupe_external_ref=(
+                    f"prediction-sink:{settlement.prediction_id}:{sink_key}"
+                ),
+            )
+            self._durable_delivered_sinks.setdefault(settlement.prediction_id, set()).add(sink_key)
+            delivered.add(index)
 
     def settlement_for(self, proposal_id: str) -> Optional[PredictionSettlement]:
         return self._settlements.get(proposal_id)
