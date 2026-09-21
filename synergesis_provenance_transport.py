@@ -219,12 +219,12 @@ class ProvenanceReplayLedger:
         previous = self._events[-1].digest if self._events else None
         body = {
             "sequence": len(self._events) + 1,
-            "event_id": f"transport-replay:{_digest({
+            "event_id": "transport-replay:" + _digest({
                 'sender_id': sender_id,
                 'bundle_id': bundle_id,
                 'nonce': envelope_nonce,
                 'sequence': len(self._events) + 1,
-            })[:32]}",
+            })[:32],
             "sender_id": sender_id,
             "bundle_id": bundle_id,
             "envelope_nonce": envelope_nonce,

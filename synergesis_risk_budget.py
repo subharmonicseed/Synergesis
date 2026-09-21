@@ -206,14 +206,14 @@ class RiskBudgetLedger:
         previous = self._events[-1].digest if self._events else None
         body = {
             "sequence": len(self._events) + 1,
-            "event_id": f"rbe:{_digest({
+            "event_id": "rbe:" + _digest({
                 'sequence': len(self._events) + 1,
                 'directive_id': directive_id,
                 'reservation_id': reservation_id,
                 'event_type': event_type,
                 'amount': amount,
                 'previous': previous,
-            })[:32]}",
+            })[:32],
             "event_type": event_type,
             "epoch_id": epoch_id,
             "directive_id": directive_id,
