@@ -20,13 +20,22 @@ limit, erase consumption, or convert a reservation into authority.
 """
 from __future__ import annotations
 
+from contextlib import contextmanager
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from hashlib import sha256
 import json
 import math
+import os
+import threading
+import time
 from pathlib import Path
 from typing import Any, Optional, Tuple
+
+try:
+    import fcntl
+except ImportError:  # pragma: no cover - exercised on unsupported platforms
+    fcntl = None
 
 from synergesis_glyph_protocol import GlyphAuditGraph
 
@@ -127,12 +136,89 @@ class RiskBudgetReservation:
     event_id: str
 
 
+_LOCK_PID = os.getpid()
+_LOCK_SETUP = threading.Lock()
+_PATH_LOCKS: dict[str, threading.RLock] = {}
+_PATH_STATES: dict[str, tuple[int, int, Any]] = {}
+_LOCK_TIMEOUT_SECONDS = 10.0
+_LOCK_POLL_SECONDS = 0.01
+
+
+class _LedgerTransaction:
+    """Reentrant thread/process lock for one canonical ledger path.
+
+    The sidecar lock uses POSIX ``flock`` and therefore requires a platform
+    providing ``fcntl``. Unsupported platforms fail closed at ledger creation;
+    graph stores remain outside this transaction and are not made concurrent
+    safe by this class.
+    """
+
+    def __init__(self, path: Path):
+        if os.getpid() != _LOCK_PID:
+            raise RuntimeError("risk budget requires spawn, not inherited fork state")
+        self.key = str(path.resolve(strict=False))
+        self.lock_path = Path(self.key + ".lock")
+        with _LOCK_SETUP:
+            self.thread_lock = _PATH_LOCKS.setdefault(self.key, threading.RLock())
+
+    def __enter__(self):
+        if os.getpid() != _LOCK_PID:
+            raise RuntimeError("risk budget requires spawn, not inherited fork state")
+        if fcntl is None:
+            raise RuntimeError("risk budget locking requires POSIX fcntl support")
+        deadline = time.monotonic() + _LOCK_TIMEOUT_SECONDS
+        if not self.thread_lock.acquire(timeout=_LOCK_TIMEOUT_SECONDS):
+            raise TimeoutError("timed out acquiring risk budget lock")
+        try:
+            state = _PATH_STATES.get(self.key)
+            if state is not None:
+                _PATH_STATES[self.key] = (state[0], state[1] + 1, state[2])
+                return self
+            fh = self.lock_path.open("a+")
+            try:
+                while True:
+                    try:
+                        fcntl.flock(fh.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+                        break
+                    except BlockingIOError:
+                        remaining = deadline - time.monotonic()
+                        if remaining <= 0:
+                            raise TimeoutError("timed out acquiring risk budget lock")
+                        time.sleep(min(_LOCK_POLL_SECONDS, remaining))
+                _PATH_STATES[self.key] = (fh.fileno(), 1, fh)
+            except BaseException:
+                fh.close()
+                raise
+            return self
+        except BaseException:
+            self.thread_lock.release()
+            raise
+
+    def __exit__(self, exc_type, exc, tb):
+        try:
+            fd, depth, fh = _PATH_STATES[self.key]
+            if depth > 1:
+                _PATH_STATES[self.key] = (fd, depth - 1, fh)
+            else:
+                del _PATH_STATES[self.key]
+                try:
+                    fcntl.flock(fd, fcntl.LOCK_UN)
+                finally:
+                    fh.close()
+        finally:
+            self.thread_lock.release()
+        return False
+
+
 class RiskBudgetLedger:
     """Append-only hash chain of budget reservation lifecycle events."""
 
     def __init__(self, path: str | Path):
-        self.path = Path(path)
+        self.path = Path(path).resolve()
         self.path.parent.mkdir(parents=True, exist_ok=True)
+        if fcntl is None:
+            raise RuntimeError("risk budget locking requires POSIX fcntl support")
+        self._transaction = _LedgerTransaction(self.path)
         self._events: list[RiskBudgetEvent] = []
         self._loaded_size: Optional[int] = None
 
@@ -183,8 +269,15 @@ class RiskBudgetLedger:
         self._loaded_size = self._size()
 
     def events(self) -> Tuple[RiskBudgetEvent, ...]:
-        self._load()
-        return tuple(self._events)
+        with self.transaction():
+            return tuple(self._events)
+
+    @contextmanager
+    def transaction(self):
+        """Lock and reload atomically; nested calls are reentrant."""
+        with self._transaction:
+            self._load(force=True)
+            yield self
 
     def append(
         self,
@@ -200,7 +293,21 @@ class RiskBudgetLedger:
         cycle_id: Optional[str] = None,
         proposal_id: Optional[str] = None,
     ) -> RiskBudgetEvent:
-        self._load()
+        with self.transaction():
+            return self._append_unlocked(
+                event_type=event_type, epoch_id=epoch_id,
+                directive_id=directive_id, reservation_id=reservation_id,
+                action_type=action_type, strategy_key=strategy_key,
+                intervention=intervention, amount=amount,
+                cycle_id=cycle_id, proposal_id=proposal_id,
+            )
+
+    def _append_unlocked(
+        self, *, event_type: str, epoch_id: str, directive_id: str,
+        reservation_id: str, action_type: str, strategy_key: str,
+        intervention: str, amount: float, cycle_id: Optional[str] = None,
+        proposal_id: Optional[str] = None,
+    ) -> RiskBudgetEvent:
         if event_type not in {"reserved", "released", "consumed"}:
             raise ValueError("invalid risk budget event type")
         previous = self._events[-1].digest if self._events else None
@@ -235,15 +342,12 @@ class RiskBudgetLedger:
         return event
 
     def verify(self) -> tuple[int, Optional[str]]:
-        self._load(force=True)
-        return (
-            len(self._events),
-            self._events[-1].digest if self._events else None,
-        )
+        with self.transaction():
+            return (len(self._events), self._events[-1].digest if self._events else None)
 
 
 class RiskBudgetManager:
-    """Single-writer cumulative exposure budget."""
+    """Serialized cumulative exposure budget; other graph writers remain single-writer."""
 
     actor = "SYN-RISK-BUDGET"
 
@@ -288,26 +392,27 @@ class RiskBudgetManager:
         return lifecycles
 
     def state(self) -> RiskBudgetState:
-        lifecycles = self._lifecycles()
-        consumed = 0.0
-        reserved = 0.0
-        active = 0
-        for events in lifecycles.values():
-            first = events[0]
-            if len(events) == 1:
-                reserved += first.amount
-                active += 1
-            elif events[1].event_type == "consumed":
-                consumed += first.amount
-        available = max(0.0, self.policy.budget_limit - consumed - reserved)
-        return RiskBudgetState(
-            epoch_id=self.policy.epoch_id,
-            budget_limit=self.policy.budget_limit,
-            consumed=consumed,
-            reserved=reserved,
-            available=available,
-            active_reservations=active,
-        )
+        with self.ledger.transaction():
+            lifecycles = self._lifecycles()
+            consumed = 0.0
+            reserved = 0.0
+            active = 0
+            for events in lifecycles.values():
+                first = events[0]
+                if len(events) == 1:
+                    reserved += first.amount
+                    active += 1
+                elif events[1].event_type == "consumed":
+                    consumed += first.amount
+            available = max(0.0, self.policy.budget_limit - consumed - reserved)
+            return RiskBudgetState(
+                epoch_id=self.policy.epoch_id,
+                budget_limit=self.policy.budget_limit,
+                consumed=consumed,
+                reserved=reserved,
+                available=available,
+                active_reservations=active,
+            )
 
     def reserve(
         self,
@@ -318,21 +423,59 @@ class RiskBudgetManager:
         intervention: str,
         amount: float,
     ) -> RiskBudgetReservation:
-        if not math.isfinite(amount) or amount < 0:
-            raise ValueError("risk reservation amount must be finite and >= 0")
-        if amount > self.policy.maximum_single_reservation:
-            raise ValueError("risk reservation exceeds single-exposure maximum")
+        with self.ledger.transaction():
+            if not math.isfinite(amount) or amount < 0:
+                raise ValueError("risk reservation amount must be finite and >= 0")
+            if amount > self.policy.maximum_single_reservation:
+                raise ValueError("risk reservation exceeds single-exposure maximum")
 
-        lifecycles = self._lifecycles()
-        existing = [
-            events for events in lifecycles.values()
-            if events[0].directive_id == directive_id
-        ]
-        if existing:
-            raise ValueError("directive already has a risk budget lifecycle")
+            lifecycles = self._lifecycles()
+            existing = [
+                events for events in lifecycles.values()
+                if events[0].directive_id == directive_id
+            ]
+            if existing:
+                raise ValueError("directive already has a risk budget lifecycle")
 
-        state = self.state()
-        if amount > state.available + 1e-15:
+            state = self.state()
+            if amount > state.available + 1e-15:
+                self.graph.create(
+                    "decision",
+                    actor=self.actor,
+                    content={
+                        "kind": "risk_budget_decision",
+                        "epoch_id": self.policy.epoch_id,
+                        "directive_id": directive_id,
+                        "status": "budget_exhausted",
+                        "requested_amount": amount,
+                        "budget_limit": self.policy.budget_limit,
+                        "consumed": state.consumed,
+                        "reserved": state.reserved,
+                        "available": state.available,
+                        "authorization_effect": "none",
+                    },
+                )
+                raise ValueError("cumulative risk budget exhausted")
+
+            reservation_id = "rbr:" + _digest({
+                'epoch_id': self.policy.epoch_id,
+                'directive_id': directive_id,
+                'amount': amount,
+                'action_type': action_type,
+                'strategy_key': strategy_key,
+                'intervention': intervention,
+                'sequence': len(self.ledger.events()) + 1,
+            })[:32]
+            event = self.ledger.append(
+                event_type="reserved",
+                epoch_id=self.policy.epoch_id,
+                directive_id=directive_id,
+                reservation_id=reservation_id,
+                action_type=action_type,
+                strategy_key=strategy_key,
+                intervention=intervention,
+                amount=amount,
+            )
             self.graph.create(
                 "decision",
                 actor=self.actor,
@@ -340,61 +483,24 @@ class RiskBudgetManager:
                     "kind": "risk_budget_decision",
                     "epoch_id": self.policy.epoch_id,
                     "directive_id": directive_id,
-                    "status": "budget_exhausted",
-                    "requested_amount": amount,
+                    "reservation_id": reservation_id,
+                    "status": "reserved",
+                    "amount": amount,
                     "budget_limit": self.policy.budget_limit,
-                    "consumed": state.consumed,
-                    "reserved": state.reserved,
-                    "available": state.available,
                     "authorization_effect": "none",
                 },
+                external_refs=(f"risk-budget-reservation:{reservation_id}",),
+                dedupe_external_ref=f"risk-budget-reservation:{reservation_id}",
             )
-            raise ValueError("cumulative risk budget exhausted")
-
-        reservation_id = "rbr:" + _digest({
-            'epoch_id': self.policy.epoch_id,
-            'directive_id': directive_id,
-            'amount': amount,
-            'action_type': action_type,
-            'strategy_key': strategy_key,
-            'intervention': intervention,
-            'sequence': len(self.ledger.events()) + 1,
-        })[:32]
-        event = self.ledger.append(
-            event_type="reserved",
-            epoch_id=self.policy.epoch_id,
-            directive_id=directive_id,
-            reservation_id=reservation_id,
-            action_type=action_type,
-            strategy_key=strategy_key,
-            intervention=intervention,
-            amount=amount,
-        )
-        self.graph.create(
-            "decision",
-            actor=self.actor,
-            content={
-                "kind": "risk_budget_decision",
-                "epoch_id": self.policy.epoch_id,
-                "directive_id": directive_id,
-                "reservation_id": reservation_id,
-                "status": "reserved",
-                "amount": amount,
-                "budget_limit": self.policy.budget_limit,
-                "authorization_effect": "none",
-            },
-            external_refs=(f"risk-budget-reservation:{reservation_id}",),
-            dedupe_external_ref=f"risk-budget-reservation:{reservation_id}",
-        )
-        return RiskBudgetReservation(
-            reservation_id=reservation_id,
-            directive_id=directive_id,
-            amount=amount,
-            action_type=action_type,
-            strategy_key=strategy_key,
-            intervention=intervention,
-            event_id=event.event_id,
-        )
+            return RiskBudgetReservation(
+                reservation_id=reservation_id,
+                directive_id=directive_id,
+                amount=amount,
+                action_type=action_type,
+                strategy_key=strategy_key,
+                intervention=intervention,
+                event_id=event.event_id,
+            )
 
     def _terminal(
         self,
@@ -404,51 +510,56 @@ class RiskBudgetManager:
         cycle_id: Optional[str],
         proposal_id: Optional[str],
     ) -> RiskBudgetEvent:
-        lifecycles = self._lifecycles()
-        events = lifecycles.get(reservation.reservation_id)
-        if events is None or len(events) != 1:
-            raise ValueError("risk reservation is not active")
-        first = events[0]
-        if (
-            first.directive_id != reservation.directive_id
-            or first.amount != reservation.amount
-        ):
-            raise ValueError("risk reservation identity mismatch")
+        with self.ledger.transaction():
+            lifecycles = self._lifecycles()
+            events = lifecycles.get(reservation.reservation_id)
+            if events is None or len(events) != 1:
+                raise ValueError("risk reservation is not active")
+            first = events[0]
+            if (
+                first.directive_id != reservation.directive_id
+                or first.amount != reservation.amount
+                or first.action_type != reservation.action_type
+                or first.strategy_key != reservation.strategy_key
+                or first.intervention != reservation.intervention
+                or first.event_id != reservation.event_id
+            ):
+                raise ValueError("risk reservation identity mismatch")
 
-        event = self.ledger.append(
-            event_type=event_type,
-            epoch_id=self.policy.epoch_id,
-            directive_id=reservation.directive_id,
-            reservation_id=reservation.reservation_id,
-            action_type=reservation.action_type,
-            strategy_key=reservation.strategy_key,
-            intervention=reservation.intervention,
-            amount=reservation.amount,
-            cycle_id=cycle_id,
-            proposal_id=proposal_id,
-        )
-        self.graph.create(
-            "learning" if event_type == "consumed" else "decision",
-            actor=self.actor,
-            content={
-                "kind": "risk_budget_exposure",
-                "epoch_id": self.policy.epoch_id,
-                "directive_id": reservation.directive_id,
-                "reservation_id": reservation.reservation_id,
-                "status": event_type,
-                "amount": reservation.amount,
-                "cycle_id": cycle_id,
-                "proposal_id": proposal_id,
-                "authorization_effect": "none",
-            },
-            external_refs=(
-                f"risk-budget-terminal:{reservation.reservation_id}",
-            ),
-            dedupe_external_ref=(
-                f"risk-budget-terminal:{reservation.reservation_id}"
-            ),
-        )
-        return event
+            event = self.ledger.append(
+                event_type=event_type,
+                epoch_id=self.policy.epoch_id,
+                directive_id=reservation.directive_id,
+                reservation_id=reservation.reservation_id,
+                action_type=reservation.action_type,
+                strategy_key=reservation.strategy_key,
+                intervention=reservation.intervention,
+                amount=reservation.amount,
+                cycle_id=cycle_id,
+                proposal_id=proposal_id,
+            )
+            self.graph.create(
+                "learning" if event_type == "consumed" else "decision",
+                actor=self.actor,
+                content={
+                    "kind": "risk_budget_exposure",
+                    "epoch_id": self.policy.epoch_id,
+                    "directive_id": reservation.directive_id,
+                    "reservation_id": reservation.reservation_id,
+                    "status": event_type,
+                    "amount": reservation.amount,
+                    "cycle_id": cycle_id,
+                    "proposal_id": proposal_id,
+                    "authorization_effect": "none",
+                },
+                external_refs=(
+                    f"risk-budget-terminal:{reservation.reservation_id}",
+                ),
+                dedupe_external_ref=(
+                    f"risk-budget-terminal:{reservation.reservation_id}"
+                ),
+            )
+            return event
 
     def release(
         self,
