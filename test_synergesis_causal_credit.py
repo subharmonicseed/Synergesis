@@ -39,8 +39,10 @@ def settle(graph, engine, prepared, effect, observed_intervention='check', forei
         parents.append(observation.glyph_id)
     verdict = graph.create('decision', actor='SYN-REALITY', content={
         'kind': 'reality_verdict', 'proposal_id': proposal.proposal_id,
+        'action_type': proposal.action_type, 'resource': 'action:file.write',
         'status': 'confirmed' if effect is True else 'contradicted' if effect is False else 'unverified',
         'effect_observed': effect}, derived_from=parents)
+    graph.relate(verdict.glyph_id, action.glyph_id, 'evaluates', actor='SYN-REALITY')
     return engine.settle(proposal=proposal, reality=fake_reality(
         proposal=proposal, verdict_glyph_id=verdict.glyph_id, effect=effect))
 

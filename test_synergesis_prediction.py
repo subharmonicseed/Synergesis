@@ -93,7 +93,7 @@ def engine(tmp_path, probability):
     )
 
 
-def prepare(graph, engine, p):
+def prepare(graph, engine, p, *, effect=True):
     action = graph.create(
         "action",
         actor="ZÆL-0",
@@ -108,16 +108,24 @@ def prepare(graph, engine, p):
     verdict = graph.create(
         "decision",
         actor="SYN-REALITY",
-        content={"kind": "reality_verdict"},
+        content={
+            "kind": "reality_verdict",
+            "proposal_id": p.proposal_id,
+            "action_type": p.action_type,
+            "resource": "action:file.write",
+            "status": "confirmed" if effect is True else "contradicted" if effect is False else "unverified",
+            "effect_observed": effect,
+        },
         derived_from=(action.glyph_id,),
     )
+    graph.relate(verdict.glyph_id, action.glyph_id, "evaluates", actor="fixture")
     return prediction, verdict
 
 
 def test_brier_score_for_success_is_exact(tmp_path):
     graph, ledger, prediction_engine = engine(tmp_path, 0.8)
     p = proposal()
-    prediction, verdict = prepare(graph, prediction_engine, p)
+    prediction, verdict = prepare(graph, prediction_engine, p, effect=True)
     settlement = prediction_engine.settle(
         proposal=p,
         reality=fake_reality(
@@ -135,7 +143,7 @@ def test_brier_score_for_success_is_exact(tmp_path):
 def test_brier_score_for_failure_is_exact(tmp_path):
     graph, ledger, prediction_engine = engine(tmp_path, 0.8)
     p = proposal()
-    prediction, verdict = prepare(graph, prediction_engine, p)
+    prediction, verdict = prepare(graph, prediction_engine, p, effect=False)
     settlement = prediction_engine.settle(
         proposal=p,
         reality=fake_reality(
@@ -152,7 +160,7 @@ def test_brier_score_for_failure_is_exact(tmp_path):
 def test_unverified_reality_does_not_poison_calibration_ledger(tmp_path):
     graph, ledger, prediction_engine = engine(tmp_path, 0.7)
     p = proposal()
-    _, verdict = prepare(graph, prediction_engine, p)
+    _, verdict = prepare(graph, prediction_engine, p, effect=None)
     settlement = prediction_engine.settle(
         proposal=p,
         reality=fake_reality(

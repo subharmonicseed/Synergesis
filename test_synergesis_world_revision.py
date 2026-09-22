@@ -21,9 +21,12 @@ def cycle(graph, engine, effect, strategy='s'):
     p = proposal(strategy=strategy)
     action = graph.create('action', actor='test', content={'proposal_id': p.proposal_id})
     prediction = engine.predict_before_action(context=context(), proposal=p, action_glyph_id=action.glyph_id)
-    verdict = graph.create('outcome', actor='SYN-REALITY', content={
+    verdict = graph.create('decision', actor='SYN-REALITY', content={
         'kind': 'reality_verdict', 'proposal_id': p.proposal_id,
-        'effect_observed': effect, 'status': 'confirmed' if effect is not None else 'unverified'})
+        'action_type': p.action_type, 'resource': 'action:file.write',
+        'effect_observed': effect,
+        'status': 'confirmed' if effect is True else 'contradicted' if effect is False else 'unverified'})
+    graph.relate(verdict.glyph_id, action.glyph_id, 'evaluates', actor='SYN-REALITY')
     settlement = engine.settle(proposal=p, reality=fake_reality(
         proposal=p, verdict_glyph_id=verdict.glyph_id, effect=effect))
     return prediction, settlement
