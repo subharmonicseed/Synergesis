@@ -32,13 +32,16 @@ capability stores, observation policies, reality probes and source adapters.
 Installing the package does not start an agent or grant network/action access.
 `test_synergesis_secure_roam_stack_v2.py` contains executable integration examples.
 
-Persistent journals generally require a single writer. The risk-budget and Glyph
-journals now serialize cooperating readers/writers on a local POSIX filesystem.
-This covers individual ledger operations and graph creation/traversal, not the full
-agent stack or higher-level multi-store workflows. Both reuse one lock utility.
+The risk-budget, Glyph, research-agenda and ROAM service journals now serialize
+cooperating readers/writers on a local POSIX filesystem. Other journals still
+require a single writer.
+This covers ledger operations, graph creation/traversal, and one research tick per
+shared agenda at a time. It does not make the whole agent stack or arbitrary
+multi-store workflows concurrent-safe. These components reuse one lock utility.
 Locking requires POSIX `fcntl` (native Windows is unsupported); use spawned workers,
 not inherited fork state. Keep `.lock` sidecars in place while processes run.
-See `SYN_GLYPH_CONCURRENCY_VALIDATION.md` for current scope and limitations.
+See `SYN_GLYPH_CONCURRENCY_VALIDATION.md` and `SYN_ROAM_CONCURRENCY_VALIDATION.md`
+for the scope and limitations.
 Keep an intact backup before upgrading; recovery is not an atomic multi-store
 transaction or a guarantee against power loss.
 ROAM now records an attempt before invoking research/controller work. After an

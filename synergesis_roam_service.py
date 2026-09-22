@@ -15,6 +15,7 @@ import os
 from typing import Any, Mapping, Optional, Tuple
 
 from synergesis_roam_attention import RoamAttentionController, RoamTick
+from synergesis_storage_lock import PathTransaction
 
 
 def _canon(value: Any) -> str:
@@ -75,8 +76,13 @@ class RoamServiceLedger:
     """Tamper-evident record of service ticks."""
 
     def __init__(self, path: str | Path):
-        self.path = Path(path)
+        self.path = Path(path).resolve()
         self.path.parent.mkdir(parents=True, exist_ok=True)
+        self._lock = PathTransaction(self.path, label="roam service ledger")
+
+    def transaction(self):
+        """Return the ledger's reentrant process and thread transaction."""
+        return self._lock
 
     def _raw(self) -> list[dict[str, Any]]:
         if not self.path.exists():
@@ -88,56 +94,59 @@ class RoamServiceLedger:
         ]
 
     def records(self) -> Tuple[ServiceTickRecord, ...]:
-        previous = None
-        out = []
-        for index, raw in enumerate(self._raw(), start=1):
-            record = ServiceTickRecord(**raw)
-            if record.sequence != index:
-                raise ValueError("roam service ledger sequence failure")
-            if record.previous_digest != previous:
-                raise ValueError("roam service ledger chain failure")
-            body = {
-                "sequence": record.sequence,
-                "status": record.status,
-                "need_id": record.need_id,
-                "session_id": record.session_id,
-                "previous_digest": record.previous_digest,
-            }
-            if _hash(body) != record.digest:
-                raise ValueError("roam service ledger integrity failure")
-            _validate_record(record)
-            out.append(record)
-            previous = record.digest
-        return tuple(out)
+        with self.transaction():
+            previous = None
+            out = []
+            for index, raw in enumerate(self._raw(), start=1):
+                record = ServiceTickRecord(**raw)
+                if record.sequence != index:
+                    raise ValueError("roam service ledger sequence failure")
+                if record.previous_digest != previous:
+                    raise ValueError("roam service ledger chain failure")
+                body = {
+                    "sequence": record.sequence,
+                    "status": record.status,
+                    "need_id": record.need_id,
+                    "session_id": record.session_id,
+                    "previous_digest": record.previous_digest,
+                }
+                if _hash(body) != record.digest:
+                    raise ValueError("roam service ledger integrity failure")
+                _validate_record(record)
+                out.append(record)
+                previous = record.digest
+            return tuple(out)
 
     def append(self, tick: RoamTick) -> ServiceTickRecord:
-        records = self.records()
-        body = {
-            "sequence": len(records) + 1,
-            "status": tick.status,
-            "need_id": tick.need_id,
-            "session_id": tick.session.session_id if tick.session else None,
-            "previous_digest": records[-1].digest if records else None,
-        }
-        record = ServiceTickRecord(**body, digest=_hash(body))
-        return self.append_record(record)
+        with self.transaction():
+            records = self.records()
+            body = {
+                "sequence": len(records) + 1,
+                "status": tick.status,
+                "need_id": tick.need_id,
+                "session_id": tick.session.session_id if tick.session else None,
+                "previous_digest": records[-1].digest if records else None,
+            }
+            record = ServiceTickRecord(**body, digest=_hash(body))
+            return self.append_record(record)
 
     def append_record(self, record: ServiceTickRecord) -> ServiceTickRecord:
-        _validate_record(record)
-        records = self.records()
-        if record.sequence <= len(records):
-            if records[record.sequence - 1] != record:
-                raise ValueError("conflicting roam service receipt")
+        with self.transaction():
+            _validate_record(record)
+            records = self.records()
+            if record.sequence <= len(records):
+                if records[record.sequence - 1] != record:
+                    raise ValueError("conflicting roam service receipt")
+                return record
+            if record.sequence != len(records) + 1:
+                raise ValueError("roam service ledger sequence failure")
+            if record.previous_digest != (records[-1].digest if records else None):
+                raise ValueError("roam service ledger chain failure")
+            with self.path.open("a", encoding="utf-8") as fh:
+                fh.write(_canon(asdict(record)) + "\n")
+                fh.flush()
+                os.fsync(fh.fileno())
             return record
-        if record.sequence != len(records) + 1:
-            raise ValueError("roam service ledger sequence failure")
-        if record.previous_digest != (records[-1].digest if records else None):
-            raise ValueError("roam service ledger chain failure")
-        with self.path.open("a", encoding="utf-8") as fh:
-            fh.write(_canon(asdict(record)) + "\n")
-            fh.flush()
-            os.fsync(fh.fileno())
-        return record
 
 
 class SynRoamService:
@@ -151,7 +160,7 @@ class SynRoamService:
         self.controller = controller
         self.ledger = ledger
         self.limits = limits
-        self._attempt_path = self.ledger.path.with_name(self.ledger.path.name + ".roam-attempt.json")
+        self._attempt_path = self.ledger.path.with_name(self.ledger.path.name + ".roam-attempt.json").resolve()
         # Recovery runs at the operation boundary, before hooks or a new tick.
 
     def _write_attempt(self, payload: Mapping[str, Any]) -> None:
@@ -195,28 +204,32 @@ class SynRoamService:
         self._attempt_path.unlink(missing_ok=True)
 
     def tick_once(self) -> RoamTick:
-        self._reconcile_attempt()
-        records = self.ledger.records()
-        sequence = len(records) + 1
-        previous = records[-1].digest if records else None
-        self._write_attempt({"phase": "started", "sequence": sequence,
-                             "previous_digest": previous})
-        tick = self.controller.tick_once()
-        body = {"sequence": sequence, "status": tick.status,
-                "need_id": tick.need_id,
-                "session_id": tick.session.session_id if tick.session else None,
-                "previous_digest": previous}
-        record = ServiceTickRecord(**body, digest=_hash(body))
-        _validate_record(record)
-        self._write_attempt({"phase": "completed", "record": asdict(record)})
-        # The completed receipt can replay this local append without calling
-        # the controller again. Other writers to this ledger are unsupported.
-        if self.ledger.records() != records:
-            raise RuntimeError("ROAM service ledger changed during tick; operator review required")
-        if self.ledger.append(tick) != record:
-            raise RuntimeError("conflicting ROAM service completion record")
-        self._attempt_path.unlink(missing_ok=True)
-        return tick
+        # Keep the receipt, controller, and ledger append in one service
+        # transaction. The controller acquires the agenda transaction inside
+        # this block, preserving service -> agenda lock ordering.
+        with self.ledger.transaction():
+            self._reconcile_attempt()
+            records = self.ledger.records()
+            sequence = len(records) + 1
+            previous = records[-1].digest if records else None
+            self._write_attempt({"phase": "started", "sequence": sequence,
+                                 "previous_digest": previous})
+            tick = self.controller.tick_once()
+            body = {"sequence": sequence, "status": tick.status,
+                    "need_id": tick.need_id,
+                    "session_id": tick.session.session_id if tick.session else None,
+                    "previous_digest": previous}
+            record = ServiceTickRecord(**body, digest=_hash(body))
+            _validate_record(record)
+            self._write_attempt({"phase": "completed", "record": asdict(record)})
+            # The completed receipt can replay this local append without calling
+            # the controller again. Cooperating writers wait for this transaction.
+            if self.ledger.records() != records:
+                raise RuntimeError("ROAM service ledger changed during tick; operator review required")
+            if self.ledger.append(tick) != record:
+                raise RuntimeError("conflicting ROAM service completion record")
+            self._attempt_path.unlink(missing_ok=True)
+            return tick
 
     def run_bounded(self) -> Tuple[RoamTick, ...]:
         ticks = []
