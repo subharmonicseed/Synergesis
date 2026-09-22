@@ -32,8 +32,13 @@ capability stores, observation policies, reality probes and source adapters.
 Installing the package does not start an agent or grant network/action access.
 `test_synergesis_secure_roam_stack_v2.py` contains executable integration examples.
 
-Persistent journals currently require a single writer. Keep an intact backup
-before upgrading; recovery is not a multi-process transactional guarantee.
+Persistent journals generally require a single writer. The risk-budget journal
+now serializes cooperating readers/writers on a local POSIX filesystem; this does
+not make a shared Glyph graph or the full stack safe for concurrent writers.
+Risk-budget locking requires POSIX `fcntl` (native Windows is unsupported); use
+spawned workers, not inherited fork state. See `SYN_RISK_CONCURRENCY_VALIDATION.md`.
+Keep an intact backup before upgrading; recovery is not an atomic multi-store
+transaction or a guarantee against power loss.
 The restoration and hardening branches are review drafts, not a released service.
 
 ## Use the maintained API
