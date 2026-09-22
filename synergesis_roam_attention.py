@@ -19,6 +19,7 @@ from typing import Any, Iterable, Mapping, Optional, Protocol, Sequence, Tuple
 
 from synergesis_glyph_protocol import GlyphAuditGraph
 from synergesis_roam import MethodOutcome, OutcomeMetrics, ResearchQuestion, RoamSession, SynRoam
+from synergesis_storage_lock import PathTransaction
 
 
 def _canon(value: Any) -> str:
@@ -161,14 +162,20 @@ class ResearchAgenda:
         weights: AttentionWeights,
         actor: str = "SYN-ROAM",
     ):
-        self.path = Path(path)
+        self.path = Path(path).resolve()
         self.path.parent.mkdir(parents=True, exist_ok=True)
+        self._lock = PathTransaction(self.path, label="research agenda")
         self.graph = graph
         self.weights = weights
         self.actor = actor
         self._pending_dir = self.path.with_name(self.path.name + ".pending")
-        self._recover_pending()
-        self._check_legacy_phantoms()
+        with self.transaction():
+            self._recover_pending()
+            self._check_legacy_phantoms()
+
+    def transaction(self):
+        """Return the agenda's reentrant process and thread transaction."""
+        return self._lock
 
     def _events(self) -> list[dict[str, Any]]:
         if not self.path.exists():
@@ -375,13 +382,14 @@ class ResearchAgenda:
         return self.get(need.need_id)
 
     def add(self, need: ResearchNeed) -> NeedState:
-        self._recover_pending()
-        current = self.get_optional(need.need_id)
-        if current is not None:
-            if _canon(self._need_payload(current.need)) != _canon(self._need_payload(need)):
-                raise ValueError("conflicting research need payload")
-            return current
-        return self._append(need=need, status="pending")
+        with self.transaction():
+            self._recover_pending()
+            current = self.get_optional(need.need_id)
+            if current is not None:
+                if _canon(self._need_payload(current.need)) != _canon(self._need_payload(need)):
+                    raise ValueError("conflicting research need payload")
+                return current
+            return self._append(need=need, status="pending")
 
     def _decode_need(self, raw: Mapping[str, Any]) -> ResearchNeed:
         item = dict(raw)
@@ -390,12 +398,13 @@ class ResearchAgenda:
         return ResearchNeed(**item)
 
     def get_optional(self, need_id: str) -> Optional[NeedState]:
-        events = [event for event in self._events() if event["need"]["need_id"] == need_id]
-        if not events:
-            return None
-        last = events[-1]
-        return NeedState(need=self._decode_need(last["need"]), status=last["status"],
-                         session_id=last["session_id"], event_count=len(events))
+        with self.transaction():
+            events = [event for event in self._events() if event["need"]["need_id"] == need_id]
+            if not events:
+                return None
+            last = events[-1]
+            return NeedState(need=self._decode_need(last["need"]), status=last["status"],
+                             session_id=last["session_id"], event_count=len(events))
 
     def get(self, need_id: str) -> NeedState:
         state = self.get_optional(need_id)
@@ -404,44 +413,50 @@ class ResearchAgenda:
         return state
 
     def pending(self) -> Tuple[NeedState, ...]:
-        ids = []
-        for event in self._events():
-            nid = event["need"]["need_id"]
-            if nid not in ids:
-                ids.append(nid)
-        return tuple(state for state in (self.get(nid) for nid in ids) if state.status == "pending")
+        with self.transaction():
+            ids = []
+            for event in self._events():
+                nid = event["need"]["need_id"]
+                if nid not in ids:
+                    ids.append(nid)
+            return tuple(state for state in (self.get(nid) for nid in ids) if state.status == "pending")
 
     def select_next(self) -> Optional[NeedState]:
-        candidates = self.pending()
-        if not candidates:
-            return None
-        return sorted(candidates, key=lambda state: (-score_attention(state.need.measurements, self.weights), state.need.need_id))[0]
+        with self.transaction():
+            candidates = self.pending()
+            if not candidates:
+                return None
+            return sorted(candidates, key=lambda state: (-score_attention(state.need.measurements, self.weights), state.need.need_id))[0]
 
     def mark_researched(self, need_id: str, session_id: str) -> NeedState:
-        current = self.get(need_id)
-        if current.status != "pending":
-            raise ValueError("only pending needs may be researched")
-        return self._append(need=current.need, status="researched", session_id=session_id)
+        with self.transaction():
+            current = self.get(need_id)
+            if current.status != "pending":
+                raise ValueError("only pending needs may be researched")
+            return self._append(need=current.need, status="researched", session_id=session_id)
 
     def mark_evaluated(self, need_id: str) -> NeedState:
-        current = self.get(need_id)
-        if current.status != "researched":
-            raise ValueError("only researched needs may be evaluated")
-        return self._append(need=current.need, status="evaluated", session_id=current.session_id)
+        with self.transaction():
+            current = self.get(need_id)
+            if current.status != "researched":
+                raise ValueError("only researched needs may be evaluated")
+            return self._append(need=current.need, status="evaluated", session_id=current.session_id)
 
     def cancel(self, need_id: str, *, reason: str) -> NeedState:
-        current = self.get(need_id)
-        if current.status != "pending":
-            raise ValueError("only pending needs may be cancelled")
-        if not reason.strip():
-            raise ValueError("cancellation reason required")
-        return self._append(need=current.need, status="cancelled", reason=reason)
+        with self.transaction():
+            current = self.get(need_id)
+            if current.status != "pending":
+                raise ValueError("only pending needs may be cancelled")
+            if not reason.strip():
+                raise ValueError("cancellation reason required")
+            return self._append(need=current.need, status="cancelled", reason=reason)
 
     def defer(self, need_id: str, *, reason: str) -> NeedState:
-        current = self.get(need_id)
-        if current.status != "pending":
-            raise ValueError("only pending needs may be deferred")
-        return self._append(need=current.need, status="deferred", reason=reason)
+        with self.transaction():
+            current = self.get(need_id)
+            if current.status != "pending":
+                raise ValueError("only pending needs may be deferred")
+            return self._append(need=current.need, status="deferred", reason=reason)
 
 
 @dataclass(frozen=True)
@@ -526,32 +541,33 @@ class RoamAttentionController:
             self._need_guards.append(guard)
 
     def tick_once(self) -> RoamTick:
-        self._reconcile_attempt()
-        for hook in tuple(self._tick_hooks):
-            hook()
-        selected = self.agenda.select_next()
-        if selected is None:
-            return RoamTick(None, None, "idle")
+        with self.agenda.transaction():
+            self._reconcile_attempt()
+            for hook in tuple(self._tick_hooks):
+                hook()
+            selected = self.agenda.select_next()
+            if selected is None:
+                return RoamTick(None, None, "idle")
 
-        if not all(guard(selected.need) for guard in tuple(self._need_guards)):
-            self.agenda.cancel(selected.need.need_id, reason="research need failed freshness guard")
-            return RoamTick(selected.need.need_id, None, "cancelled")
+            if not all(guard(selected.need) for guard in tuple(self._need_guards)):
+                self.agenda.cancel(selected.need.need_id, reason="research need failed freshness guard")
+                return RoamTick(selected.need.need_id, None, "cancelled")
 
-        question = ResearchQuestion.create(
-            domain=selected.need.domain,
-            question=selected.need.question,
-            hypothesis=selected.need.hypothesis,
-        )
-        self._write_attempt({"phase": "started", "need_id": selected.need.need_id,
-                             "need_digest": _hash(self.agenda._need_payload(selected.need)),
-                             "sequence": selected.event_count})
-        session = self.roam.research_once(question)
-        self._write_attempt({"phase": "completed", "need_id": selected.need.need_id,
-                             "need_digest": _hash(self.agenda._need_payload(selected.need)),
-                             "sequence": selected.event_count,
-                             "session_id": session.session_id})
-        self._reconcile_attempt()
-        return RoamTick(selected.need.need_id, session, "researched")
+            question = ResearchQuestion.create(
+                domain=selected.need.domain,
+                question=selected.need.question,
+                hypothesis=selected.need.hypothesis,
+            )
+            self._write_attempt({"phase": "started", "need_id": selected.need.need_id,
+                                 "need_digest": _hash(self.agenda._need_payload(selected.need)),
+                                 "sequence": selected.event_count})
+            session = self.roam.research_once(question)
+            self._write_attempt({"phase": "completed", "need_id": selected.need.need_id,
+                                 "need_digest": _hash(self.agenda._need_payload(selected.need)),
+                                 "sequence": selected.event_count,
+                                 "session_id": session.session_id})
+            self._reconcile_attempt()
+            return RoamTick(selected.need.need_id, session, "researched")
 
     def evaluate_need(
         self,
@@ -560,14 +576,15 @@ class RoamAttentionController:
         session: RoamSession,
         metrics: OutcomeMetrics,
     ) -> MethodOutcome:
-        state = self.agenda.get(need_id)
-        if state.status != "researched":
-            raise ValueError("only researched needs may be evaluated")
-        if state.session_id != session.session_id:
-            raise ValueError("session does not belong to research need")
-        outcome = self.roam.evaluate(session, metrics)
-        self.agenda.mark_evaluated(need_id)
-        return outcome
+        with self.agenda.transaction():
+            state = self.agenda.get(need_id)
+            if state.status != "researched":
+                raise ValueError("only researched needs may be evaluated")
+            if state.session_id != session.session_id:
+                raise ValueError("session does not belong to research need")
+            outcome = self.roam.evaluate(session, metrics)
+            self.agenda.mark_evaluated(need_id)
+            return outcome
 
 
 class GapNeedProvider(Protocol):
