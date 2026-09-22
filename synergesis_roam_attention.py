@@ -13,6 +13,7 @@ from dataclasses import asdict, dataclass
 from hashlib import sha256
 import json
 import math
+import os
 from pathlib import Path
 from typing import Any, Iterable, Mapping, Optional, Protocol, Sequence, Tuple
 
@@ -144,7 +145,13 @@ class NeedState:
 
 
 class ResearchAgenda:
-    """Append-only lifecycle ledger for spontaneous research needs."""
+    """Append-only lifecycle ledger for spontaneous research needs.
+
+    Agenda events and their graph projections are committed through a small
+    per-event intent file.  The intent is durable before either projection is
+    changed; a newly opened agenda replays any remaining intents.  This keeps
+    the two single-writer append-only ledgers convergent after a process crash.
+    """
 
     def __init__(
         self,
@@ -159,6 +166,9 @@ class ResearchAgenda:
         self.graph = graph
         self.weights = weights
         self.actor = actor
+        self._pending_dir = self.path.with_name(self.path.name + ".pending")
+        self._recover_pending()
+        self._check_legacy_phantoms()
 
     def _events(self) -> list[dict[str, Any]]:
         if not self.path.exists():
@@ -169,78 +179,207 @@ class ResearchAgenda:
             if line.strip()
         ]
 
-    def _append(
-        self,
-        *,
-        need: ResearchNeed,
-        status: str,
-        session_id: Optional[str] = None,
-        reason: Optional[str] = None,
-    ) -> NeedState:
-        current = self.get_optional(need.need_id)
-        event = {
-            "need": {
-                **asdict(need),
-                "measurements": asdict(need.measurements),
-            },
+    @staticmethod
+    def _need_payload(need: ResearchNeed) -> dict[str, Any]:
+        return {**asdict(need), "measurements": asdict(need.measurements)}
+
+    def _event_for(self, need: ResearchNeed, status: str, session_id: Optional[str],
+                   reason: Optional[str], sequence: int) -> dict[str, Any]:
+        return {
+            "need": self._need_payload(need),
             "status": status,
             "session_id": session_id,
             "reason": reason,
-            "sequence_for_need": 1 if current is None else current.event_count + 1,
+            "sequence_for_need": sequence,
         }
+
+    def _intent_path(self, event: Mapping[str, Any]) -> Path:
+        key = _hash({"need_id": event["need"]["need_id"], "sequence": event["sequence_for_need"]})
+        return self._pending_dir / f"{key}.json"
+
+    def _write_intent(self, event: Mapping[str, Any]) -> Path:
+        self._pending_dir.mkdir(parents=True, exist_ok=True)
+        target = self._intent_path(event)
+        if target.exists():
+            existing = json.loads(target.read_text(encoding="utf-8"))
+            existing_event = existing.get("event", existing)
+            if _canon(existing_event) != _canon(event):
+                raise ValueError("conflicting pending agenda intent")
+            return target
+        temporary = target.with_suffix(".tmp")
+        payload = {"event": event, "actor": self.actor,
+                   "attention_score": score_attention(self._decode_need(event["need"]).measurements, self.weights)}
+        with temporary.open("w", encoding="utf-8") as fh:
+            fh.write(_canon(payload))
+            fh.flush()
+            os.fsync(fh.fileno())
+        os.replace(temporary, target)
+        return target
+
+    def _append_event_if_needed(self, event: Mapping[str, Any]) -> None:
+        events = self._events()
+        same = [e for e in events if e["need"]["need_id"] == event["need"]["need_id"]
+                and e["sequence_for_need"] == event["sequence_for_need"]]
+        if same:
+            if _canon(same[-1]) != _canon(event):
+                raise ValueError("conflicting agenda event payload")
+            return
         with self.path.open("a", encoding="utf-8") as fh:
             fh.write(_canon(event) + "\n")
+            fh.flush()
+            os.fsync(fh.fileno())
 
-        prior_glyph = None
-        matches = self.graph.ledger.find_by_external_ref(
-            need.need_id,
-            glyph_type="goal",
-        )
-        if matches:
-            prior_glyph = matches[-1]
-
+    def _apply_intent(self, event: Mapping[str, Any]) -> None:
+        need = self._decode_need(event["need"])
+        public_event = {k: v for k, v in event.items() if not k.startswith("_")}
+        rows = [e for e in self._events() if e['need']['need_id'] == need.need_id]
+        sequence = event['sequence_for_need']
+        if type(sequence) is not int or sequence < 1:
+            raise ValueError("invalid agenda sequence")
+        if [e['sequence_for_need'] for e in rows] != list(range(1, len(rows) + 1)):
+            raise ValueError("agenda sequence is not contiguous")
+        if sequence <= len(rows):
+            if _canon(rows[sequence - 1]) != _canon(public_event):
+                raise ValueError("conflicting agenda event payload")
+        elif sequence != len(rows) + 1:
+            raise ValueError("agenda intent sequence gap")
+        previous_status = rows[sequence - 2]['status'] if sequence > 1 else None
+        allowed = {None: {'pending'}, 'pending': {'researched', 'cancelled', 'deferred'},
+                   'researched': {'evaluated'}}
+        if event['status'] not in allowed.get(previous_status, set()):
+            raise ValueError("invalid agenda lifecycle transition")
+        # Parent validation happens before graph or agenda mutation, including
+        # when this intent is replayed after a crash.
         parents = list(need.source_glyph_ids)
-        # Validate provenance before appending the new immutable goal glyph, so
-        # a bad reference cannot leave a partial ledger write.
         for parent_id in parents:
             self.graph.ledger.get(parent_id)
+
+        current = self.get_optional(need.need_id)
+        if current is not None and _canon(self._need_payload(current.need)) != _canon(self._need_payload(need)):
+            raise ValueError("conflicting research need payload")
+
+        state_glyphs = self.graph.ledger.find_by_external_ref(
+            f"need-state:{need.need_id}:{event['sequence_for_need']}",
+            glyph_type="goal",
+        )
+        prior_glyph = None
+        if event["sequence_for_need"] > 1:
+            prior_ref = f"need-state:{need.need_id}:{event['sequence_for_need'] - 1}"
+            prior_matches = self.graph.ledger.find_by_external_ref(prior_ref, glyph_type="goal")
+            if not prior_matches:
+                raise ValueError("missing prior research graph state")
+            prior_glyph = prior_matches[-1]
         if prior_glyph is not None:
             parents.append(prior_glyph.glyph_id)
-        need_glyph = self.graph.create(
-            "goal",
-            actor=self.actor,
-            content={
-                "kind": "research_need",
-                "domain": need.domain,
-                "question": need.question,
-                "hypothesis": need.hypothesis,
-                "reason": need.reason,
-                "measurements": asdict(need.measurements),
-                "attention_score": score_attention(
-                    need.measurements, self.weights
-                ),
-                "status": status,
-                "session_id": session_id,
-            },
-            external_refs=(
-                need.need_id,
-                f"need-state:{need.need_id}:{event['sequence_for_need']}",
-            ),
+
+        # Replay uses the original scoring/actor values captured in the intent.
+        intent_actor = event.get("_actor", self.actor)
+        intent_score = event.get("_attention_score")
+        content = {
+            "kind": "research_need",
+            "domain": need.domain,
+            "question": need.question,
+            "hypothesis": need.hypothesis,
+            "reason": need.reason,
+            "measurements": asdict(need.measurements),
+            "attention_score": (intent_score if intent_score is not None else score_attention(need.measurements, self.weights)),
+            "status": event["status"],
+            "session_id": event["session_id"],
+        }
+        if len(state_glyphs) > 1 or (state_glyphs and dict(state_glyphs[-1].content) != content):
+            raise ValueError("conflicting research graph payload")
+        glyph = self.graph.create(
+            "goal", actor=intent_actor, content=content,
+            external_refs=(need.need_id,
+                           f"need-state:{need.need_id}:{event['sequence_for_need']}"),
             derived_from=tuple(parents),
             dedupe_external_ref=f"need-state:{need.need_id}:{event['sequence_for_need']}",
         )
         if prior_glyph is not None:
-            self.graph.relate(
-                need_glyph.glyph_id,
-                prior_glyph.glyph_id,
-                "supersedes",
-                actor=self.actor,
-            )
+            self.graph.relate(glyph.glyph_id, prior_glyph.glyph_id, "supersedes", actor=intent_actor)
+        public_event = {k: v for k, v in event.items() if not k.startswith("_")}
+        self._append_event_if_needed(public_event)
+
+    def _recover_pending(self) -> None:
+        if not self._pending_dir.exists():
+            return
+        pending = []
+        for intent in self._pending_dir.glob("*.json"):
+            raw = json.loads(intent.read_text(encoding="utf-8"))
+            event = raw.get("event", raw)
+            if "actor" in raw:
+                event = {**event, "_actor": raw["actor"], "_attention_score": raw.get("attention_score")}
+            pending.append((intent, event))
+        for intent, event in sorted(pending, key=lambda item: (item[1]['need']['need_id'], item[1]['sequence_for_need'])):
+            self._apply_intent(event)
+            intent.unlink()
+
+    def _check_legacy_phantoms(self) -> None:
+        # Legacy rows are trusted only when their graph projection exists.
+        counts = {}
+        for event in self._events():
+            nid = event['need']['need_id']
+            counts[nid] = counts.get(nid, 0) + 1
+            if event['sequence_for_need'] != counts[nid]:
+                raise ValueError("agenda sequence is not contiguous")
+            ref = f"need-state:{event['need']['need_id']}:{event['sequence_for_need']}"
+            matches = self.graph.ledger.find_by_external_ref(ref, glyph_type="goal")
+            if not matches:
+                raise ValueError("agenda event missing graph projection; reconciliation required")
+            content = matches[-1].content
+            expected = {k: event['need'][k] for k in ('domain', 'question', 'hypothesis', 'reason', 'measurements')}
+            expected.update(kind='research_need', status=event['status'], session_id=event['session_id'])
+            if len(matches) != 1 or any(_canon(content.get(k)) != _canon(v) for k, v in expected.items()):
+                raise ValueError("agenda graph projection mismatch; reconciliation required")
+            parents = set(event['need'].get('source_glyph_ids', ()))
+            if counts[nid] > 1:
+                prior = self.graph.ledger.find_by_external_ref(
+                    f"need-state:{nid}:{counts[nid] - 1}", glyph_type='goal')[0]
+                parents.add(prior.glyph_id)
+                supersedes = {e.target for e in self.graph.ledger.edges_from(matches[0].glyph_id, relation='supersedes')}
+                if prior.glyph_id not in supersedes:
+                    raise ValueError("agenda graph links incomplete; reconciliation required")
+            derived = {e.target for e in self.graph.ledger.edges_from(matches[0].glyph_id, relation='derived_from')}
+            if not parents <= derived:
+                raise ValueError("agenda graph links incomplete; reconciliation required")
+
+    def _append(self, *, need: ResearchNeed, status: str,
+                session_id: Optional[str] = None, reason: Optional[str] = None) -> NeedState:
+        self._recover_pending()
+        current = self.get_optional(need.need_id)
+        if current is not None:
+            if _canon(self._need_payload(current.need)) != _canon(self._need_payload(need)):
+                raise ValueError("conflicting research need payload")
+            last = [e for e in self._events() if e['need']['need_id'] == need.need_id][-1]
+            if (current.status == status and current.session_id == session_id
+                    and last['reason'] == reason):
+                return current
+            sequence = current.event_count + 1
+        else:
+            sequence = 1
+        allowed = {None: {'pending'}, 'pending': {'researched', 'cancelled', 'deferred'},
+                   'researched': {'evaluated'}}
+        if status not in allowed.get(current.status if current else None, set()):
+            raise ValueError("invalid agenda lifecycle transition")
+        # Reject bad provenance before even creating a durable intent.
+        for parent_id in need.source_glyph_ids:
+            self.graph.ledger.get(parent_id)
+        event = self._event_for(need, status, session_id, reason, sequence)
+        intent = self._write_intent(event)
+        try:
+            self._apply_intent(event)
+        except Exception:
+            # Leave the durable intent for a subsequent process to replay.
+            raise
+        intent.unlink(missing_ok=True)
         return self.get(need.need_id)
 
     def add(self, need: ResearchNeed) -> NeedState:
+        self._recover_pending()
         current = self.get_optional(need.need_id)
         if current is not None:
+            if _canon(self._need_payload(current.need)) != _canon(self._need_payload(need)):
+                raise ValueError("conflicting research need payload")
             return current
         return self._append(need=need, status="pending")
 
@@ -251,19 +390,12 @@ class ResearchAgenda:
         return ResearchNeed(**item)
 
     def get_optional(self, need_id: str) -> Optional[NeedState]:
-        events = [
-            event for event in self._events()
-            if event["need"]["need_id"] == need_id
-        ]
+        events = [event for event in self._events() if event["need"]["need_id"] == need_id]
         if not events:
             return None
         last = events[-1]
-        return NeedState(
-            need=self._decode_need(last["need"]),
-            status=last["status"],
-            session_id=last["session_id"],
-            event_count=len(events),
-        )
+        return NeedState(need=self._decode_need(last["need"]), status=last["status"],
+                         session_id=last["session_id"], event_count=len(events))
 
     def get(self, need_id: str) -> NeedState:
         state = self.get_optional(need_id)
@@ -277,43 +409,25 @@ class ResearchAgenda:
             nid = event["need"]["need_id"]
             if nid not in ids:
                 ids.append(nid)
-        return tuple(
-            state
-            for state in (self.get(nid) for nid in ids)
-            if state.status == "pending"
-        )
+        return tuple(state for state in (self.get(nid) for nid in ids) if state.status == "pending")
 
     def select_next(self) -> Optional[NeedState]:
         candidates = self.pending()
         if not candidates:
             return None
-        return sorted(
-            candidates,
-            key=lambda state: (
-                -score_attention(state.need.measurements, self.weights),
-                state.need.need_id,
-            ),
-        )[0]
+        return sorted(candidates, key=lambda state: (-score_attention(state.need.measurements, self.weights), state.need.need_id))[0]
 
     def mark_researched(self, need_id: str, session_id: str) -> NeedState:
         current = self.get(need_id)
         if current.status != "pending":
             raise ValueError("only pending needs may be researched")
-        return self._append(
-            need=current.need,
-            status="researched",
-            session_id=session_id,
-        )
+        return self._append(need=current.need, status="researched", session_id=session_id)
 
     def mark_evaluated(self, need_id: str) -> NeedState:
         current = self.get(need_id)
         if current.status != "researched":
             raise ValueError("only researched needs may be evaluated")
-        return self._append(
-            need=current.need,
-            status="evaluated",
-            session_id=current.session_id,
-        )
+        return self._append(need=current.need, status="evaluated", session_id=current.session_id)
 
     def cancel(self, need_id: str, *, reason: str) -> NeedState:
         current = self.get(need_id)
@@ -327,11 +441,7 @@ class ResearchAgenda:
         current = self.get(need_id)
         if current.status != "pending":
             raise ValueError("only pending needs may be deferred")
-        return self._append(
-            need=current.need,
-            status="deferred",
-            reason=reason,
-        )
+        return self._append(need=current.need, status="deferred", reason=reason)
 
 
 @dataclass(frozen=True)

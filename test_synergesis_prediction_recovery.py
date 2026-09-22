@@ -27,12 +27,19 @@ def setup(tmp_path, sink=()):
 
 def prepare(graph, engine, p):
     action = graph.create(
-        "action", actor="test", content={"proposal_id": p.proposal_id},
+        "action", actor="test", content={"proposal_id": p.proposal_id, "action_type": p.action_type},
     )
     engine.predict_before_action(
         context=context(), proposal=p, action_glyph_id=action.glyph_id,
     )
-    verdict = graph.create("decision", actor="SYN-REALITY", content={"kind": "reality_verdict"})
+    verdict = graph.create(
+        "decision", actor="SYN-REALITY", content={
+            "kind": "reality_verdict", "proposal_id": p.proposal_id,
+            "action_type": p.action_type, "resource": "action:file.write",
+            "status": "confirmed", "effect_observed": True,
+        },
+    )
+    graph.relate(verdict.glyph_id, action.glyph_id, "evaluates", actor="fixture")
     return verdict
 
 
@@ -61,7 +68,13 @@ def test_identical_replay_calls_sink_once_and_conflict_is_rejected(tmp_path):
     first = engine.settle(proposal=p, reality=reality)
     assert engine.settle(proposal=p, reality=reality) == first
     assert sink.values == [first]
-    other = graph.create("decision", actor="SYN-REALITY", content={"kind": "reality_verdict"})
+    other = graph.create("decision", actor="SYN-REALITY", content={
+        "kind": "reality_verdict", "proposal_id": p.proposal_id,
+        "action_type": p.action_type, "resource": "action:file.write",
+        "status": "contradicted", "effect_observed": False,
+    })
+    action = next(g for g in graph.ledger.glyphs() if g.glyph_type == "action")
+    graph.relate(other.glyph_id, action.glyph_id, "evaluates", actor="fixture")
     conflicting = fake_reality(proposal=p, verdict_glyph_id=other.glyph_id, effect=False)
     import pytest
     with pytest.raises(ValueError, match="conflicting"):

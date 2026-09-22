@@ -487,6 +487,58 @@ class PredictionEngine:
         if recorded_action_type is not None and recorded_action_type != proposal.action_type:
             raise ValueError("prediction action type mismatch")
 
+    def _validate_reality_verdict(
+        self,
+        *,
+        verdict_glyph_id: str,
+        proposal_id: str,
+        action_type: str,
+        action_glyph_id: str,
+        observed_effect: Optional[bool],
+        status: str,
+    ) -> None:
+        """Validate the durable reality contract before any settlement write.
+
+        Compare content and links inside the trusted local graph. This is a
+        structural consistency check, not authentication of a producer: an
+        actor label alone never establishes authority.
+        """
+        try:
+            verdict = self.graph.ledger.get(verdict_glyph_id)
+        except KeyError as exc:
+            raise ValueError("reality verdict glyph is missing") from exc
+        if verdict.glyph_type != "decision" or verdict.content.get("kind") != "reality_verdict":
+            raise ValueError("reality verdict glyph is not a reality verdict")
+        content = verdict.content
+        required = ("proposal_id", "action_type", "status", "effect_observed")
+        if any(key not in content for key in required):
+            raise ValueError("reality verdict is missing required fields")
+        if observed_effect is not None and type(observed_effect) is not bool:
+            raise ValueError("reality verdict effect/status mismatch")
+        if content.get("proposal_id") != proposal_id or content.get("action_type") != action_type:
+            raise ValueError("reality verdict proposal/action identity mismatch")
+        if (type(content.get("effect_observed")) is not bool
+                and content.get("effect_observed") is not None):
+            raise ValueError("reality verdict effect/status mismatch")
+        if content.get("effect_observed") != observed_effect or content.get("status") != status:
+            raise ValueError("reality verdict effect/status mismatch")
+        expected = {"confirmed": True, "contradicted": False,
+                    "unverified": None, "observer_conflict": None}
+        if status not in expected or observed_effect != expected[status]:
+            raise ValueError("reality verdict effect/status mismatch")
+        evaluates = self.graph.ledger.edges_from(verdict_glyph_id, relation="evaluates")
+        if len(evaluates) != 1 or evaluates[0].target != action_glyph_id:
+            raise ValueError("reality verdict evaluates the wrong action")
+        action = self.graph.ledger.get(action_glyph_id)
+        if action.glyph_type != "action":
+            raise ValueError("reality verdict evaluates a non-action glyph")
+        if (proposal_id not in action.external_refs
+                and action.content.get("proposal_id") != proposal_id):
+            raise ValueError("reality verdict action identity mismatch")
+        recorded_type = action.content.get("action_type")
+        if recorded_type is not None and recorded_type != action_type:
+            raise ValueError("reality verdict action type mismatch")
+
     def _recover_persisted_state(self) -> None:
         """Rebuild pending predictions and completed settlements from glyphs.
 
@@ -574,6 +626,39 @@ class PredictionEngine:
                 raise ValueError("persisted prediction settlement has invalid links")
             observed = content.get("observed_effect")
             status = str(content.get("status", "unscored"))
+            required = {"observed_effect", "status", "action_type", "strategy_key",
+                        "probability_effect_success", "brier_score", "absolute_error",
+                        "surprise_bits", "settled_at"}
+            if not required <= set(content):
+                raise ValueError("persisted prediction settlement is incomplete")
+            if status != ("scored" if observed is not None else "unscored"):
+                raise ValueError("persisted prediction settlement status mismatch")
+            self._validate_reality_verdict(
+                verdict_glyph_id=reality_parents[0].glyph_id,
+                proposal_id=proposal_id,
+                action_type=prediction.action_type,
+                action_glyph_id=self._prediction_action_glyphs[proposal_id],
+                observed_effect=observed,
+                status=reality_parents[0].content.get("status"),
+            )
+            if (content['action_type'] != prediction.action_type
+                    or content['strategy_key'] != prediction.strategy_key
+                    or type(content['probability_effect_success']) not in (float, int)
+                    or content['probability_effect_success'] != prediction.probability_effect_success):
+                raise ValueError("persisted prediction settlement differs from prediction")
+            p = prediction.probability_effect_success
+            metrics = (content['brier_score'], content['absolute_error'], content['surprise_bits'])
+            if observed is None:
+                if metrics != (None, None, None):
+                    raise ValueError("unscored settlement has scores")
+            else:
+                outcome = float(observed)
+                expected = ((p - outcome) ** 2, abs(p - outcome),
+                            -math.log2(max(p if observed else 1.0 - p, 1e-12)))
+                if any(type(value) not in (float, int) or not math.isfinite(value)
+                       or not math.isclose(value, target, rel_tol=1e-12, abs_tol=1e-12)
+                       for value, target in zip(metrics, expected)):
+                    raise ValueError("persisted prediction settlement scores mismatch")
             settlement = PredictionSettlement(
                 prediction_id=prediction_id,
                 proposal_id=proposal_id,
@@ -683,6 +768,15 @@ class PredictionEngine:
                 or reality.proposal_id != proposal.proposal_id
                 or reality.action_type != proposal.action_type):
             raise ValueError("prediction/reality identity mismatch")
+
+        self._validate_reality_verdict(
+            verdict_glyph_id=reality.verdict_glyph_id,
+            proposal_id=proposal.proposal_id,
+            action_type=proposal.action_type,
+            action_glyph_id=self._prediction_action_glyphs.get(proposal.proposal_id, ""),
+            observed_effect=reality.effect_observed,
+            status=reality.status,
+        )
 
         existing = self._settlements_by_prediction.get(prediction.prediction_id)
         if existing is not None:
