@@ -26,9 +26,6 @@ from datetime import datetime, timezone
 from hashlib import sha256
 import json
 import math
-import os
-import threading
-import time
 from pathlib import Path
 from typing import Any, Optional, Tuple
 
@@ -38,6 +35,7 @@ except ImportError:  # pragma: no cover - exercised on unsupported platforms
     fcntl = None
 
 from synergesis_glyph_protocol import GlyphAuditGraph
+from synergesis_storage_lock import PathTransaction
 
 
 def _canonical(value: Any) -> str:
@@ -136,78 +134,7 @@ class RiskBudgetReservation:
     event_id: str
 
 
-_LOCK_PID = os.getpid()
-_LOCK_SETUP = threading.Lock()
-_PATH_LOCKS: dict[str, threading.RLock] = {}
-_PATH_STATES: dict[str, tuple[int, int, Any]] = {}
 _LOCK_TIMEOUT_SECONDS = 10.0
-_LOCK_POLL_SECONDS = 0.01
-
-
-class _LedgerTransaction:
-    """Reentrant thread/process lock for one canonical ledger path.
-
-    The sidecar lock uses POSIX ``flock`` and therefore requires a platform
-    providing ``fcntl``. Unsupported platforms fail closed at ledger creation;
-    graph stores remain outside this transaction and are not made concurrent
-    safe by this class.
-    """
-
-    def __init__(self, path: Path):
-        if os.getpid() != _LOCK_PID:
-            raise RuntimeError("risk budget requires spawn, not inherited fork state")
-        self.key = str(path.resolve(strict=False))
-        self.lock_path = Path(self.key + ".lock")
-        with _LOCK_SETUP:
-            self.thread_lock = _PATH_LOCKS.setdefault(self.key, threading.RLock())
-
-    def __enter__(self):
-        if os.getpid() != _LOCK_PID:
-            raise RuntimeError("risk budget requires spawn, not inherited fork state")
-        if fcntl is None:
-            raise RuntimeError("risk budget locking requires POSIX fcntl support")
-        deadline = time.monotonic() + _LOCK_TIMEOUT_SECONDS
-        if not self.thread_lock.acquire(timeout=_LOCK_TIMEOUT_SECONDS):
-            raise TimeoutError("timed out acquiring risk budget lock")
-        try:
-            state = _PATH_STATES.get(self.key)
-            if state is not None:
-                _PATH_STATES[self.key] = (state[0], state[1] + 1, state[2])
-                return self
-            fh = self.lock_path.open("a+")
-            try:
-                while True:
-                    try:
-                        fcntl.flock(fh.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
-                        break
-                    except BlockingIOError:
-                        remaining = deadline - time.monotonic()
-                        if remaining <= 0:
-                            raise TimeoutError("timed out acquiring risk budget lock")
-                        time.sleep(min(_LOCK_POLL_SECONDS, remaining))
-                _PATH_STATES[self.key] = (fh.fileno(), 1, fh)
-            except BaseException:
-                fh.close()
-                raise
-            return self
-        except BaseException:
-            self.thread_lock.release()
-            raise
-
-    def __exit__(self, exc_type, exc, tb):
-        try:
-            fd, depth, fh = _PATH_STATES[self.key]
-            if depth > 1:
-                _PATH_STATES[self.key] = (fd, depth - 1, fh)
-            else:
-                del _PATH_STATES[self.key]
-                try:
-                    fcntl.flock(fd, fcntl.LOCK_UN)
-                finally:
-                    fh.close()
-        finally:
-            self.thread_lock.release()
-        return False
 
 
 class RiskBudgetLedger:
@@ -218,7 +145,6 @@ class RiskBudgetLedger:
         self.path.parent.mkdir(parents=True, exist_ok=True)
         if fcntl is None:
             raise RuntimeError("risk budget locking requires POSIX fcntl support")
-        self._transaction = _LedgerTransaction(self.path)
         self._events: list[RiskBudgetEvent] = []
         self._loaded_size: Optional[int] = None
 
@@ -275,7 +201,7 @@ class RiskBudgetLedger:
     @contextmanager
     def transaction(self):
         """Lock and reload atomically; nested calls are reentrant."""
-        with self._transaction:
+        with PathTransaction(self.path, timeout=_LOCK_TIMEOUT_SECONDS, label="risk budget"):
             self._load(force=True)
             yield self
 

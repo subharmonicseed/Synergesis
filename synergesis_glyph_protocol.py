@@ -16,6 +16,7 @@ edges. Missing information is omitted rather than fabricated.
 """
 from __future__ import annotations
 
+from contextlib import contextmanager
 from dataclasses import asdict, dataclass, is_dataclass
 from datetime import datetime, timezone
 from hashlib import sha256
@@ -23,6 +24,8 @@ import json
 import math
 from pathlib import Path
 from typing import Any, Iterable, Mapping, Optional, Sequence, Tuple
+
+from synergesis_storage_lock import PathTransaction
 
 
 SCHEMA_VERSION = "synergesis.glyph.v1"
@@ -202,7 +205,7 @@ class GlyphLedger:
     """
 
     def __init__(self, path: str | Path):
-        self.path = Path(path)
+        self.path = Path(path).expanduser().resolve()
         self.path.parent.mkdir(parents=True, exist_ok=True)
         self._cache_size: Optional[int] = None
         self._events_cache: list[LedgerEvent] = []
@@ -213,6 +216,12 @@ class GlyphLedger:
         self._edge_key_index: dict[tuple[str, str, str], GlyphEdge] = {}
         self._edges_from_index: dict[str, list[GlyphEdge]] = {}
         self._edges_to_index: dict[str, list[GlyphEdge]] = {}
+
+    @contextmanager
+    def transaction(self):
+        """Hold the shared ledger lock across a coherent sequence of operations."""
+        with PathTransaction(self.path):
+            yield self
 
     def _file_size(self) -> Optional[int]:
         if not self.path.exists():
@@ -312,10 +321,17 @@ class GlyphLedger:
         self._install_cache(out)
 
     def events(self) -> Tuple[LedgerEvent, ...]:
-        self._load_verified()
-        return tuple(self._events_cache)
+        with self.transaction():
+            self._load_verified()
+            return tuple(self._events_cache)
 
     def _append(self, event_type: str, payload: Mapping[str, Any]) -> LedgerEvent:
+        if event_type not in {"glyph", "edge"}:
+            raise ValueError(f"unsupported glyph ledger event type: {event_type}")
+        with self.transaction():
+            return self._append_locked(event_type, payload)
+
+    def _append_locked(self, event_type: str, payload: Mapping[str, Any]) -> LedgerEvent:
         self._load_verified()
         events = self._events_cache
         sequence = len(events) + 1
@@ -365,12 +381,14 @@ class GlyphLedger:
         return event
 
     def glyphs(self) -> Tuple[Glyph, ...]:
-        self._load_verified()
-        return tuple(self._glyphs_cache)
+        with self.transaction():
+            self._load_verified()
+            return tuple(self._glyphs_cache)
 
     def edges(self) -> Tuple[GlyphEdge, ...]:
-        self._load_verified()
-        return tuple(self._edges_cache)
+        with self.transaction():
+            self._load_verified()
+            return tuple(self._edges_cache)
 
     def edges_from(
         self,
@@ -378,11 +396,12 @@ class GlyphLedger:
         *,
         relation: Optional[str] = None,
     ) -> Tuple[GlyphEdge, ...]:
-        self._load_verified()
-        values = tuple(self._edges_from_index.get(source, ()))
-        if relation is None:
-            return values
-        return tuple(edge for edge in values if edge.relation == relation)
+        with self.transaction():
+            self._load_verified()
+            values = tuple(self._edges_from_index.get(source, ()))
+            if relation is None:
+                return values
+            return tuple(edge for edge in values if edge.relation == relation)
 
     def edges_to(
         self,
@@ -390,18 +409,20 @@ class GlyphLedger:
         *,
         relation: Optional[str] = None,
     ) -> Tuple[GlyphEdge, ...]:
-        self._load_verified()
-        values = tuple(self._edges_to_index.get(target, ()))
-        if relation is None:
-            return values
-        return tuple(edge for edge in values if edge.relation == relation)
+        with self.transaction():
+            self._load_verified()
+            values = tuple(self._edges_to_index.get(target, ()))
+            if relation is None:
+                return values
+            return tuple(edge for edge in values if edge.relation == relation)
 
     def get(self, glyph_id: str) -> Glyph:
-        self._load_verified()
-        try:
-            return self._glyph_by_id[glyph_id]
-        except KeyError as exc:
-            raise KeyError(f"unknown glyph: {glyph_id}") from exc
+        with self.transaction():
+            self._load_verified()
+            try:
+                return self._glyph_by_id[glyph_id]
+            except KeyError as exc:
+                raise KeyError(f"unknown glyph: {glyph_id}") from exc
 
     def find_by_external_ref(
         self,
@@ -409,11 +430,12 @@ class GlyphLedger:
         *,
         glyph_type: Optional[str] = None,
     ) -> Tuple[Glyph, ...]:
-        self._load_verified()
-        matches = tuple(self._external_ref_index.get(external_ref, ()))
-        if glyph_type is None:
-            return matches
-        return tuple(g for g in matches if g.glyph_type == glyph_type)
+        with self.transaction():
+            self._load_verified()
+            matches = tuple(self._external_ref_index.get(external_ref, ()))
+            if glyph_type is None:
+                return matches
+            return tuple(g for g in matches if g.glyph_type == glyph_type)
 
     def append_glyph(
         self,
@@ -426,48 +448,49 @@ class GlyphLedger:
         metadata: Optional[Mapping[str, Any]] = None,
         dedupe_external_ref: Optional[str] = None,
     ) -> Glyph:
-        if glyph_type not in GLYPH_TYPES:
-            raise ValueError(f"unsupported glyph_type: {glyph_type}")
-        if not actor.strip():
-            raise ValueError("actor is required")
-        _validate_confidence(confidence)
+        with self.transaction():
+            if glyph_type not in GLYPH_TYPES:
+                raise ValueError(f"unsupported glyph_type: {glyph_type}")
+            if not actor.strip():
+                raise ValueError("actor is required")
+            _validate_confidence(confidence)
 
-        refs = tuple(dict.fromkeys(str(x) for x in external_refs))
-        if any(not x.strip() for x in refs):
-            raise ValueError("external refs must be non-empty")
-        if dedupe_external_ref is not None:
-            existing = self.find_by_external_ref(
-                dedupe_external_ref,
+            refs = tuple(dict.fromkeys(str(x) for x in external_refs))
+            if any(not x.strip() for x in refs):
+                raise ValueError("external refs must be non-empty")
+            if dedupe_external_ref is not None:
+                existing = self.find_by_external_ref(
+                    dedupe_external_ref,
+                    glyph_type=glyph_type,
+                )
+                if existing:
+                    return existing[-1]
+
+            created_at = _now()
+            identity = {
+                "glyph_type": glyph_type,
+                "schema_version": SCHEMA_VERSION,
+                "created_at": created_at,
+                "actor": actor,
+                "content": dict(content),
+                "external_refs": refs,
+                "confidence": confidence,
+                "metadata": dict(metadata or {}),
+            }
+            glyph_id = f"g:{_digest(identity)[:32]}"
+            glyph = Glyph(
+                glyph_id=glyph_id,
                 glyph_type=glyph_type,
+                schema_version=SCHEMA_VERSION,
+                created_at=created_at,
+                actor=actor,
+                content=dict(content),
+                external_refs=refs,
+                confidence=float(confidence) if confidence is not None else None,
+                metadata=dict(metadata or {}),
             )
-            if existing:
-                return existing[-1]
-
-        created_at = _now()
-        identity = {
-            "glyph_type": glyph_type,
-            "schema_version": SCHEMA_VERSION,
-            "created_at": created_at,
-            "actor": actor,
-            "content": dict(content),
-            "external_refs": refs,
-            "confidence": confidence,
-            "metadata": dict(metadata or {}),
-        }
-        glyph_id = f"g:{_digest(identity)[:32]}"
-        glyph = Glyph(
-            glyph_id=glyph_id,
-            glyph_type=glyph_type,
-            schema_version=SCHEMA_VERSION,
-            created_at=created_at,
-            actor=actor,
-            content=dict(content),
-            external_refs=refs,
-            confidence=float(confidence) if confidence is not None else None,
-            metadata=dict(metadata or {}),
-        )
-        self._append("glyph", asdict(glyph))
-        return glyph
+            self._append("glyph", asdict(glyph))
+            return glyph
 
     def append_edge(
         self,
@@ -479,53 +502,55 @@ class GlyphLedger:
         metadata: Optional[Mapping[str, Any]] = None,
         dedupe: bool = True,
     ) -> GlyphEdge:
-        if relation not in RELATION_TYPES:
-            raise ValueError(f"unsupported relation: {relation}")
-        self.get(source)
-        self.get(target)
-        if source == target:
-            raise ValueError("self-edges are not allowed")
+        with self.transaction():
+            if relation not in RELATION_TYPES:
+                raise ValueError(f"unsupported relation: {relation}")
+            self.get(source)
+            self.get(target)
+            if source == target:
+                raise ValueError("self-edges are not allowed")
 
-        if dedupe:
-            existing = self._edge_key_index.get((source, target, relation))
-            if existing is not None:
-                return existing
+            if dedupe:
+                existing = self._edge_key_index.get((source, target, relation))
+                if existing is not None:
+                    return existing
 
-        created_at = _now()
-        body = {
-            "source": source,
-            "target": target,
-            "relation": relation,
-            "created_at": created_at,
-            "actor": actor,
-            "metadata": dict(metadata or {}),
-        }
-        edge = GlyphEdge(
-            edge_id=f"e:{_digest(body)[:32]}",
-            source=source,
-            target=target,
-            relation=relation,
-            created_at=created_at,
-            actor=actor,
-            metadata=dict(metadata or {}),
-        )
-        self._append("edge", asdict(edge))
-        return edge
+            created_at = _now()
+            body = {
+                "source": source,
+                "target": target,
+                "relation": relation,
+                "created_at": created_at,
+                "actor": actor,
+                "metadata": dict(metadata or {}),
+            }
+            edge = GlyphEdge(
+                edge_id=f"e:{_digest(body)[:32]}",
+                source=source,
+                target=target,
+                relation=relation,
+                created_at=created_at,
+                actor=actor,
+                metadata=dict(metadata or {}),
+            )
+            self._append("edge", asdict(edge))
+            return edge
 
     def verify(self) -> IntegrityCheckpoint:
-        # Always re-read and re-hash from disk here, even if in-memory indexes
-        # appear current. This preserves the explicit integrity-check boundary.
-        self._load_verified(force=True)
-        glyph_ids = set(self._glyph_by_id)
-        for edge in self._edges_cache:
-            if edge.source not in glyph_ids or edge.target not in glyph_ids:
-                raise ValueError(f"dangling glyph edge: {edge.edge_id}")
-        digests = [event.digest for event in self._events_cache]
-        return IntegrityCheckpoint(
-            event_count=len(self._events_cache),
-            chain_head=digests[-1] if digests else None,
-            merkle_root=_merkle_root(digests),
-        )
+        with self.transaction():
+            # Always re-read and re-hash from disk here, even if in-memory indexes
+            # appear current. This preserves the explicit integrity-check boundary.
+            self._load_verified(force=True)
+            glyph_ids = set(self._glyph_by_id)
+            for edge in self._edges_cache:
+                if edge.source not in glyph_ids or edge.target not in glyph_ids:
+                    raise ValueError(f"dangling glyph edge: {edge.edge_id}")
+            digests = [event.digest for event in self._events_cache]
+            return IntegrityCheckpoint(
+                event_count=len(self._events_cache),
+                chain_head=digests[-1] if digests else None,
+                merkle_root=_merkle_root(digests),
+            )
 
 def _merkle_root(digests: Sequence[str]) -> Optional[str]:
     if not digests:
@@ -559,24 +584,25 @@ class GlyphAuditGraph:
         derived_from: Sequence[str] = (),
         dedupe_external_ref: Optional[str] = None,
     ) -> Glyph:
-        glyph = self.ledger.append_glyph(
-            glyph_type=glyph_type,
-            actor=actor,
-            content=content,
-            external_refs=external_refs,
-            confidence=confidence,
-            metadata=metadata,
-            dedupe_external_ref=dedupe_external_ref,
-        )
-        for parent in derived_from:
-            if parent != glyph.glyph_id:
-                self.ledger.append_edge(
-                    source=glyph.glyph_id,
-                    target=parent,
-                    relation="derived_from",
-                    actor=actor,
-                )
-        return glyph
+        with self.ledger.transaction():
+            glyph = self.ledger.append_glyph(
+                glyph_type=glyph_type,
+                actor=actor,
+                content=content,
+                external_refs=external_refs,
+                confidence=confidence,
+                metadata=metadata,
+                dedupe_external_ref=dedupe_external_ref,
+            )
+            for parent in derived_from:
+                if parent != glyph.glyph_id:
+                    self.ledger.append_edge(
+                        source=glyph.glyph_id,
+                        target=parent,
+                        relation="derived_from",
+                        actor=actor,
+                    )
+            return glyph
 
     def relate(
         self,
@@ -618,56 +644,58 @@ class GlyphAuditGraph:
         upstream: bool,
         max_depth: int,
     ) -> AuditTrace:
-        if max_depth < 0:
-            raise ValueError("max_depth must be >= 0")
-        focal = self.ledger.get(glyph_id)
-        seen = {glyph_id}
-        frontier = {glyph_id}
-        chosen_edges: list[GlyphEdge] = []
+        with self.ledger.transaction():
+            if max_depth < 0:
+                raise ValueError("max_depth must be >= 0")
+            focal = self.ledger.get(glyph_id)
+            seen = {glyph_id}
+            frontier = {glyph_id}
+            chosen_edges: list[GlyphEdge] = []
 
-        for _ in range(max_depth):
-            next_frontier = set()
-            for current in frontier:
-                edges = (
-                    self.ledger.edges_from(current)
-                    if upstream
-                    else self.ledger.edges_to(current)
-                )
-                for edge in edges:
-                    node = edge.target if upstream else edge.source
-                    chosen_edges.append(edge)
-                    if node not in seen:
-                        seen.add(node)
-                        next_frontier.add(node)
-            if not next_frontier:
-                break
-            frontier = next_frontier
+            for _ in range(max_depth):
+                next_frontier = set()
+                for current in frontier:
+                    edges = (
+                        self.ledger.edges_from(current)
+                        if upstream
+                        else self.ledger.edges_to(current)
+                    )
+                    for edge in edges:
+                        node = edge.target if upstream else edge.source
+                        chosen_edges.append(edge)
+                        if node not in seen:
+                            seen.add(node)
+                            next_frontier.add(node)
+                if not next_frontier:
+                    break
+                frontier = next_frontier
 
-        glyphs = tuple(
-            sorted(
-                (self.ledger.get(gid) for gid in seen),
-                key=lambda g: (g.created_at, g.glyph_id),
-            )
-        )
-        unique_edges = {
-            edge.edge_id: edge for edge in chosen_edges
-        }
-        return AuditTrace(
-            focal_glyph=focal,
-            glyphs=glyphs,
-            edges=tuple(
+            glyphs = tuple(
                 sorted(
-                    unique_edges.values(),
-                    key=lambda e: (e.created_at, e.edge_id),
+                    (self.ledger.get(gid) for gid in seen),
+                    key=lambda g: (g.created_at, g.glyph_id),
                 )
-            ),
-        )
+            )
+            unique_edges = {
+                edge.edge_id: edge for edge in chosen_edges
+            }
+            return AuditTrace(
+                focal_glyph=focal,
+                glyphs=glyphs,
+                edges=tuple(
+                    sorted(
+                        unique_edges.values(),
+                        key=lambda e: (e.created_at, e.edge_id),
+                    )
+                ),
+            )
 
     def explain_decision(self, glyph_id: str) -> AuditTrace:
-        glyph = self.ledger.get(glyph_id)
-        if glyph.glyph_type != "decision":
-            raise ValueError("explain_decision requires a decision glyph")
-        return self.upstream(glyph_id)
+        with self.ledger.transaction():
+            glyph = self.ledger.get(glyph_id)
+            if glyph.glyph_type != "decision":
+                raise ValueError("explain_decision requires a decision glyph")
+            return self.upstream(glyph_id)
 
     def impacted_by(self, glyph_id: str, *, max_depth: int = 16) -> AuditTrace:
         """Return descendants that ultimately depend on the focal glyph."""
