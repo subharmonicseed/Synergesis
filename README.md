@@ -39,6 +39,10 @@ Risk-budget locking requires POSIX `fcntl` (native Windows is unsupported); use
 spawned workers, not inherited fork state. See `SYN_RISK_CONCURRENCY_VALIDATION.md`.
 Keep an intact backup before upgrading; recovery is not an atomic multi-store
 transaction or a guarantee against power loss.
+ROAM now records an attempt before invoking research/controller work. After an
+interruption, a completed receipt repairs local bookkeeping; an uncertain attempt
+stops further ticks for operator review. Preserve the adjacent `.roam-attempt.json`
+files with the journals in backups. See `SYN_ROAM_RECOVERY_VALIDATION.md`.
 The restoration and hardening branches are review drafts, not a released service.
 
 ## Use the maintained API

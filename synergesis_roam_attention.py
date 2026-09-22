@@ -459,6 +459,63 @@ class RoamAttentionController:
         self.roam = roam
         self._tick_hooks = []
         self._need_guards = []
+        self._attempt_path = self.agenda.path.with_name(self.agenda.path.name + ".roam-attempt.json")
+        # Recovery runs at the operation boundary, before hooks or a new tick.
+
+    def _write_attempt(self, payload: Mapping[str, Any]) -> None:
+        """Atomically persist the single-writer external-call receipt."""
+        body = dict(payload)
+        body["schema"] = "syn-roam-controller-attempt-v1"
+        body["digest"] = _hash({k: v for k, v in body.items() if k != "digest"})
+        temporary = self._attempt_path.with_suffix(self._attempt_path.suffix + ".tmp")
+        with temporary.open("w", encoding="utf-8") as fh:
+            fh.write(_canon(body))
+            fh.flush()
+            os.fsync(fh.fileno())
+        os.replace(temporary, self._attempt_path)
+
+    def _read_attempt(self) -> Optional[dict[str, Any]]:
+        if not self._attempt_path.exists():
+            return None
+        try:
+            raw = json.loads(self._attempt_path.read_text(encoding="utf-8"))
+        except Exception as exc:
+            raise RuntimeError("ROAM controller attempt receipt requires operator review") from exc
+        if not isinstance(raw, dict) or raw.get("schema") != "syn-roam-controller-attempt-v1":
+            raise RuntimeError("ROAM controller attempt receipt requires operator review")
+        digest = raw.get("digest")
+        if not isinstance(digest, str) or digest != _hash({k: v for k, v in raw.items() if k != "digest"}):
+            raise RuntimeError("ROAM controller attempt receipt requires operator review")
+        if raw.get("phase") not in {"started", "completed"} or not isinstance(raw.get("need_id"), str):
+            raise RuntimeError("ROAM controller attempt receipt requires operator review")
+        if (type(raw.get("sequence")) is not int or raw["sequence"] < 1
+                or not isinstance(raw.get("need_digest"), str)
+                or not raw["need_id"]):
+            raise RuntimeError("ROAM controller attempt receipt requires operator review")
+        if raw.get("phase") == "completed" and (not isinstance(raw.get("session_id"), str) or not raw["session_id"]):
+            raise RuntimeError("ROAM controller attempt receipt requires operator review")
+        return raw
+
+    def _reconcile_attempt(self) -> None:
+        receipt = self._read_attempt()
+        if receipt is None:
+            return
+        if receipt["phase"] == "started":
+            raise RuntimeError("ROAM research attempt outcome is unknown; operator review required")
+        state = self.agenda.get_optional(receipt["need_id"])
+        if state is None or _hash(self.agenda._need_payload(state.need)) != receipt.get("need_digest"):
+            raise RuntimeError("conflicting ROAM controller completion receipt")
+        sid = receipt["session_id"]
+        increment = {"pending": 0, "researched": 1, "evaluated": 2}.get(state.status)
+        if increment is None or receipt["sequence"] + increment != state.event_count:
+            raise RuntimeError("conflicting ROAM controller completion receipt")
+        if state.status == "pending":
+            self.agenda.mark_researched(receipt["need_id"], sid)
+        elif state.status in {"researched", "evaluated"} and state.session_id == sid:
+            pass
+        else:
+            raise RuntimeError("conflicting ROAM controller completion receipt")
+        self._attempt_path.unlink(missing_ok=True)
 
     def add_tick_hook(self, hook):
         if hook not in self._tick_hooks:
@@ -469,6 +526,7 @@ class RoamAttentionController:
             self._need_guards.append(guard)
 
     def tick_once(self) -> RoamTick:
+        self._reconcile_attempt()
         for hook in tuple(self._tick_hooks):
             hook()
         selected = self.agenda.select_next()
@@ -484,8 +542,15 @@ class RoamAttentionController:
             question=selected.need.question,
             hypothesis=selected.need.hypothesis,
         )
+        self._write_attempt({"phase": "started", "need_id": selected.need.need_id,
+                             "need_digest": _hash(self.agenda._need_payload(selected.need)),
+                             "sequence": selected.event_count})
         session = self.roam.research_once(question)
-        self.agenda.mark_researched(selected.need.need_id, session.session_id)
+        self._write_attempt({"phase": "completed", "need_id": selected.need.need_id,
+                             "need_digest": _hash(self.agenda._need_payload(selected.need)),
+                             "sequence": selected.event_count,
+                             "session_id": session.session_id})
+        self._reconcile_attempt()
         return RoamTick(selected.need.need_id, session, "researched")
 
     def evaluate_need(
