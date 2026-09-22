@@ -29,6 +29,7 @@ test = [
 # explicit so retired prototypes and one-off scripts are never installed as the
 # advertised API by an import glob.
 py-modules = [
+    "synergesis_storage_lock",
     "synergesis_aegis",
     "synergesis_agent_loop",
     "synergesis_agent_loop_v2",
