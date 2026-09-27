@@ -32,7 +32,7 @@ capability stores, observation policies, reality probes and source adapters.
 Installing the package does not start an agent or grant network/action access.
 `test_synergesis_secure_roam_stack_v2.py` contains executable integration examples.
 
-The risk-budget, Glyph, research-agenda and ROAM service journals now serialize
+The risk-budget, Glyph, research-agenda, ROAM service and method-outcome journals serialize
 cooperating readers/writers on a local POSIX filesystem. Other journals still
 require a single writer.
 This covers ledger operations, graph creation/traversal, and one research tick per
@@ -42,6 +42,9 @@ Locking requires POSIX `fcntl` (native Windows is unsupported); use spawned work
 not inherited fork state. Keep `.lock` sidecars in place while processes run.
 See `SYN_GLYPH_CONCURRENCY_VALIDATION.md` and `SYN_ROAM_CONCURRENCY_VALIDATION.md`
 for the scope and limitations.
+Method outcomes count each session once: an identical retry returns the original
+record; a conflicting result is rejected. Existing duplicate histories require
+review. See `SYN_METHOD_LEDGER_VALIDATION.md`.
 Keep an intact backup before upgrading; recovery is not an atomic multi-store
 transaction or a guarantee against power loss.
 ROAM now records an attempt before invoking research/controller work. After an

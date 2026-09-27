@@ -101,57 +101,58 @@ class AdaptiveResearchMethodLearner(ResearchMethodLearner):
         self,
         candidates: Tuple[ResearchMethod, ...],
     ) -> Tuple[AdaptiveMethodScore, ...]:
-        global_events = self._global_outcome_events()
-        total_events = len(global_events)
-        out = []
+        with self.ledger.transaction():
+            global_events = self._global_outcome_events()
+            total_events = len(global_events)
+            out = []
 
-        for method in candidates:
-            all_outcomes = self.ledger.outcomes(method_id=method.method_id)
-            events = self._recent_events(method.method_id)
-            last_seq = self._last_event_sequence(method.method_id)
-            gap = None if last_seq is None else total_events - last_seq
+            for method in candidates:
+                all_outcomes = self.ledger.outcomes(method_id=method.method_id)
+                events = self._recent_events(method.method_id)
+                last_seq = self._last_event_sequence(method.method_id)
+                gap = None if last_seq is None else total_events - last_seq
 
-            if not events:
+                if not events:
+                    out.append(
+                        AdaptiveMethodScore(
+                            method_id=method.method_id,
+                            observations_total=len(all_outcomes),
+                            observations_window=0,
+                            recent_mean_utility=None,
+                            selections_since_last_trial=gap,
+                            exploration_bonus=None,
+                            score=None,
+                        )
+                    )
+                    continue
+
+                weighted_sum = 0.0
+                total_weight = 0.0
+                for event in events:
+                    age = max(0, total_events - int(event["sequence"]))
+                    weight = 0.5 ** (
+                        age / self.adaptive_config.decay_half_life_events
+                    )
+                    weighted_sum += float(event["payload"]["utility"]) * weight
+                    total_weight += weight
+
+                mean = weighted_sum / total_weight
+                effective_n = max(total_weight, 1e-9)
+                bonus = self.adaptive_config.exploration_strength * math.sqrt(
+                    math.log(max(total_events, 1) + 1.0) / effective_n
+                )
                 out.append(
                     AdaptiveMethodScore(
                         method_id=method.method_id,
                         observations_total=len(all_outcomes),
-                        observations_window=0,
-                        recent_mean_utility=None,
+                        observations_window=len(events),
+                        recent_mean_utility=mean,
                         selections_since_last_trial=gap,
-                        exploration_bonus=None,
-                        score=None,
+                        exploration_bonus=bonus,
+                        score=mean + bonus,
                     )
                 )
-                continue
-
-            weighted_sum = 0.0
-            total_weight = 0.0
-            for event in events:
-                age = max(0, total_events - int(event["sequence"]))
-                weight = 0.5 ** (
-                    age / self.adaptive_config.decay_half_life_events
-                )
-                weighted_sum += float(event["payload"]["utility"]) * weight
-                total_weight += weight
-
-            mean = weighted_sum / total_weight
-            effective_n = max(total_weight, 1e-9)
-            bonus = self.adaptive_config.exploration_strength * math.sqrt(
-                math.log(max(total_events, 1) + 1.0) / effective_n
-            )
-            out.append(
-                AdaptiveMethodScore(
-                    method_id=method.method_id,
-                    observations_total=len(all_outcomes),
-                    observations_window=len(events),
-                    recent_mean_utility=mean,
-                    selections_since_last_trial=gap,
-                    exploration_bonus=bonus,
-                    score=mean + bonus,
-                )
-            )
-        return tuple(out)
+            return tuple(out)
 
     def _audit_selection(
         self,
@@ -187,63 +188,64 @@ class AdaptiveResearchMethodLearner(ResearchMethodLearner):
         )
 
     def select(self, question: ResearchQuestion) -> ResearchMethod:
-        candidates = self._eligible(question)
-        if not candidates:
-            raise ValueError("no eligible research method")
+        with self.ledger.transaction():
+            candidates = self._eligible(question)
+            if not candidates:
+                raise ValueError("no eligible research method")
 
-        scores = self._score_snapshot(candidates)
+            scores = self._score_snapshot(candidates)
 
-        # Cold start remains deterministic.
-        unseen = [
-            method
-            for method in candidates
-            if next(
-                s for s in scores if s.method_id == method.method_id
-            ).observations_total == 0
-        ]
-        if unseen:
-            selected = sorted(unseen, key=lambda m: m.method_id)[0]
+            # Cold start remains deterministic.
+            unseen = [
+                method
+                for method in candidates
+                if next(
+                    s for s in scores if s.method_id == method.method_id
+                ).observations_total == 0
+            ]
+            if unseen:
+                selected = sorted(unseen, key=lambda m: m.method_id)[0]
+                self._audit_selection(
+                    question=question,
+                    selected=selected,
+                    scores=scores,
+                    forced=True,
+                    reason="cold_start",
+                )
+                return selected
+
+            # Bounded forced re-exploration: a historically bad method cannot be
+            # starved forever if the environment changes.
+            stale = []
+            for method in candidates:
+                score = next(s for s in scores if s.method_id == method.method_id)
+                gap = score.selections_since_last_trial or 0
+                if gap >= self.adaptive_config.max_selection_gap:
+                    stale.append((gap, method.method_id, method))
+            if stale:
+                stale.sort(key=lambda x: (-x[0], x[1]))
+                selected = stale[0][2]
+                self._audit_selection(
+                    question=question,
+                    selected=selected,
+                    scores=scores,
+                    forced=True,
+                    reason="stale_method_retest",
+                )
+                return selected
+
+            ranked = []
+            for method in candidates:
+                score = next(s for s in scores if s.method_id == method.method_id)
+                assert score.score is not None
+                ranked.append((score.score, method.method_id, method))
+            ranked.sort(key=lambda x: (-x[0], x[1]))
+            selected = ranked[0][2]
             self._audit_selection(
                 question=question,
                 selected=selected,
                 scores=scores,
-                forced=True,
-                reason="cold_start",
+                forced=False,
+                reason="rolling_ucb",
             )
             return selected
-
-        # Bounded forced re-exploration: a historically bad method cannot be
-        # starved forever if the environment changes.
-        stale = []
-        for method in candidates:
-            score = next(s for s in scores if s.method_id == method.method_id)
-            gap = score.selections_since_last_trial or 0
-            if gap >= self.adaptive_config.max_selection_gap:
-                stale.append((gap, method.method_id, method))
-        if stale:
-            stale.sort(key=lambda x: (-x[0], x[1]))
-            selected = stale[0][2]
-            self._audit_selection(
-                question=question,
-                selected=selected,
-                scores=scores,
-                forced=True,
-                reason="stale_method_retest",
-            )
-            return selected
-
-        ranked = []
-        for method in candidates:
-            score = next(s for s in scores if s.method_id == method.method_id)
-            assert score.score is not None
-            ranked.append((score.score, method.method_id, method))
-        ranked.sort(key=lambda x: (-x[0], x[1]))
-        selected = ranked[0][2]
-        self._audit_selection(
-            question=question,
-            selected=selected,
-            scores=scores,
-            forced=False,
-            reason="rolling_ucb",
-        )
-        return selected
