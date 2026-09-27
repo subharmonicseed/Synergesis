@@ -17,7 +17,8 @@ Security properties
   local `runtime_reality_observation`.
 
 This module never creates capabilities, permissions, executors, or local
-runtime facts.
+runtime facts. A durable attempt marker blocks uncertain interrupted imports; this
+is a fail-closed guard, not full recovery or an exactly-once guarantee.
 """
 from __future__ import annotations
 
@@ -25,6 +26,7 @@ from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta, timezone
 from hashlib import sha256
 import json
+import os
 from pathlib import Path
 import tempfile
 from typing import Any, Mapping, Optional, Sequence, Tuple
@@ -372,6 +374,11 @@ class ProvenanceTransportExporter:
 
 
 class ProvenanceTransportImporter:
+    """Import verified bundles with a fail-closed interruption guard.
+
+    The marker prevents automatic re-execution after uncertain destination
+    writes. It does not roll back partial writes or promise exactly-once import.
+    """
     actor = "SYN-PROVENANCE-TRANSPORT"
 
     def __init__(
@@ -396,6 +403,84 @@ class ProvenanceTransportImporter:
         self.replay_ledger = replay_ledger
         self.policy = policy
         self.now_fn = now_fn
+        self._attempt_path = Path(str(replay_ledger.path) + ".transport-attempt.json")
+
+    def _destinations(self) -> dict[str, str]:
+        return {
+            "graph_path": str(self.graph.ledger.path.resolve()),
+            "receipt_path": str(self.receipt_store.path.resolve()),
+        }
+
+    def _write_attempt(self, bundle: PortableProvenanceBundle, prefix_count: int,
+                       prefix_head: Optional[str]) -> None:
+        body = {
+            "schema": 1,
+            "sender_id": bundle.sender_id,
+            "bundle_id": bundle.bundle_id,
+            "nonce": bundle.envelope.nonce,
+            "remote_glyph_id": str(bundle.leaf_glyph["glyph_id"]),
+            "prefix_count": prefix_count,
+            "prefix_head": prefix_head,
+            **self._destinations(),
+        }
+        marker = {**body, "digest": _digest(body)}
+        self._attempt_path.parent.mkdir(parents=True, exist_ok=True)
+        tmp = self._attempt_path.with_name(self._attempt_path.name + ".tmp")
+        with tmp.open("w", encoding="utf-8") as fh:
+            fh.write(_canonical(marker) + "\n")
+            fh.flush()
+            os.fsync(fh.fileno())
+        os.replace(tmp, self._attempt_path)
+        fd = os.open(self._attempt_path.parent, os.O_RDONLY)
+        try:
+            os.fsync(fd)
+        finally:
+            os.close(fd)
+
+    def _reconcile_attempt(self) -> None:
+        if not self._attempt_path.exists():
+            return
+        try:
+            marker = json.loads(self._attempt_path.read_text(encoding="utf-8"))
+            keys = {"schema", "sender_id", "bundle_id", "nonce", "remote_glyph_id",
+                    "prefix_count", "prefix_head", "graph_path", "receipt_path", "digest"}
+            if type(marker) is not dict or set(marker) != keys:
+                raise ValueError
+            if type(marker["schema"]) is not int or marker["schema"] != 1:
+                raise ValueError
+            for key in ("sender_id", "bundle_id", "nonce", "remote_glyph_id", "graph_path", "receipt_path"):
+                if type(marker[key]) is not str or not marker[key]:
+                    raise ValueError
+            if type(marker["prefix_count"]) is not int or marker["prefix_count"] < 0:
+                raise ValueError
+            if marker["prefix_head"] is not None and type(marker["prefix_head"]) is not str:
+                raise ValueError
+            if marker["prefix_count"] == 0:
+                if marker["prefix_head"] is not None:
+                    raise ValueError
+            elif (type(marker["prefix_head"]) is not str or len(marker["prefix_head"]) != 64
+                  or any(c not in "0123456789abcdef" for c in marker["prefix_head"])):
+                raise ValueError
+            body = {k: marker[k] for k in keys if k != "digest"}
+            if type(marker["digest"]) is not str or marker["digest"] != _digest(body):
+                raise ValueError
+        except (OSError, ValueError, TypeError, KeyError) as exc:
+            raise ValueError("transport attempt marker is malformed or tampered") from exc
+        if marker["graph_path"] != self._destinations()["graph_path"] or marker["receipt_path"] != self._destinations()["receipt_path"]:
+            raise ValueError("transport attempt marker destinations do not match")
+        events = self.replay_ledger.events()
+        n = marker["prefix_count"]
+        if len(events) == n + 1:
+            prior = events[n - 1].digest if n else None
+            event = events[n]
+            if (event.sequence == n + 1 and event.previous_digest == prior == marker["prefix_head"]
+                    and event.sender_id == marker["sender_id"]
+                    and event.bundle_id == marker["bundle_id"]
+                    and event.envelope_nonce == marker["nonce"]
+                    and event.remote_glyph_id == marker["remote_glyph_id"]):
+                self._attempt_path.unlink()
+                return
+        raise ValueError("uncertain interrupted transport import; manual intervention required")
 
     def _expected_payload(self, bundle: PortableProvenanceBundle) -> Mapping[str, Any]:
         return {
@@ -476,6 +561,8 @@ class ProvenanceTransportImporter:
         bundle: PortableProvenanceBundle,
     ) -> ImportedRemoteClaim:
         with self.replay_ledger.transaction():
+            prefix_count, prefix_head = self.replay_ledger.verify()
+            self._reconcile_attempt()
             self._verify_bundle_signature(bundle)
             self._verify_freshness(bundle)
 
@@ -490,6 +577,8 @@ class ProvenanceTransportImporter:
             if leaf.get("glyph_id") is None or leaf.get("glyph_type") is None:
                 raise ValueError("transport bundle leaf glyph is incomplete")
             trace, decoded = self._verify_receipts_staged(bundle)
+
+            self._write_attempt(bundle, prefix_count, prefix_head)
 
             # Only verified staged receipts are allowed into the persistent store.
             for receipt in decoded:
@@ -556,6 +645,7 @@ class ProvenanceTransportImporter:
                 remote_glyph_id=str(leaf["glyph_id"]),
                 local_glyph_id=imported.glyph_id,
             )
+            self._attempt_path.unlink()
             return ImportedRemoteClaim(
                 bundle_id=bundle.bundle_id,
                 sender_id=bundle.sender_id,
