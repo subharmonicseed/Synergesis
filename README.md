@@ -48,7 +48,11 @@ review. See `SYN_METHOD_LEDGER_VALIDATION.md`.
 Concurrent signed-message imports sharing one replay ledger are serialized; a
 duplicate is rejected before destination writes. Freshness is checked after
 waiting. See `SYN_TRANSPORT_CONCURRENCY_VALIDATION.md` for limits, including the
-unresolved multi-store crash window.
+multi-store crash window.
+Interrupted imports now retain a persistent attempt marker: a confirmed terminal
+journal entry clears a stale marker; uncertain partial writes block further
+imports for review. Keep markers with journal backups. See
+`SYN_TRANSPORT_RECOVERY_VALIDATION.md`; this does not roll back partial writes.
 Keep an intact backup before upgrading; recovery is not an atomic multi-store
 transaction or a guarantee against power loss.
 ROAM now records an attempt before invoking research/controller work. After an
