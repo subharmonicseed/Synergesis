@@ -45,6 +45,10 @@ for the scope and limitations.
 Method outcomes count each session once: an identical retry returns the original
 record; a conflicting result is rejected. Existing duplicate histories require
 review. See `SYN_METHOD_LEDGER_VALIDATION.md`.
+Concurrent signed-message imports sharing one replay ledger are serialized; a
+duplicate is rejected before destination writes. Freshness is checked after
+waiting. See `SYN_TRANSPORT_CONCURRENCY_VALIDATION.md` for limits, including the
+unresolved multi-store crash window.
 Keep an intact backup before upgrading; recovery is not an atomic multi-store
 transaction or a guarantee against power loss.
 ROAM now records an attempt before invoking research/controller work. After an
