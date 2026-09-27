@@ -37,6 +37,7 @@ from synergesis_aegis import (
     verify_envelope,
 )
 from synergesis_glyph_protocol import Glyph, GlyphAuditGraph
+from synergesis_storage_lock import PathTransaction
 from synergesis_provenance_receipts import (
     DerivationReceipt,
     OriginReceipt,
@@ -144,10 +145,15 @@ class ProvenanceReplayLedger:
     """Append-only hash chain of accepted transport bundles."""
 
     def __init__(self, path: str | Path):
-        self.path = Path(path)
+        self.path = Path(path).resolve()
         self.path.parent.mkdir(parents=True, exist_ok=True)
+        self._transaction = PathTransaction(self.path, label="provenance replay ledger")
         self._events: list[ReplayEvent] = []
         self._loaded_size: Optional[int] = None
+
+    def transaction(self) -> PathTransaction:
+        """Return the canonical-path transaction shared by ledger users."""
+        return self._transaction
 
     def _size(self) -> Optional[int]:
         return self.path.stat().st_size if self.path.exists() else None
@@ -189,16 +195,18 @@ class ProvenanceReplayLedger:
         self._loaded_size = self._size()
 
     def events(self) -> Tuple[ReplayEvent, ...]:
-        self._load()
-        return tuple(self._events)
+        with self.transaction():
+            self._load()
+            return tuple(self._events)
 
     def seen(self, *, sender_id: str, bundle_id: str, nonce: str) -> bool:
-        self._load()
-        return any(
-            event.sender_id == sender_id
-            and (event.bundle_id == bundle_id or event.envelope_nonce == nonce)
-            for event in self._events
-        )
+        with self.transaction():
+            self._load()
+            return any(
+                event.sender_id == sender_id
+                and (event.bundle_id == bundle_id or event.envelope_nonce == nonce)
+                for event in self._events
+            )
 
     def append(
         self,
@@ -209,43 +217,45 @@ class ProvenanceReplayLedger:
         remote_glyph_id: str,
         local_glyph_id: str,
     ) -> ReplayEvent:
-        self._load()
-        if self.seen(
-            sender_id=sender_id,
-            bundle_id=bundle_id,
-            nonce=envelope_nonce,
-        ):
-            raise ValueError("transport bundle replay detected")
-        previous = self._events[-1].digest if self._events else None
-        body = {
-            "sequence": len(self._events) + 1,
-            "event_id": "transport-replay:" + _digest({
-                'sender_id': sender_id,
-                'bundle_id': bundle_id,
-                'nonce': envelope_nonce,
-                'sequence': len(self._events) + 1,
-            })[:32],
-            "sender_id": sender_id,
-            "bundle_id": bundle_id,
-            "envelope_nonce": envelope_nonce,
-            "remote_glyph_id": remote_glyph_id,
-            "local_glyph_id": local_glyph_id,
-            "received_at": _iso(_now()),
-            "previous_digest": previous,
-        }
-        event = ReplayEvent(**body, digest=_digest(body))
-        with self.path.open("a", encoding="utf-8") as fh:
-            fh.write(_canonical(asdict(event)) + "\n")
-        self._events.append(event)
-        self._loaded_size = self._size()
-        return event
+        with self.transaction():
+            self._load()
+            if self.seen(
+                sender_id=sender_id,
+                bundle_id=bundle_id,
+                nonce=envelope_nonce,
+            ):
+                raise ValueError("transport bundle replay detected")
+            previous = self._events[-1].digest if self._events else None
+            body = {
+                "sequence": len(self._events) + 1,
+                "event_id": "transport-replay:" + _digest({
+                    'sender_id': sender_id,
+                    'bundle_id': bundle_id,
+                    'nonce': envelope_nonce,
+                    'sequence': len(self._events) + 1,
+                })[:32],
+                "sender_id": sender_id,
+                "bundle_id": bundle_id,
+                "envelope_nonce": envelope_nonce,
+                "remote_glyph_id": remote_glyph_id,
+                "local_glyph_id": local_glyph_id,
+                "received_at": _iso(_now()),
+                "previous_digest": previous,
+            }
+            event = ReplayEvent(**body, digest=_digest(body))
+            with self.path.open("a", encoding="utf-8") as fh:
+                fh.write(_canonical(asdict(event)) + "\n")
+            self._events.append(event)
+            self._loaded_size = self._size()
+            return event
 
     def verify(self) -> tuple[int, Optional[str]]:
-        self._load(force=True)
-        return (
-            len(self._events),
-            self._events[-1].digest if self._events else None,
-        )
+        with self.transaction():
+            self._load(force=True)
+            return (
+                len(self._events),
+                self._events[-1].digest if self._events else None,
+            )
 
 
 def _serialize_receipt(receipt: Receipt) -> Mapping[str, Any]:
@@ -465,93 +475,94 @@ class ProvenanceTransportImporter:
         self,
         bundle: PortableProvenanceBundle,
     ) -> ImportedRemoteClaim:
-        self._verify_bundle_signature(bundle)
-        self._verify_freshness(bundle)
+        with self.replay_ledger.transaction():
+            self._verify_bundle_signature(bundle)
+            self._verify_freshness(bundle)
 
-        if self.replay_ledger.seen(
-            sender_id=bundle.sender_id,
-            bundle_id=bundle.bundle_id,
-            nonce=bundle.envelope.nonce,
-        ):
-            raise ValueError("transport bundle replay detected")
+            if self.replay_ledger.seen(
+                sender_id=bundle.sender_id,
+                bundle_id=bundle.bundle_id,
+                nonce=bundle.envelope.nonce,
+            ):
+                raise ValueError("transport bundle replay detected")
 
-        leaf = bundle.leaf_glyph
-        if leaf.get("glyph_id") is None or leaf.get("glyph_type") is None:
-            raise ValueError("transport bundle leaf glyph is incomplete")
-        trace, decoded = self._verify_receipts_staged(bundle)
+            leaf = bundle.leaf_glyph
+            if leaf.get("glyph_id") is None or leaf.get("glyph_type") is None:
+                raise ValueError("transport bundle leaf glyph is incomplete")
+            trace, decoded = self._verify_receipts_staged(bundle)
 
-        # Only verified staged receipts are allowed into the persistent store.
-        for receipt in decoded:
-            self.receipt_store.append(receipt)
-        # Re-run using the destination store to ensure the same chain is valid
-        # in the actual persistent environment.
-        persisted_trace = self.receipt_verifier.verify_for_glyph(
-            bundle.leaf_receipt_id,
-            str(leaf["glyph_id"]),
-            max_hops=self.policy.max_receipts - 1,
-        )
-        if persisted_trace != trace:
-            raise ValueError("staged/persisted provenance trace mismatch")
+            # Only verified staged receipts are allowed into the persistent store.
+            for receipt in decoded:
+                self.receipt_store.append(receipt)
+            # Re-run using the destination store to ensure the same chain is valid
+            # in the actual persistent environment.
+            persisted_trace = self.receipt_verifier.verify_for_glyph(
+                bundle.leaf_receipt_id,
+                str(leaf["glyph_id"]),
+                max_hops=self.policy.max_receipts - 1,
+            )
+            if persisted_trace != trace:
+                raise ValueError("staged/persisted provenance trace mismatch")
 
-        local_ref = f"remote-bundle:{bundle.bundle_id}"
-        imported = self.graph.create(
-            "observation",
-            actor=self.actor,
-            content={
-                "kind": "remote_signed_claim",
-                "channel": "remote_transport",
-                "runtime_local": False,
-                "bundle_id": bundle.bundle_id,
-                "sender_id": bundle.sender_id,
-                "remote_glyph_id": leaf["glyph_id"],
-                "remote_glyph_type": leaf["glyph_type"],
-                "remote_actor": leaf.get("actor"),
-                "remote_content": dict(leaf.get("content") or {}),
-                "remote_created_at": leaf.get("created_at"),
-                "leaf_receipt_id": bundle.leaf_receipt_id,
-                "origin_authority_class": trace.origin_authority_class,
-                "origin_rank": trace.origin_rank,
-                "receipt_hops": trace.hops,
-                "freshness": "verified",
-                "authorization_effect": "none",
-            },
-            external_refs=(
-                local_ref,
-                f"remote-glyph:{leaf['glyph_id']}",
-            ),
-            metadata={
-                "transport": "portable_provenance_bundle",
-            },
-            dedupe_external_ref=local_ref,
-        )
+            local_ref = f"remote-bundle:{bundle.bundle_id}"
+            imported = self.graph.create(
+                "observation",
+                actor=self.actor,
+                content={
+                    "kind": "remote_signed_claim",
+                    "channel": "remote_transport",
+                    "runtime_local": False,
+                    "bundle_id": bundle.bundle_id,
+                    "sender_id": bundle.sender_id,
+                    "remote_glyph_id": leaf["glyph_id"],
+                    "remote_glyph_type": leaf["glyph_type"],
+                    "remote_actor": leaf.get("actor"),
+                    "remote_content": dict(leaf.get("content") or {}),
+                    "remote_created_at": leaf.get("created_at"),
+                    "leaf_receipt_id": bundle.leaf_receipt_id,
+                    "origin_authority_class": trace.origin_authority_class,
+                    "origin_rank": trace.origin_rank,
+                    "receipt_hops": trace.hops,
+                    "freshness": "verified",
+                    "authorization_effect": "none",
+                },
+                external_refs=(
+                    local_ref,
+                    f"remote-glyph:{leaf['glyph_id']}",
+                ),
+                metadata={
+                    "transport": "portable_provenance_bundle",
+                },
+                dedupe_external_ref=local_ref,
+            )
 
-        self.security_graph.bind_origin(
-            imported.glyph_id,
-            authority_class=trace.origin_authority_class,
-            reason="verified fresh remote provenance bundle",
-            metadata={
-                "bundle_id": bundle.bundle_id,
-                "sender_id": bundle.sender_id,
-                "remote_glyph_id": leaf["glyph_id"],
-                "remote_runtime_local": False,
-                "leaf_receipt_id": bundle.leaf_receipt_id,
-            },
-        )
+            self.security_graph.bind_origin(
+                imported.glyph_id,
+                authority_class=trace.origin_authority_class,
+                reason="verified fresh remote provenance bundle",
+                metadata={
+                    "bundle_id": bundle.bundle_id,
+                    "sender_id": bundle.sender_id,
+                    "remote_glyph_id": leaf["glyph_id"],
+                    "remote_runtime_local": False,
+                    "leaf_receipt_id": bundle.leaf_receipt_id,
+                },
+            )
 
-        replay = self.replay_ledger.append(
-            sender_id=bundle.sender_id,
-            bundle_id=bundle.bundle_id,
-            envelope_nonce=bundle.envelope.nonce,
-            remote_glyph_id=str(leaf["glyph_id"]),
-            local_glyph_id=imported.glyph_id,
-        )
-        return ImportedRemoteClaim(
-            bundle_id=bundle.bundle_id,
-            sender_id=bundle.sender_id,
-            local_glyph_id=imported.glyph_id,
-            remote_glyph_id=str(leaf["glyph_id"]),
-            origin_authority_class=trace.origin_authority_class,
-            origin_rank=trace.origin_rank,
-            receipt_ids=trace.receipt_ids,
-            replay_event_id=replay.event_id,
-        )
+            replay = self.replay_ledger.append(
+                sender_id=bundle.sender_id,
+                bundle_id=bundle.bundle_id,
+                envelope_nonce=bundle.envelope.nonce,
+                remote_glyph_id=str(leaf["glyph_id"]),
+                local_glyph_id=imported.glyph_id,
+            )
+            return ImportedRemoteClaim(
+                bundle_id=bundle.bundle_id,
+                sender_id=bundle.sender_id,
+                local_glyph_id=imported.glyph_id,
+                remote_glyph_id=str(leaf["glyph_id"]),
+                origin_authority_class=trace.origin_authority_class,
+                origin_rank=trace.origin_rank,
+                receipt_ids=trace.receipt_ids,
+                replay_event_id=replay.event_id,
+            )
