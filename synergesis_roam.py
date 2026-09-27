@@ -33,6 +33,7 @@ from typing import Any, Mapping, Optional, Protocol, Sequence, Tuple
 
 from synergesis_aegis import AegisSecurityGraph
 from synergesis_glyph_protocol import Glyph, GlyphAuditGraph
+from synergesis_storage_lock import PathTransaction
 
 
 def _now() -> str:
@@ -359,8 +360,13 @@ class MethodLedger:
     """Append-only empirical outcome ledger with SHA-256 chaining."""
 
     def __init__(self, path: str | Path):
-        self.path = Path(path)
+        self.path = Path(path).resolve()
         self.path.parent.mkdir(parents=True, exist_ok=True)
+        self._transaction = PathTransaction(self.path, label="method ledger")
+
+    def transaction(self):
+        """Return the bounded, reentrant transaction for this ledger path."""
+        return self._transaction
 
     def _raw(self) -> list[dict[str, Any]]:
         if not self.path.exists():
@@ -372,49 +378,118 @@ class MethodLedger:
         ]
 
     def events(self) -> Tuple[Mapping[str, Any], ...]:
+        with self.transaction():
+            return self._events_locked()
+
+    def _events_locked(self) -> Tuple[Mapping[str, Any], ...]:
         previous = None
         out = []
-        for index, event in enumerate(self._raw(), start=1):
-            if event["sequence"] != index:
-                raise ValueError("method ledger sequence failure")
-            if event["previous_digest"] != previous:
-                raise ValueError("method ledger chain failure")
-            body = {
-                "sequence": event["sequence"],
-                "previous_digest": event["previous_digest"],
-                "payload": event["payload"],
-            }
-            digest = _hash(body)
-            if digest != event["digest"]:
-                raise ValueError("method ledger integrity failure")
+        outcomes = []
+        try:
+            raw = self._raw()
+        except (OSError, json.JSONDecodeError) as exc:
+            raise ValueError("method ledger reconciliation required: unreadable history") from exc
+        for index, event in enumerate(raw, start=1):
+            try:
+                if not isinstance(event, dict):
+                    raise ValueError("event is not an object")
+                if type(event["sequence"]) is not int or event["sequence"] != index:
+                    raise ValueError("method ledger sequence failure")
+                if event["previous_digest"] != previous:
+                    raise ValueError("method ledger chain failure")
+                body = {
+                    "sequence": event["sequence"],
+                    "previous_digest": event["previous_digest"],
+                    "payload": event["payload"],
+                }
+                digest = _hash(body)
+                if digest != event["digest"]:
+                    raise ValueError("method ledger integrity failure")
+                payload = event["payload"]
+                outcomes.append(self._decode_payload(payload))
+            except (KeyError, TypeError, json.JSONDecodeError) as exc:
+                raise ValueError("method ledger reconciliation required: malformed history") from exc
             out.append(event)
             previous = digest
+        # Detect semantic duplication in legacy files instead of silently
+        # counting repeated sessions or reused outcome identifiers.
+        self._validate_unique(outcomes)
         return tuple(out)
 
-    def append(self, outcome: MethodOutcome) -> MethodOutcome:
-        events = self.events()
-        body = {
-            "sequence": len(events) + 1,
-            "previous_digest": events[-1]["digest"] if events else None,
-            "payload": {
-                **asdict(outcome),
-                "metrics": asdict(outcome.metrics),
-            },
-        }
-        event = {**body, "digest": _hash(body)}
-        with self.path.open("a", encoding="utf-8") as fh:
-            fh.write(_canon(event) + "\n")
+    @staticmethod
+    def _decode_payload(payload: Mapping[str, Any]) -> MethodOutcome:
+        try:
+            values = dict(payload)
+            values["metrics"] = OutcomeMetrics(**values["metrics"])
+            outcome = MethodOutcome(**values)
+        except (KeyError, TypeError, ValueError) as exc:
+            raise ValueError("method ledger reconciliation required: malformed outcome") from exc
+        MethodLedger._validate_outcome(outcome)
         return outcome
 
+    @staticmethod
+    def _validate_outcome(outcome: MethodOutcome) -> None:
+        if not isinstance(outcome, MethodOutcome):
+            raise ValueError("outcome must be a MethodOutcome")
+        for field in ("outcome_id", "session_id", "method_id", "domain"):
+            value = getattr(outcome, field)
+            if not isinstance(value, str) or not value.strip():
+                raise ValueError(f"{field} must be a nonempty string")
+        if not isinstance(outcome.metrics, OutcomeMetrics):
+            raise ValueError("metrics must be OutcomeMetrics")
+        if isinstance(outcome.utility, bool) or not isinstance(outcome.utility, (int, float)) or not math.isfinite(float(outcome.utility)):
+            raise ValueError("utility must be finite numeric")
+        if not isinstance(outcome.evaluated_at, str) or not outcome.evaluated_at.strip():
+            raise ValueError("evaluated_at must be a nonempty string")
+
+    @staticmethod
+    def _semantic(outcome: MethodOutcome) -> str:
+        payload = asdict(outcome)
+        payload.pop("evaluated_at", None)
+        return _canon(payload)
+
+    @staticmethod
+    def _validate_unique(outcomes: Sequence[MethodOutcome]) -> None:
+        sessions: set[str] = set()
+        ids: set[str] = set()
+        for outcome in outcomes:
+            if outcome.session_id in sessions:
+                raise ValueError("method ledger reconciliation required: duplicate/conflicting session")
+            if outcome.outcome_id in ids:
+                raise ValueError("method ledger reconciliation required: reused outcome_id")
+            sessions.add(outcome.session_id)
+            ids.add(outcome.outcome_id)
+
+    def append(self, outcome: MethodOutcome) -> MethodOutcome:
+        self._validate_outcome(outcome)
+        with self.transaction():
+            events = self._events_locked()
+            existing = [self._decode_payload(e["payload"]) for e in events]
+            for stored in existing:
+                if stored.session_id == outcome.session_id:
+                    if self._semantic(stored) == self._semantic(outcome):
+                        return stored
+                    raise ValueError("session_id already has a conflicting outcome")
+                if stored.outcome_id == outcome.outcome_id:
+                    raise ValueError("outcome_id is already used by another outcome")
+            body = {
+                "sequence": len(events) + 1,
+                "previous_digest": events[-1]["digest"] if events else None,
+                "payload": asdict(outcome),
+            }
+            event = {**body, "digest": _hash(body)}
+            with self.path.open("a", encoding="utf-8") as fh:
+                fh.write(_canon(event) + "\n")
+            return outcome
+
     def outcomes(self, *, method_id: Optional[str] = None) -> Tuple[MethodOutcome, ...]:
-        results = []
-        for event in self.events():
-            payload = dict(event["payload"])
-            payload["metrics"] = OutcomeMetrics(**payload["metrics"])
-            outcome = MethodOutcome(**payload)
-            if method_id is None or outcome.method_id == method_id:
-                results.append(outcome)
-        return tuple(results)
+        with self.transaction():
+            results = []
+            for event in self._events_locked():
+                outcome = self._decode_payload(event["payload"])
+                if method_id is None or outcome.method_id == method_id:
+                    results.append(outcome)
+            return tuple(results)
 
     def stats(self, method_id: str) -> MethodStats:
         values = [x.utility for x in self.outcomes(method_id=method_id)]
@@ -479,7 +554,8 @@ class ResearchMethodLearner:
             raise ValueError("no eligible research method")
 
         # Deterministic cold-start: least observed, then lexical method_id.
-        stats = {m.method_id: self.ledger.stats(m.method_id) for m in candidates}
+        with self.ledger.transaction():
+            stats = {m.method_id: self.ledger.stats(m.method_id) for m in candidates}
         zero = [m for m in candidates if stats[m.method_id].observations == 0]
         if zero:
             return sorted(zero, key=lambda m: m.method_id)[0]
