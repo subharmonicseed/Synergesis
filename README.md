@@ -1,5 +1,12 @@
 # Synergesis
 
+## Première découverte
+
+Voir [DECOUVRIR_SYN.md](DECOUVRIR_SYN.md) : une démonstration de la vraie stack,
+hors réseau, sans clé API, avec deux actions dont les résultats sont contrôlés
+et journalisés. Raisonnement programmé ; ce n’est pas encore un chat avec un LLM.
+
+
 Synergesis is a flat-module Python distribution for quantitative reasoning,
 Glyph Protocol records, provenance, policy, and bounded source adapters. The
 maintained modules are installed explicitly; the retired `SynergesisCore_DeepSeek_Pro_Complete.py`
