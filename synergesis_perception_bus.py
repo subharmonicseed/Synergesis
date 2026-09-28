@@ -143,6 +143,10 @@ class PerceptionBus:
         return f"percept-digest:{digest}"
 
     def ingest(self, percept: RawPercept) -> PerceptionRecord:
+        with self.graph.ledger.transaction():
+            return self._ingest(percept)
+
+    def _ingest(self, percept: RawPercept) -> PerceptionRecord:
         policy = self.policies.get(percept.source_id)
         if policy is None:
             raise ValueError("unknown perception source")
@@ -168,6 +172,12 @@ class PerceptionBus:
                 or raw.content.get("percept_digest") != digest
             ):
                 raise ValueError("perception external_id collision with different payload")
+            contract = raw.content.get("authority_contract")
+            if "authority_contract" in raw.content and contract != {
+                "authority_class": policy.origin_authority_class,
+                "taint_label": policy.taint_label,
+            }:
+                raise ValueError("perception authority/taint configuration changed")
         else:
             raw = self.graph.create(
                 "observation",
@@ -182,26 +192,32 @@ class PerceptionBus:
                     "percept_digest": digest,
                     "authority_from_payload": False,
                     "authorization_effect": "none",
+                    "authority_contract": {
+                        "authority_class": policy.origin_authority_class,
+                        "taint_label": policy.taint_label,
+                    },
                 },
                 external_refs=(raw_ref,),
                 metadata={"perception_stage": "raw"},
                 dedupe_external_ref=raw_ref,
             )
-            self.security_graph.bind_origin(
-                raw.glyph_id,
-                authority_class=policy.origin_authority_class,
-                reason="configured perception source policy",
-                metadata={
-                    "perception_source_id": percept.source_id,
-                    "perception_modality": percept.modality,
-                },
-            )
-            if policy.taint_label is not None:
-                self.security_graph.mark_taint(
-                    raw.glyph_id,
-                    label=policy.taint_label,
-                    reason="configured perception source taint",
-                )
+
+        # Legacy raw records have no durable contract. Recover only if both
+        # bindings already prove the current configuration; never infer it.
+        if "authority_contract" not in raw.content:
+            binding = self.security_graph.origin_binding(raw.glyph_id)
+            taints = self.security_graph._policy_targets("taint", raw.glyph_id)
+            if binding is None or binding.content.get("authority_class") != policy.origin_authority_class:
+                raise ValueError("legacy perception raw has no matching origin binding")
+            if policy.taint_label is None:
+                if any(t.content.get("active") for t in taints):
+                    raise ValueError("legacy perception raw has conflicting taint binding")
+            elif not any(t.content.get("active") and t.content.get("label") == policy.taint_label for t in taints):
+                raise ValueError("legacy perception raw has no matching taint binding")
+
+        with self.graph.ledger.transaction():
+            self._ensure_origin(raw.glyph_id, policy, percept)
+            self._ensure_taint(raw.glyph_id, policy)
 
         normalized_ref = f"normalized-percept:{raw.glyph_id}"
         existing_normalized = self.graph.ledger.find_by_external_ref(
@@ -210,6 +226,21 @@ class PerceptionBus:
         )
         if existing_normalized:
             normalized_glyph = existing_normalized[-1]
+            if (normalized_glyph.content.get("kind") != "normalized_perception"
+                    or normalized_glyph.content.get("source_id") != percept.source_id
+                    or normalized_glyph.content.get("modality") != percept.modality
+                    or normalized_glyph.content.get("percept_digest") != digest):
+                raise ValueError("normalized perception reference conflicts with percept")
+            parents = [edge.target for edge in self.graph.ledger.edges_from(normalized_glyph.glyph_id)
+                       if edge.relation == "derived_from"]
+            if any(parent != raw.glyph_id for parent in parents):
+                raise ValueError("normalized perception has conflicting provenance parent")
+            self.graph.ledger.append_edge(
+                source=normalized_glyph.glyph_id,
+                target=raw.glyph_id,
+                relation="derived_from",
+                actor=self.actor,
+            )
         else:
             normalized = adapter.normalize(percept)
             if not isinstance(normalized, NormalizedPercept):
@@ -242,3 +273,66 @@ class PerceptionBus:
             source_id=percept.source_id,
             modality=percept.modality,
         )
+
+    def _ensure_origin(self, raw_id: str, policy: PerceptionSourcePolicy, percept: RawPercept) -> None:
+        binding = self.security_graph.origin_binding(raw_id)
+        if binding is not None:
+            current = binding.content.get("authority_class")
+            if (current != policy.origin_authority_class
+                    or binding.content.get("rank") != self.security_graph.ORIGIN_CLASSES[policy.origin_authority_class]):
+                raise ValueError("existing perception origin binding conflicts with configured authority")
+        ref = f"perception-origin:{raw_id}"
+        glyphs = self.graph.ledger.find_by_external_ref(ref, glyph_type="policy")
+        if glyphs:
+            origin = glyphs[-1]
+            if (origin.content.get("kind") != "origin_authority"
+                    or origin.actor != self.security_graph.actor
+                    or origin.content.get("authority_class") != policy.origin_authority_class
+                    or origin.content.get("rank") != self.security_graph.ORIGIN_CLASSES[policy.origin_authority_class]
+                    or origin.content.get("perception_source_id") != percept.source_id
+                    or origin.content.get("perception_modality") != percept.modality):
+                raise ValueError("perception origin policy reference conflicts")
+        elif binding is not None:
+            origin = binding
+        else:
+            origin = self.graph.create(
+                "policy", actor=self.security_graph.actor,
+                content={"kind": "origin_authority", "authority_class": policy.origin_authority_class,
+                         "rank": self.security_graph.ORIGIN_CLASSES[policy.origin_authority_class],
+                         "reason": "configured perception source policy",
+                         "perception_source_id": percept.source_id,
+                         "perception_modality": percept.modality},
+                external_refs=(ref,), dedupe_external_ref=ref, derived_from=(raw_id,),
+            )
+        self.graph.ledger.append_edge(source=origin.glyph_id, target=raw_id, relation="targets", actor=self.security_graph.actor)
+        self.graph.ledger.append_edge(source=origin.glyph_id, target=raw_id, relation="derived_from", actor=self.security_graph.actor)
+
+    def _ensure_taint(self, raw_id: str, policy: PerceptionSourcePolicy) -> None:
+        taints = self.security_graph._policy_targets("taint", raw_id)
+        active = [t for t in taints if t.content.get("active")]
+        if policy.taint_label is None:
+            if taints:
+                raise ValueError("existing perception taint conflicts with configured policy")
+            return
+        if any(t.content.get("label") != policy.taint_label for t in active):
+            raise ValueError("existing perception taint conflicts with configured label")
+        if any(t.content.get("label") == policy.taint_label and not t.content.get("active") for t in taints):
+            raise ValueError("configured perception taint was explicitly cleared")
+        ref = f"perception-taint:{raw_id}"
+        glyphs = self.graph.ledger.find_by_external_ref(ref, glyph_type="policy")
+        if glyphs:
+            taint = glyphs[-1]
+            if (taint.content.get("kind") != "taint" or taint.actor != self.security_graph.actor
+                    or taint.content.get("label") != policy.taint_label or taint.content.get("active") is not True):
+                raise ValueError("perception taint policy reference conflicts")
+        elif active:
+            taint = active[-1]
+        else:
+            taint = self.graph.create(
+                "policy", actor=self.security_graph.actor,
+                content={"kind": "taint", "label": policy.taint_label, "active": True,
+                         "reason": "configured perception source taint"},
+                external_refs=(ref,), dedupe_external_ref=ref, derived_from=(raw_id,),
+            )
+        self.graph.ledger.append_edge(source=taint.glyph_id, target=raw_id, relation="targets", actor=self.security_graph.actor)
+        self.graph.ledger.append_edge(source=taint.glyph_id, target=raw_id, relation="derived_from", actor=self.security_graph.actor)

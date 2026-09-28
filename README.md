@@ -66,6 +66,11 @@ ROAM now records an attempt before invoking research/controller work. After an
 interruption, a completed receipt repairs local bookkeeping; an uncertain attempt
 stops further ticks for operator review. Preserve the adjacent `.roam-attempt.json`
 files with the journals in backups. See `SYN_ROAM_RECOVERY_VALIDATION.md`.
+Perception ingestion now retains its configured authority/taint contract and
+repairs interrupted policy/lineage links when retried. Conflicting settings and
+ambiguous legacy records stop for review. Normalization adapters may be retried;
+this is not exactly-once execution of external adapter effects. See
+`SYN_PERCEPTION_RECOVERY_VALIDATION.md`.
 The restoration and hardening branches are review drafts, not a released service.
 
 ## Use the maintained API
