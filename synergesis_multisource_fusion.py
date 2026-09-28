@@ -106,6 +106,9 @@ class FusionPolicy:
     research_domain: Optional[str] = None
     research_question_template: Optional[str] = None
     research_measurements: Optional[AttentionMeasurements] = None
+    # None preserves archive/replay behavior. When configured, captures older
+    # than this age are unresolved at the fusion boundary.
+    max_observation_age_seconds: Optional[float] = None
 
     def __post_init__(self):
         for name, value in (
@@ -128,6 +131,13 @@ class FusionPolicy:
             or float(self.max_time_span_seconds) < 0
         ):
             raise ValueError("max_time_span_seconds must be finite and >= 0")
+        if self.max_observation_age_seconds is not None and (
+            isinstance(self.max_observation_age_seconds, bool)
+            or not isinstance(self.max_observation_age_seconds, (int, float))
+            or not math.isfinite(float(self.max_observation_age_seconds))
+            or self.max_observation_age_seconds < 0
+        ):
+            raise ValueError("max_observation_age_seconds must be finite and >= 0")
         if (
             isinstance(self.minimum_independent_groups, bool)
             or not isinstance(self.minimum_independent_groups, int)
@@ -357,6 +367,7 @@ class MultisourcePerceptionFusion:
         reliability_ledger: PerceptionReliabilityLedger,
         agenda: Optional[ResearchAgenda] = None,
         aura: Optional[GlyphAuditedAura] = None,
+        now_fn=None,
     ):
         if security_graph.graph is not graph:
             raise ValueError("fusion security graph must share Glyph graph")
@@ -377,6 +388,7 @@ class MultisourcePerceptionFusion:
         self.reliability_ledger = reliability_ledger
         self.agenda = agenda
         self.aura = aura
+        self.now_fn = now_fn
         self._decision_sinks = []
         if aura is not None and aura.graph is not graph:
             raise ValueError("fusion aura must share Glyph graph")
@@ -585,6 +597,22 @@ class MultisourcePerceptionFusion:
             max(times) - min(times)
             > timedelta(seconds=self.policy.max_time_span_seconds)
         )
+        future_observation = False
+        stale_observation = False
+        evaluation_time = None
+        if self.now_fn is not None:
+            now = self.now_fn()
+            if not isinstance(now, datetime) or now.tzinfo is None or now.utcoffset() is None:
+                raise ValueError("now_fn must return a timezone-aware datetime")
+            now = now.astimezone(timezone.utc)
+            # Keep the clock boundary used for adjudication in the receipt.
+            # This makes replay stable at a fixed instant while preventing a
+            # future/current/stale decision from aliasing under one fusion ID.
+            evaluation_time = now.isoformat()
+            future_observation = max(times) > now
+            if self.policy.max_observation_age_seconds is not None:
+                # A set is only as fresh as its oldest required capture.
+                stale_observation = (now - min(times)).total_seconds() > self.policy.max_observation_age_seconds
 
         eligible_by_group: dict[str, list[SourceContribution]] = {}
         for contribution in contributions:
@@ -635,7 +663,11 @@ class MultisourcePerceptionFusion:
         margin = None
         winner_groups = 0
 
-        if time_span_exceeded:
+        if future_observation:
+            resolution_reason = "future_observation"
+        elif stale_observation:
+            resolution_reason = "stale_observation"
+        elif time_span_exceeded:
             resolution_reason = "time_span_exceeds_policy"
         elif not support_by_claim:
             resolution_reason = "no_eligible_independent_support"
@@ -673,6 +705,13 @@ class MultisourcePerceptionFusion:
         )
         fusion_payload = {
             "kind": "multisource_perception_fusion",
+            "fusion_identity_version": 2,
+            "evaluated_at": evaluation_time,
+            "configuration_fingerprint": _digest({
+                "policy": asdict(self.policy),
+                "profiles": [asdict(self.profiles[k]) for k in sorted(self.profiles)],
+                "temporal_clock_enabled": self.now_fn is not None,
+            }),
             "observation_kind": self.policy.observation_kind,
             "subject": subject,
             "status": status,

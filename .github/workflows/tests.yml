@@ -33,5 +33,27 @@ jobs:
           else
             python -m pip install ".[test]"
           fi
+      - name: Verify source manifest
+        run: python scripts/verify_manifest.py
       - name: Run test suite
-        run: python -m pytest -q
+        shell: bash
+        run: |
+          set -o pipefail
+          python -m pytest -q | tee pytest-receipt.txt
+      - name: Capture environment
+        if: always()
+        shell: bash
+        run: |
+          python --version > python-environment.txt
+          python -m pip freeze >> python-environment.txt
+          echo "$GITHUB_SHA" > tested-commit.txt
+      - name: Preserve validation receipts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: validation-python-${{ matrix.python-version }}
+          path: |
+            pytest-receipt.txt
+            python-environment.txt
+            tested-commit.txt
+            MANIFEST_SHA256.json

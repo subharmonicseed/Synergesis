@@ -13,6 +13,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import json
+import math
+import time
 from pathlib import Path
 import sqlite3
 from typing import Any, Mapping, Sequence
@@ -31,6 +33,7 @@ class SQLiteProbePolicy:
     bind_parameter_keys: tuple[str, ...]
     result_column: str
     max_rows: int = 8
+    query_timeout_seconds: float = 1.0
 
     def __post_init__(self):
         root = Path(self.allowed_root).resolve()
@@ -48,6 +51,10 @@ class SQLiteProbePolicy:
             raise ValueError("result_column is required")
         if self.max_rows < 1:
             raise ValueError("max_rows must be >= 1")
+        if (isinstance(self.query_timeout_seconds, bool)
+                or not math.isfinite(self.query_timeout_seconds)
+                or self.query_timeout_seconds <= 0):
+            raise ValueError("query_timeout_seconds must be finite and > 0")
 
 
 class SQLiteStateProbe:
@@ -85,30 +92,31 @@ class SQLiteStateProbe:
             conn = sqlite3.connect(uri, uri=True)
             try:
                 conn.row_factory = sqlite3.Row
-                rows = conn.execute(
-                    self.policy.select_sql,
-                    tuple(binds),
-                ).fetchmany(self.policy.max_rows + 1)
+                deadline = time.monotonic() + self.policy.query_timeout_seconds
+                conn.set_progress_handler(lambda: int(time.monotonic() >= deadline), 1000)
+                try:
+                    rows = conn.execute(self.policy.select_sql, tuple(binds)).fetchmany(self.policy.max_rows + 1)
+                except sqlite3.OperationalError as exc:
+                    if "interrupt" not in str(exc).lower():
+                        raise
+                    facts = {"database_exists": True, "known": False,
+                             "unknown_reason": "query_timeout", "found": None,
+                             "row_count": None, "value": None}
+                    rows = None
             finally:
                 conn.close()
 
-            truncated = len(rows) > self.policy.max_rows
-            rows = rows[: self.policy.max_rows]
-            values = []
-            for row in rows:
-                if self.policy.result_column not in row.keys():
-                    raise ValueError(
-                        "SQLite reality result_column missing from SELECT result"
-                    )
-                values.append(row[self.policy.result_column])
-            facts = {
-                "database_exists": True,
-                "found": bool(rows),
-                "row_count": len(rows),
-                "value": values[0] if values else None,
-                "values": values,
-                "truncated": truncated,
-            }
+            if rows is not None:
+                truncated = len(rows) > self.policy.max_rows
+                rows = rows[: self.policy.max_rows]
+                values = []
+                for row in rows:
+                    if self.policy.result_column not in row.keys():
+                        raise ValueError("SQLite reality result_column missing from SELECT result")
+                    values.append(row[self.policy.result_column])
+                facts = {"database_exists": True, "known": True, "found": bool(rows),
+                         "row_count": len(rows), "value": values[0] if values else None,
+                         "values": values, "truncated": truncated}
 
         return (
             RealityObservation.create(
@@ -139,8 +147,10 @@ class LoopbackHttpJsonPolicy:
             raise ValueError("path_prefix must start with /")
         if not self.path_parameter.strip() or not self.json_field.strip():
             raise ValueError("path_parameter and json_field are required")
-        if self.timeout_seconds <= 0:
-            raise ValueError("timeout_seconds must be > 0")
+        if (isinstance(self.timeout_seconds, bool)
+                or not math.isfinite(self.timeout_seconds)
+                or self.timeout_seconds <= 0):
+            raise ValueError("timeout_seconds must be finite and > 0")
         if self.max_response_bytes < 1:
             raise ValueError("max_response_bytes must be >= 1")
 

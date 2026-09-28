@@ -204,7 +204,14 @@ class GlyphLedger:
     fresh full-chain verification from disk.
     """
 
-    def __init__(self, path: str | Path):
+    def __init__(self, path: str | Path, *, max_event_bytes: int = 1_048_576,
+                 max_journal_bytes: int = 67_108_864):
+        for name, value in (("max_event_bytes", max_event_bytes),
+                            ("max_journal_bytes", max_journal_bytes)):
+            if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
+                raise ValueError(f"{name} must be a positive integer")
+        self.max_event_bytes = max_event_bytes
+        self.max_journal_bytes = max_journal_bytes
         self.path = Path(path).expanduser().resolve()
         self.path.parent.mkdir(parents=True, exist_ok=True)
         self._cache_size: Optional[int] = None
@@ -231,10 +238,24 @@ class GlyphLedger:
     def _raw_events(self) -> list[dict[str, Any]]:
         if not self.path.exists():
             return []
+        if self.path.stat().st_size > self.max_journal_bytes:
+            raise ValueError("glyph journal exceeds configured byte limit")
         out = []
-        for line in self.path.read_text(encoding="utf-8").splitlines():
-            if line.strip():
-                out.append(json.loads(line))
+        total = 0
+        with self.path.open("rb") as stream:
+            while True:
+                line = stream.readline(self.max_event_bytes + 1)
+                if not line:
+                    break
+                total += len(line)
+                if total > self.max_journal_bytes:
+                    raise ValueError("glyph journal exceeds configured byte limit")
+                if len(line) > self.max_event_bytes:
+                    raise ValueError("glyph event exceeds configured byte limit")
+                if not line.endswith(b"\n"):
+                    raise ValueError("glyph journal has an unterminated record")
+                if line.strip():
+                    out.append(json.loads(line))
         return out
 
     def _decode_glyph(self, payload: Mapping[str, Any]) -> Glyph:
@@ -354,8 +375,13 @@ class GlyphLedger:
             payload=dict(payload),
             digest=digest,
         )
-        with self.path.open("a", encoding="utf-8") as fh:
-            fh.write(_canonical(asdict(event)) + "\n")
+        encoded = (_canonical(asdict(event)) + "\n").encode("utf-8")
+        if len(encoded) > self.max_event_bytes:
+            raise ValueError("glyph event exceeds configured byte limit")
+        if (self._file_size() or 0) + len(encoded) > self.max_journal_bytes:
+            raise ValueError("glyph journal exceeds configured byte limit")
+        with self.path.open("ab") as fh:
+            fh.write(encoded)
 
         # Incremental cache update; no full ledger re-read on normal appends.
         self._events_cache.append(event)

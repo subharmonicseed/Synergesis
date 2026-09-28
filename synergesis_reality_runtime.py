@@ -92,6 +92,10 @@ class ProcessMarkerProbe:
                 continue
 
         facts = {
+            # A matching marker is evidence of current presence only. It does
+            # not establish that this action created the process.
+            "presence_observed": bool(matches),
+            "creation_attributed_to_action": False,
             "marker_found": bool(matches),
             "match_count": len(matches),
             "matches": matches,

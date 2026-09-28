@@ -872,6 +872,15 @@ class SynRoam:
                 "domain": outcome.domain,
                 "utility": outcome.utility,
                 "metrics": asdict(outcome.metrics),
+                # Receipt metadata is additive: outcome_id and MethodLedger's
+                # historical semantic identity intentionally remain unchanged.
+                "configuration_fingerprint": _hash({
+                    "identity_version": 1,
+                    "selection": asdict(self.learner.config),
+                    "utility_weights": asdict(self.utility_weights),
+                    "method_id": session.method_id,
+                }),
+                "configuration_version": 1,
             },
             external_refs=(outcome.outcome_id,),
             derived_from=parents,

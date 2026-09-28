@@ -24,6 +24,9 @@ from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from hashlib import sha256
 import json
+import os
+import stat
+import errno
 import math
 from pathlib import Path
 from typing import Any, Callable, Mapping, Optional, Protocol, Sequence, Tuple
@@ -262,6 +265,50 @@ class FileStateProbe:
             raise ValueError("filesystem reality probe path escapes allowed_root") from exc
         return resolved
 
+    def _open_contained(self, raw_path: Any) -> tuple[int, Path]:
+        """Open a lexically-contained path by walking from the configured root."""
+        if not isinstance(raw_path, str) or not raw_path.strip():
+            raise ValueError("file path parameter must be a non-empty string")
+        candidate = Path(raw_path)
+        if candidate.is_absolute():
+            try:
+                relative = candidate.relative_to(self.allowed_root)
+            except ValueError as exc:
+                raise ValueError("filesystem reality probe path escapes allowed_root") from exc
+        else:
+            relative = candidate
+        if any(part == ".." for part in relative.parts):
+            raise ValueError("filesystem reality probe path escapes allowed_root")
+        relative = Path(*(part for part in relative.parts if part not in ("", ".")))
+        resolved = self.allowed_root / relative
+        parts = relative.parts
+        if not parts:
+            raise ValueError("filesystem reality probe path must name a file")
+        nofollow = getattr(os, "O_NOFOLLOW", None)
+        directory = getattr(os, "O_DIRECTORY", None)
+        if nofollow is None or directory is None:
+            raise RuntimeError("filesystem probe requires O_NOFOLLOW and O_DIRECTORY support")
+        root_fd = os.open(self.allowed_root, os.O_RDONLY | directory | nofollow)
+        current_fd = root_fd
+        try:
+            for component in parts[:-1]:
+                next_fd = os.open(component, os.O_RDONLY | directory | nofollow, dir_fd=current_fd)
+                if current_fd != root_fd:
+                    os.close(current_fd)
+                current_fd = next_fd
+            fd = os.open(parts[-1], os.O_RDONLY | nofollow | getattr(os, "O_NONBLOCK", 0), dir_fd=current_fd)
+            return fd, resolved
+        except OSError as exc:
+            if exc.errno == errno.ENOENT:
+                return -1, resolved
+            if exc.errno in (errno.ELOOP, errno.ENOTDIR):
+                raise ValueError("filesystem reality probe refuses symlinks") from exc
+            raise
+        finally:
+            if current_fd != root_fd:
+                os.close(current_fd)
+            os.close(root_fd)
+
     def observe(
         self,
         *,
@@ -269,20 +316,37 @@ class FileStateProbe:
         resource: str,
         parameters: Mapping[str, Any],
     ) -> Sequence[RealityObservation]:
-        path = self._resolve(parameters.get(self.path_parameter))
+        fd, path = self._open_contained(parameters.get(self.path_parameter))
         facts: dict[str, Any] = {
-            "exists": path.exists(),
-            "is_file": path.is_file(),
+            "exists": fd >= 0,
+            "is_file": False,
             "path": str(path),
         }
-        if path.is_file():
-            size = path.stat().st_size
-            facts["size_bytes"] = size
-            if size <= self.max_hash_bytes:
-                facts["sha256"] = sha256(path.read_bytes()).hexdigest()
-            else:
-                facts["sha256"] = None
-                facts["hash_skipped_reason"] = "file_exceeds_max_hash_bytes"
+        if fd >= 0:
+            try:
+                info = os.fstat(fd)
+                facts["is_file"] = stat.S_ISREG(info.st_mode)
+                if facts["is_file"]:
+                    facts["size_bytes"] = info.st_size
+                    if info.st_size <= self.max_hash_bytes:
+                        chunks = []
+                        remaining = self.max_hash_bytes + 1
+                        while remaining:
+                            chunk = os.read(fd, min(65536, remaining))
+                            if not chunk:
+                                break
+                            chunks.append(chunk)
+                            remaining -= len(chunk)
+                        content = b"".join(chunks)
+                        facts["sha256"] = sha256(content).hexdigest() if len(content) <= self.max_hash_bytes else None
+                    else:
+                        facts["sha256"] = None
+                        facts["hash_skipped_reason"] = "file_exceeds_max_hash_bytes"
+                else:
+                    facts["size_bytes"] = None
+                    facts["sha256"] = None
+            finally:
+                os.close(fd)
         else:
             facts["size_bytes"] = None
             facts["sha256"] = None
@@ -570,20 +634,27 @@ class RealityVerifier:
 
         observation_glyphs: list[Glyph] = []
         for observation in observations:
-            glyph = self.graph.create(
-                "observation",
-                actor=f"observer:{observation.observer_id}",
-                content={
-                    "kind": "runtime_reality_observation",
-                    "observer_id": observation.observer_id,
-                    "channel": observation.channel,
-                    "resource": observation.resource,
-                    "facts": dict(observation.facts),
-                    "observed_at": observation.observed_at,
-                },
-                external_refs=(observation.event_id,),
-                dedupe_external_ref=observation.event_id,
-            )
+            body = {
+                "observer_id": observation.observer_id,
+                "channel": observation.channel,
+                "resource": observation.resource,
+                "facts": dict(observation.facts),
+                "observed_at": observation.observed_at,
+            }
+            content = {"kind": "runtime_reality_observation", **body}
+            with self.graph.ledger.transaction():
+                persisted = self.graph.ledger.find_by_external_ref(
+                    observation.event_id, glyph_type="observation"
+                )
+                if any(item.content != content for item in persisted):
+                    raise ValueError("reality observation event_id conflicts with persisted body")
+                glyph = self.graph.create(
+                    "observation",
+                    actor=f"observer:{observation.observer_id}",
+                    content=content,
+                    external_refs=(observation.event_id,),
+                    dedupe_external_ref=observation.event_id,
+                )
             binding = self._bindings[observation.observer_id]
             if self.security_graph.origin_binding(glyph.glyph_id) is None:
                 self.security_graph.bind_origin(

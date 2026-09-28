@@ -1,5 +1,13 @@
 # Synergesis
 
+## État consolidé
+
+Voir [SYN_AUDIT_STATUS.md](SYN_AUDIT_STATUS.md) pour le bilan des 29 points,
+les validations et les limites restantes. La démonstration utilise maintenant
+une session gérée qui réserve son stockage pendant son exécution.
+`python -m synergesis_runtime_session DOSSIER` fournit un diagnostic structurel
+borné, sans afficher le contenu des enregistrements ; il ne certifie pas la chaîne.
+
 ## Première découverte
 
 Voir [DECOUVRIR_SYN.md](DECOUVRIR_SYN.md) : une démonstration de la vraie stack,
