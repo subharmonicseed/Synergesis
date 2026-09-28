@@ -142,6 +142,12 @@ class FusionProvisionalBeliefs:
         if existing:
             return existing[-1]  # Replay never renews TTL or changes the current head.
         previous = self._head(decision.subject)
+        previous_status = previous.content['status'] if previous else None
+        if (previous is not None and previous_status == 'provisional'
+                and now >= _time(previous.content['expires_at'])):
+            # Expiry is effective at the caller's clock boundary even before a
+            # new revision is appended. Retain the old event unchanged.
+            previous_status = 'expired'
         status, reason, applied = 'provisional', 'fusion_support_admitted', True
         claim = decision.selected_claim
         eligible_groups = {item.independence_group for item in decision.source_contributions if item.eligible}
@@ -154,7 +160,15 @@ class FusionProvisionalBeliefs:
         elif previous and earliest < _time(previous.content['observed_through']):
             status, reason, applied = 'rejected', 'overlapping_or_older_observation', False
         elif previous and earliest == _time(previous.content['observed_through']):
-            if previous.content['status'] != 'provisional' or claim != previous.content['claim']:
+            # Once a capture instant has conflicted, later arrival order must
+            # not restore a winner. An expired provisional head is the sole
+            # exception: its TTL no longer lets that old claim veto fresh
+            # evidence at the same timestamp.
+            same_instant_conflicted = (previous_status == 'suspended'
+                                       and previous.content['reason'] == 'same_time_conflict')
+            differs_from_live_claim = (previous_status == 'provisional'
+                                       and claim != previous.content['claim'])
+            if previous_status != 'expired' and (same_instant_conflicted or differs_from_live_claim):
                 status, reason, claim = 'suspended', 'same_time_conflict', None
         if applied and status == 'provisional':
             supported = (decision.status == 'resolved'
@@ -165,7 +179,7 @@ class FusionProvisionalBeliefs:
                          and decision.support_margin >= self.policy.minimum_margin)
             if not supported:
                 status, reason, claim = 'suspended', 'insufficient_or_conflicting_support', None
-            elif previous and previous.content['status'] == 'provisional' and previous.content['claim'] != claim:
+            elif previous and previous_status == 'provisional' and previous.content['claim'] != claim:
                 status, reason, claim = 'suspended', 'newer_fusion_contradicts_belief', None
         if not applied:
             claim = None

@@ -17,7 +17,8 @@ from synergesis_roam_attention import AttentionWeights
 from synergesis_roam_evolution import EvolutionPolicy
 from synergesis_roam_service import RoamServiceLimits
 from synergesis_glyph_protocol import GlyphLedger
-from synergesis_secure_roam_stack_v2 import SecureRoamConfig, build_secure_roam_reality_stack
+from synergesis_secure_roam_stack_v2 import SecureRoamConfig
+from synergesis_runtime_session import secure_roam_runtime_session
 
 
 class Reasoner:
@@ -125,7 +126,7 @@ def run_scenario(root: Path, *, claim_only: bool) -> dict:
 
     probe = FileStateProbe(observer_id="os:file", allowed_root=runtime,
                           path_parameter="path", max_hash_bytes=1024)
-    stack = build_secure_roam_reality_stack(
+    with secure_roam_runtime_session(
         config=config(root), reasoner=Reasoner(), planning_provider=Planner(),
         executors={"file.write": executor}, identity_registry=identities,
         capability_store=CapabilityStore(root / "capabilities.jsonl"),
@@ -139,39 +140,39 @@ def run_scenario(root: Path, *, claim_only: bool) -> dict:
             RealityAssertion("os:file", "sha256", "sha256_parameter_utf8", parameter_key="content"),
         )),),
         source_registry=SourceRegistry(), source_adapters={}, research_methods=(),
-    )
-    recorded = stack.agent_audit.run_cycle(
-        goal=Goal.create("Écrire et vérifier le fichier de démonstration"),
-        observation=AgentObservation("request", {"scenario": "offline discovery"}, "user"),
-    )
-    cycle = recorded.cycle
-    ledger_path = root / "stack" / "glyph_ledger.jsonl"
-    checkpoint = stack.graph.ledger.verify()
-    # Re-open durable audit with a fresh reader, not just the in-memory graph.
-    reopened = GlyphLedger(ledger_path)
-    if reopened.verify() != checkpoint:
-        raise RuntimeError("Audit checkpoint differs on reopening")
-    reality = cycle.action_result.output["reality"]
-    result = {
-        "scenario": "claim_only" if claim_only else "real_write",
-        "authorized": cycle.policy.allowed,
-        "effective_success": cycle.action_result.success,
-        "reality": reality,
-        "learning_score": cycle.learning.score,
-        "file_exists": target.exists(),
-        "audit": asdict(checkpoint),
-        "ledger": str(ledger_path),
-        "cycle_glyph_id": recorded.cycle_glyph_id,
-        "trace_ids": {k: v for k, v in asdict(recorded).items() if k.endswith("glyph_id")},
-        "kinds": sorted({g.content.get("kind") for g in reopened.glyphs()
-                         if isinstance(g.content, dict) and isinstance(g.content.get("kind"), str)}),
-    }
-    if not result["authorized"] or result["effective_success"] != (not claim_only):
-        raise RuntimeError("Unexpected authorization or observed outcome")
-    if claim_only and result["learning_score"] != 0:
-        raise RuntimeError("Unconfirmed success was rewarded")
-    return result
+    ) as stack:
 
+        recorded = stack.agent_audit.run_cycle(
+            goal=Goal.create("Écrire et vérifier le fichier de démonstration"),
+            observation=AgentObservation("request", {"scenario": "offline discovery"}, "user"),
+        )
+        cycle = recorded.cycle
+        ledger_path = root / "stack" / "glyph_ledger.jsonl"
+        checkpoint = stack.graph.ledger.verify()
+        # Re-open durable audit with a fresh reader, not just the in-memory graph.
+        reopened = GlyphLedger(ledger_path)
+        if reopened.verify() != checkpoint:
+            raise RuntimeError("Audit checkpoint differs on reopening")
+        reality = cycle.action_result.output["reality"]
+        result = {
+            "scenario": "claim_only" if claim_only else "real_write",
+            "authorized": cycle.policy.allowed,
+            "effective_success": cycle.action_result.success,
+            "reality": reality,
+            "learning_score": cycle.learning.score,
+            "file_exists": target.exists(),
+            "audit": asdict(checkpoint),
+            "ledger": str(ledger_path),
+            "cycle_glyph_id": recorded.cycle_glyph_id,
+            "trace_ids": {k: v for k, v in asdict(recorded).items() if k.endswith("glyph_id")},
+            "kinds": sorted({g.content.get("kind") for g in reopened.glyphs()
+                             if isinstance(g.content, dict) and isinstance(g.content.get("kind"), str)}),
+        }
+        if not result["authorized"] or result["effective_success"] != (not claim_only):
+            raise RuntimeError("Unexpected authorization or observed outcome")
+        if claim_only and result["learning_score"] != 0:
+            raise RuntimeError("Unconfirmed success was rewarded")
+        return result
 
 def run_discovery(output: Path | None = None) -> dict:
     if sys.platform == "win32":

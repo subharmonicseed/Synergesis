@@ -54,6 +54,35 @@ def _parse_time(value: str) -> datetime:
     return parsed.astimezone(timezone.utc)
 
 
+def _safe_path_resource(value: str) -> bool:
+    """Reject traversal and platform-specific separators for path-scoped grants."""
+    if "\\" in value or "\x00" in value:
+        return False
+    # Validate path components after any namespace/scheme prefix (for example
+    # ``system:/safe``); URI-style empty components remain allowed.
+    path = value.split(":", 1)[1] if ":" in value else value
+    return all(part not in {".", ".."} for part in path.split("/"))
+
+
+def _resource_matches(resource: str, scope: str, mode: str) -> bool:
+    if scope == "*":
+        return True
+    if mode == "legacy_prefix":
+        # Compatibility contract for previously issued and signed grants.
+        return resource.startswith(scope)
+    if mode == "exact":
+        return resource == scope
+    if mode == "path":
+        if not _safe_path_resource(resource) or not _safe_path_resource(scope):
+            return False
+        if resource == scope or (scope.endswith("/") and resource == scope.rstrip("/")):
+            return True
+        boundary_scope = scope if scope.endswith("/") else scope + "/"
+        return resource.startswith(boundary_scope)
+    # Grants constructed outside the normal dataclass constructor fail closed.
+    return False
+
+
 def _canonical_native(value: Any) -> Any:
     if is_dataclass(value):
         return _canonical_native(asdict(value))
@@ -284,6 +313,13 @@ class CapabilityGrant:
     parent_grant_id: Optional[str]
     issuer_fingerprint: str
     signature_b64: str
+    # ``legacy_prefix`` preserves the original signed grant contract. New
+    # grants may opt into narrower matching without changing old signatures.
+    resource_match_mode: str = "legacy_prefix"
+
+    def __post_init__(self):
+        if self.resource_match_mode not in {"legacy_prefix", "exact", "path"}:
+            raise ValueError("unknown capability resource matching mode")
 
 
 @dataclass(frozen=True)
@@ -307,8 +343,9 @@ def _grant_unsigned_payload(
     delegable: bool,
     parent_grant_id: Optional[str],
     issuer_fingerprint: str,
+    resource_match_mode: str = "legacy_prefix",
 ) -> dict[str, Any]:
-    return {
+    payload = {
         "issuer_id": issuer_id,
         "subject_id": subject_id,
         "action_type": action_type,
@@ -319,6 +356,11 @@ def _grant_unsigned_payload(
         "parent_grant_id": parent_grant_id,
         "issuer_fingerprint": issuer_fingerprint,
     }
+    # Omitting the default keeps grants issued before this field existed
+    # verifiable byte-for-byte under their original signature contract.
+    if resource_match_mode != "legacy_prefix":
+        payload["resource_match_mode"] = resource_match_mode
+    return payload
 
 
 class CapabilityAuthority:
@@ -335,12 +377,15 @@ class CapabilityAuthority:
         delegable: bool = False,
         parent_grant_id: Optional[str] = None,
         issued_at: Optional[str] = None,
+        resource_match_mode: str = "legacy_prefix",
     ) -> CapabilityGrant:
         if not subject_id.strip() or not action_type.strip():
             raise ValueError("capability subject and action_type are required")
         prefixes = tuple(dict.fromkeys(str(x) for x in resource_prefixes))
         if not prefixes or any(not x.strip() for x in prefixes):
             raise ValueError("capability requires at least one resource prefix")
+        if resource_match_mode not in {"legacy_prefix", "exact", "path"}:
+            raise ValueError("unknown capability resource matching mode")
         issued = issued_at or _now()
         if _parse_time(expires_at) <= _parse_time(issued):
             raise ValueError("capability expiry must be after issuance")
@@ -355,6 +400,7 @@ class CapabilityAuthority:
             delegable=delegable,
             parent_grant_id=parent_grant_id,
             issuer_fingerprint=self.signer.fingerprint,
+            resource_match_mode=resource_match_mode,
         )
         grant_id = f"cap:{sha256(_canonical_bytes(body)).hexdigest()[:32]}"
         signed = {"grant_id": grant_id, **body}
@@ -371,6 +417,7 @@ class CapabilityAuthority:
             parent_grant_id=parent_grant_id,
             issuer_fingerprint=self.signer.fingerprint,
             signature_b64=_b64(signature),
+            resource_match_mode=resource_match_mode,
         )
 
     def revoke(
@@ -432,16 +479,16 @@ class CapabilityStore:
         ]
 
     def grants(self) -> Tuple[CapabilityGrant, ...]:
-        return tuple(
-            CapabilityGrant(
-                **{
-                    **event["value"],
-                    "resource_prefixes": tuple(event["value"]["resource_prefixes"]),
-                }
-            )
-            for event in self._events()
-            if event["kind"] == "grant"
-        )
+        grants = []
+        for event in self._events():
+            if event["kind"] != "grant":
+                continue
+            value = dict(event["value"])
+            # Old persisted grants predate resource_match_mode.
+            value.setdefault("resource_match_mode", "legacy_prefix")
+            value["resource_prefixes"] = tuple(value["resource_prefixes"])
+            grants.append(CapabilityGrant(**value))
+        return tuple(grants)
 
     def revocations(self) -> Tuple[CapabilityRevocation, ...]:
         return tuple(
@@ -484,6 +531,7 @@ def verify_grant_signature(
             delegable=grant.delegable,
             parent_grant_id=grant.parent_grant_id,
             issuer_fingerprint=grant.issuer_fingerprint,
+            resource_match_mode=grant.resource_match_mode,
         ),
     }
     expected_id = f"cap:{sha256(_canonical_bytes({k: v for k, v in body.items() if k != 'grant_id'})).hexdigest()[:32]}"
@@ -880,10 +928,8 @@ class AegisGuard:
             return False
         if not (_parse_time(grant.issued_at) <= now < _parse_time(grant.expires_at)):
             return False
-        if not any(
-            prefix == "*" or resource.startswith(prefix)
-            for prefix in grant.resource_prefixes
-        ):
+        if not any(_resource_matches(resource, scope, grant.resource_match_mode)
+                   for scope in grant.resource_prefixes):
             return False
         if grant.grant_id in self._active_revocations():
             return False
