@@ -30,6 +30,9 @@ test = [
 # explicit so retired prototypes and one-off scripts are never installed as the
 # advertised API by an import glob.
 py-modules = [
+    "synergesis_conversation",
+    "synergesis_responses_backend",
+    "synergesis_chat",
     "synergesis_model_context_bridge",
     "synergesis_storage_lock",
     "synergesis_runtime_session",

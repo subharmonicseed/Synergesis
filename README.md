@@ -15,6 +15,13 @@ vérifiés par empreinte et produit un dossier JSON sous budget déclaré. Il pe
 de donner le même contexte à plusieurs assistants. Le comptage par défaut est
 une estimation ; les tests cités ne sont pas présentés comme exécutés.
 
+## Première conversation texte
+
+Voir [PREMIERE_CONVERSATION.md](PREMIERE_CONVERSATION.md) pour essayer sans clé,
+puis brancher un modèle via API. Les tests du fournisseur sont simulés ; une
+session avec une vraie clé reste à valider. REALITY contrôle la remise du texte,
+pas sa vérité.
+
 ## Première découverte
 
 Voir [DECOUVRIR_SYN.md](DECOUVRIR_SYN.md) : une démonstration de la vraie stack,
