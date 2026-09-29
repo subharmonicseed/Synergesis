@@ -1,0 +1,7 @@
+{
+  "budget": 6000,
+  "counter": "estimated_chars_div_4; not guaranteed to match destination tokenizer",
+  "measured": 1627,
+  "reserve": 512,
+  "total_with_reserve": 2139
+}

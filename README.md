@@ -8,6 +8,13 @@ une session gérée qui réserve son stockage pendant son exécution.
 `python -m synergesis_runtime_session DOSSIER` fournit un diagnostic structurel
 borné, sans afficher le contenu des enregistrements ; il ne certifie pas la chaîne.
 
+## Contexte de développement borné
+
+Le [ModelContextBridge v0](SYN_MODEL_CONTEXT_BRIDGE.md) extrait des symboles Python
+vérifiés par empreinte et produit un dossier JSON sous budget déclaré. Il permet
+de donner le même contexte à plusieurs assistants. Le comptage par défaut est
+une estimation ; les tests cités ne sont pas présentés comme exécutés.
+
 ## Première découverte
 
 Voir [DECOUVRIR_SYN.md](DECOUVRIR_SYN.md) : une démonstration de la vraie stack,
