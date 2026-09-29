@@ -29,7 +29,7 @@ La CI est contrôlée séparément ; ce nombre ne prouve pas une autonomie compl
 | COG-08 | Traité | Expiration inclusive ; un conflit simultané suspendu reste suspendu. |
 | COG-09 | Traité pour nouveaux reçus | Empreintes de configuration fusion/ROAM ; pas d'empreinte de toute implémentation externe. |
 | OPS-01 | Traité | Paquet, dépendances cœur/test ; extras runners pour les tracés. |
-| OPS-02 | Traité pour découverte | Guide et démonstration réelle hors réseau ; pas encore de chat LLM. |
+| OPS-02 | Conversation préparée | Démonstration hors réseau et adaptateur de conversation texte ; essai API réel restant. |
 | OPS-03 | Traité | CI 3.11/3.12, manifest vérifié et reçus de tests/environnement archivés par commit. |
 | OPS-04 | Traité | Prototype retiré de l'API installée et téléchargement implicite supprimé. |
 | OPS-05 | Traité | Scripts sans suppression automatique, dossier neuf, corpus explicite, imports sans exécution. |
@@ -57,10 +57,11 @@ services ; ni une suppression de fichier ni un force-push ne révoquent une clé
 Aucune purge d'historique ou utilisation de ces identifiants n'est effectuée ici.
 La nouvelle règle .gitignore est préventive uniquement.
 
-Le dialogue avec un fournisseur LLM reste à brancher et à valider avec une clé
+Le dialogue texte dispose maintenant d'un adaptateur API et d'un lancement
+décrits dans `PREMIERE_CONVERSATION.md`. Il reste à valider avec une clé
 neuve fournie par l'opérateur hors dépôt. Les imports partiels incertains
 requièrent encore une revue opérateur. Le remplacement de main et la parité des
 applications legacy restent une décision de livraison distincte.
 
-Le ModelContextBridge est une prochaine tâche cadrée dans
-`SYN_CONTEXT_BRIDGE_TASK.md`, pas une fonction déclarée déjà livrée.
+Le ModelContextBridge v0 est livré dans la PR #46 et décrit dans
+`SYN_MODEL_CONTEXT_BRIDGE.md` ; son comptage par défaut reste estimatif.
