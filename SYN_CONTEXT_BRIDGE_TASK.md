@@ -1,6 +1,8 @@
 # SynTask — contexte de développement borné (contre-expertise)
 
-Ce document définit un prochain travail ; il ne prétend pas que le bridge existe.
+Spécification historique du bridge. La première implémentation est maintenant
+décrite dans [SYN_MODEL_CONTEXT_BRIDGE.md](SYN_MODEL_CONTEXT_BRIDGE.md),
+avec son périmètre livré et ses limites.
 
 ## Référence
 
