@@ -1,4 +1,5 @@
 import sys, os, socket, subprocess, time, json, shutil, select
+import textwrap
 from pathlib import Path
 
 
@@ -108,7 +109,7 @@ def main(argv=None):
 
     def spawn_listener(host, port):
         proc = subprocess.Popen(
-            [sys.executable, "-u", "-c", SERVER_CODE, host, str(port)],
+            [sys.executable, "-u", "-c", textwrap.dedent(SERVER_CODE), host, str(port)],
             stdout=subprocess.PIPE,
             stderr=subprocess.DEVNULL,
             text=True,
@@ -194,7 +195,7 @@ def main(argv=None):
         observer_id="os:process",
         policy=ProcessMarkerPolicy(
             marker_parameter="marker",
-            allowed_executable_basenames=frozenset({Path(sys.executable).name}),
+            allowed_executable_basenames=frozenset({Path(sys.executable).name, Path(sys.executable).resolve().name}),
             max_processes_scanned=4096,
         ),
     )
