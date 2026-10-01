@@ -31,7 +31,16 @@ def main(argv=None):
     parser.add_argument('--output', type=Path, required=True, help="Nouveau dossier de journaux")
     parser.add_argument('--message', help="Un seul message, puis quitter")
     parser.add_argument('--max-turns', type=int, default=10)
+    parser.add_argument('--profile', type=Path, help="Dossier persistant de souvenirs et questions explicites")
+    parser.add_argument('--document', action='append', type=Path, default=[],
+                        help="Document .txt/.md autorisé pour /initiative (maximum 16)")
     args = parser.parse_args(argv)
+    if args.profile is not None and args.profile.expanduser().resolve() == args.output.expanduser().resolve():
+        parser.error('Le profil et le dossier de session doivent être distincts')
+    if args.document and args.profile is None:
+        parser.error('--document nécessite --profile')
+    if len(args.document) > 16:
+        parser.error('Maximum 16 documents explicitement autorisés')
     if not 1 <= args.max_turns <= 20:
         parser.error('--max-turns doit être compris entre 1 et 20')
     if args.message is not None and (not args.message.strip() or len(args.message) > 8192):
@@ -45,6 +54,13 @@ def main(argv=None):
     if sys.platform == 'win32':
         parser.error('Utiliser Linux, macOS ou Ubuntu dans WSL sous Windows')
     try:
+        profile = None
+        if args.profile is not None:
+            from synergesis_initiative import InitiativeProfile
+            profile = InitiativeProfile(args.profile)
+            print('Profil persistant actif : souvenirs déclarés et questions, sans navigation Internet.\n'
+                  'Les souvenirs retrouvés seront transmis au modèle choisi.\n'
+                  'Commandes : /memoriser TEXTE, /memoire MOTS, /question TEXTE, /initiative')
         if args.provider == 'openai':
             from synergesis_responses_backend import OpenAIResponsesBackend
             print('Mode API OpenAI : les messages et leur historique seront envoyés au fournisseur.\n'
@@ -66,9 +82,10 @@ def main(argv=None):
         print('Les échanges sont conservés dans les journaux locaux.\n'
               'REALITY vérifie la remise du texte au programme, pas sa véracité.\n'
               'Pour quitter : /quitter')
-        with open_conversation(args.output, backend, max_turns=args.max_turns) as session:
+        with open_conversation(args.output, backend, max_turns=args.max_turns, profile=profile) as session:
             print('Dossier : ' + terminal_text(str(args.output.resolve())))
-            for _ in range(args.max_turns):
+            turns = 0
+            for _ in range(args.max_turns + 32):
                 if args.message is not None:
                     message = args.message
                 else:
@@ -85,7 +102,29 @@ def main(argv=None):
                     if len(message) > 8192:
                         print('Message trop long : session terminée avant appel au modèle.')
                         return 1
+                if message.startswith(('/memoriser ', '/memoire', '/question ', '/initiative')):
+                    if profile is None:
+                        raise ValueError('Ces commandes nécessitent --profile')
+                    import json
+                    command, _, body = message.partition(' ')
+                    if command == '/memoriser':
+                        result = profile.remember(body)
+                    elif command == '/memoire':
+                        result = profile.recall(body)
+                    elif command == '/question':
+                        result = profile.add_question(body)
+                    elif command == '/initiative' and not body.strip():
+                        result = profile.step(args.document)
+                    else:
+                        raise ValueError('Commande de profil inconnue')
+                    print('Profil > ' + terminal_text(json.dumps(result, ensure_ascii=False, default=str)))
+                    if args.message is not None:
+                        break
+                    continue
+                if turns >= args.max_turns:
+                    break
                 receipt = session.turn(message)
+                turns += 1
                 print('Syn > ' + terminal_text(receipt['text']))
                 print('Trace : ' + terminal_text(receipt['cycle_glyph_id']))
                 if args.message is not None:

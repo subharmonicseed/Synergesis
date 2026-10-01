@@ -15,6 +15,12 @@ vérifiés par empreinte et produit un dossier JSON sous budget déclaré. Il pe
 de donner le même contexte à plusieurs assistants. Le comptage par défaut est
 une estimation ; les tests cités ne sont pas présentés comme exécutés.
 
+## Mémoire et initiative bornée
+
+Voir [SYN_INITIATIVE_V0.md](SYN_INITIATIVE_V0.md) : profil persistant de souvenirs
+explicites, questions conservées entre sessions et recherche avec traces dans
+les documents choisis. Aucun entraînement ni accès Internet automatique.
+
 ## Première conversation texte
 
 Voir [PREMIERE_CONVERSATION.md](PREMIERE_CONVERSATION.md) pour essayer sans clé,
