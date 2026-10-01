@@ -21,6 +21,12 @@ Voir [SYN_INITIATIVE_V0.md](SYN_INITIATIVE_V0.md) : profil persistant de souveni
 explicites, questions conservées entre sessions et recherche avec traces dans
 les documents choisis. Aucun entraînement ni accès Internet automatique.
 
+## Comparaison avec le modèle seul
+
+Voir [SYN_COMPARAISON.md](SYN_COMPARAISON.md) pour comparer le même modèle
+seul, avec le contexte identique à celui de Syn, puis dans Syn. Le contrôle
+simulé vérifie le protocole ; une mesure du modèle local reste nécessaire.
+
 ## Première conversation texte
 
 Voir [PREMIERE_CONVERSATION.md](PREMIERE_CONVERSATION.md) pour essayer sans clé,
