@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Syn · God's Eye View</title>
+  </head>
+  <body>
+    <main id="map" aria-label="Globe sismique God's Eye View">
+      <div id="cesiumContainer"></div>
+      <div id="cesium-credits"></div>
+      <p id="map-note">Globe local God's Eye View · données USGS conservées par Syn</p>
+    </main>
+    <aside id="syn-panel" aria-label="Observations et preuves Syn">
+      <header><p class="eyebrow">SYN × GOD'S EYE VIEW</p><h1>Observations sismiques</h1></header>
+      <p id="status" role="status">Connexion au journal local de Syn…</p>
+      <div class="actions"><button id="refresh" type="button">Relire le journal</button><button id="overview" type="button">Vue globale</button></div>
+      <p class="legend">Posez votre question dans le terminal Syn, puis actualisez ici.</p>
+      <p class="legend"><span class="dot real"></span> Observation USGS · <span class="dot simulation"></span> Simulation explicite</p>
+      <p class="legend">Disques : rouge = profondeur &lt; 70 km ; orange = 70–300 km ; jaune = ≥ 300 km.</p>
+      <p class="legend">Taille des disques = effet visuel de magnitude, aucune zone de dégâts observée.</p>
+      <p id="collection"></p>
+      <section id="question" aria-label="Question de Syn" hidden></section>
+      <section id="answer" aria-label="Réponse de Syn conservée" hidden></section>
+      <ul id="events" aria-label="Événements conservés"></ul>
+      <section id="selection" aria-label="Événement choisi" hidden></section>
+      <ul id="limitations"></ul>
+      <footer><a id="source" hidden target="_blank" rel="noreferrer">Requête USGS exacte</a><p id="read-budget"></p><p>Chaque bouton sélectionne un événement conservé. Le globe utilise le moteur et la couche séismes de God's Eye View ; aucun modèle d’IA n’invente ces observations.</p><p>Code GEV : MIT · données USGS : domaine public.</p></footer>
+    </aside>
+    <script type="module" src="/src/syn/main.js"></script>
+  </body>
+</html>
