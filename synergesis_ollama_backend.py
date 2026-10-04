@@ -9,7 +9,8 @@ class _NoRedirect(urllib.request.HTTPRedirectHandler):
 
 
 class OllamaBackend:
-    def __init__(self, model, *, port=11434, seed=20261001, timeout=60):
+    def __init__(self, model, *, port=11434, seed=20261001, timeout=60,
+                 response_format="json"):
         if not isinstance(model, str) or not model.strip() or len(model) > 128:
             raise ValueError("Un nom de modèle local est requis")
         if type(port) is not int or not 1 <= port <= 65535:
@@ -18,7 +19,10 @@ class OllamaBackend:
             raise ValueError("Seed invalide")
         if not isinstance(timeout, (int, float)) or not 1 <= timeout <= 60:
             raise ValueError("Timeout invalide")
+        if response_format is not None and response_format != "json":
+            raise ValueError("Format de réponse invalide")
         self.model, self.port, self.seed, self.timeout = model, port, seed, timeout
+        self.response_format = response_format
         self.usage = None
         self._opener = urllib.request.build_opener(
             urllib.request.ProxyHandler({}), _NoRedirect())
@@ -31,11 +35,13 @@ class OllamaBackend:
                     or item["role"] not in {"user", "assistant", "system"}
                     or not isinstance(item["content"], str)):
                 raise ValueError("Message invalide")
-        payload = json.dumps({"model": self.model, "messages": messages,
-                              "stream": False, "format": "json",
-                              "options": {"temperature": 0, "seed": self.seed,
-                                          "num_predict": 512}},
-                             ensure_ascii=False).encode("utf-8")
+        body = {"model": self.model, "messages": messages, "stream": False,
+                "options": {"temperature": 0, "seed": self.seed,
+                            "num_predict": 512}}
+        # Comparisons retain structured JSON; conversation requests ordinary text.
+        if self.response_format is not None:
+            body["format"] = self.response_format
+        payload = json.dumps(body, ensure_ascii=False).encode("utf-8")
         if len(payload) > 131072:
             raise ValueError("Contexte trop volumineux")
         request = urllib.request.Request(

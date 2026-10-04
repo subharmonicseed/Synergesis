@@ -43,8 +43,9 @@ Le programme doit afficher la déclaration originale et sa référence, avant to
 appel au modèle. En mode démonstration, les réponses restent programmées. Le même
 paramètre `--profile` peut être utilisé avec le backend OpenAI existant : les
 souvenirs sélectionnés sont alors envoyés au fournisseur. Le backend Mistral
-installé sur le PC de Gabriel n'est pas présent dans cette branche GitHub ; son
-raccordement doit reprendre le paramètre `profile` de `open_conversation`.
+peut maintenant être sélectionné avec `--provider ollama --model mistral` et
+le même `--profile`, si ce modèle est déjà disponible dans le serveur Ollama local.
+Voir [le guide de conversation](PREMIERE_CONVERSATION.md) pour le port et les limites.
 
 ## Une prochaine étape effectivement exécutée
 
