@@ -87,25 +87,21 @@ class ProvenanceReceiptStore:
     def __init__(self, path: str | Path):
         self.path = Path(path)
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        self._cache_signature: Optional[tuple[int, int]] = None
+        self._cache_signature: Optional[str] = None
+        self._cache_loaded = False
         self._events_cache: Tuple[Mapping[str, Any], ...] = ()
         self._receipts_cache: Tuple[Receipt, ...] = ()
         self._by_id: dict[str, Receipt] = {}
 
-    def _file_signature(self) -> Optional[tuple[int, int]]:
-        if not self.path.exists():
-            return None
-        stat = self.path.stat()
-        return (int(stat.st_size), int(stat.st_mtime_ns))
-
-    def _raw(self) -> list[dict[str, Any]]:
-        if not self.path.exists():
-            return []
-        return [
-            json.loads(line)
-            for line in self.path.read_text(encoding="utf-8").splitlines()
-            if line.strip()
-        ]
+    def _snapshot(self) -> tuple[Optional[str], bytes]:
+        # File size and timestamps are not an integrity boundary: equal-size
+        # rewrites can preserve them, including on coarse-resolution clocks.
+        # Parse exactly the bytes whose fingerprint is used for invalidation.
+        try:
+            data = self.path.read_bytes()
+        except FileNotFoundError:
+            return None, b""
+        return sha256(data).hexdigest(), data
 
     @staticmethod
     def _decode_envelope(raw: Mapping[str, Any]) -> SignedEnvelope:
@@ -140,15 +136,16 @@ class ProvenanceReceiptStore:
         raise ValueError(f"unknown receipt kind: {kind}")
 
     def _load_verified(self, *, force: bool = False) -> None:
-        signature = self._file_signature()
-        if not force and signature == self._cache_signature:
+        signature, data = self._snapshot()
+        if not force and self._cache_loaded and signature == self._cache_signature:
             return
 
         previous = None
         events = []
         receipts = []
         by_id: dict[str, Receipt] = {}
-        for index, event in enumerate(self._raw(), start=1):
+        raw_events = (json.loads(line) for line in data.decode("utf-8").splitlines() if line.strip())
+        for index, event in enumerate(raw_events, start=1):
             if int(event["sequence"]) != index:
                 raise ValueError("receipt ledger sequence failure")
             if event["previous_digest"] != previous:
@@ -174,6 +171,7 @@ class ProvenanceReceiptStore:
         self._receipts_cache = tuple(receipts)
         self._by_id = by_id
         self._cache_signature = signature
+        self._cache_loaded = True
 
     def events(self) -> Tuple[Mapping[str, Any], ...]:
         self._load_verified()
@@ -207,7 +205,9 @@ class ProvenanceReceiptStore:
         self._events_cache = (*self._events_cache, event)
         self._receipts_cache = (*self._receipts_cache, receipt)
         self._by_id[receipt.receipt_id] = receipt
-        self._cache_signature = self._file_signature()
+        # An append invalidates the snapshot. Do not mark arbitrary disk bytes
+        # as verified merely because they were read after our own write.
+        self._cache_loaded = False
         return receipt
 
     def receipts(self) -> Tuple[Receipt, ...]:

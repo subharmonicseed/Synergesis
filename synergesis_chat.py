@@ -66,7 +66,8 @@ def main(argv=None):
         try:
             # Validate before creating a profile or session. No connection here.
             local_backend = OllamaBackend(args.model,
-                port=args.port if args.port is not None else 11434, response_format=None)
+                port=args.port if args.port is not None else 11434,
+                response_format=None, conversation=True, timeout=180)
         except ValueError:
             parser.error('Configuration Ollama invalide : modèle de 1 à 128 caractères, port de 1 à 65535')
     try:
@@ -113,7 +114,8 @@ def main(argv=None):
         with open_conversation(args.output, backend, max_turns=args.max_turns, profile=profile) as session:
             print('Dossier : ' + terminal_text(str(args.output.resolve())))
             turns = 0
-            for _ in range(args.max_turns + 32):
+            profile_commands = 0
+            while True:
                 if args.message is not None:
                     message = args.message
                 else:
@@ -160,6 +162,9 @@ def main(argv=None):
                 if message.startswith(('/memoriser ', '/memoire', '/question ', '/initiative')):
                     if profile is None:
                         raise ValueError('Ces commandes nécessitent --profile')
+                    if profile_commands >= 32:
+                        print('Limite de 32 commandes de profil atteinte : session terminée.')
+                        break
                     import json
                     command, _, body = message.partition(' ')
                     if command == '/memoriser':
@@ -172,6 +177,7 @@ def main(argv=None):
                         result = profile.step(args.document)
                     else:
                         raise ValueError('Commande de profil inconnue')
+                    profile_commands += 1
                     print('Profil > ' + terminal_text(json.dumps(result, ensure_ascii=False, default=str)))
                     if args.message is not None:
                         break
@@ -181,6 +187,11 @@ def main(argv=None):
                 receipt = session.turn(message)
                 turns += 1
                 print('Syn > ' + terminal_text(receipt['text']))
+                for reference in receipt.get('source_references', []):
+                    target = (reference['path'] + ':' + str(reference['line'])
+                              if reference['kind'] in {'document', 'web'} else reference['id'])
+                    print(terminal_text('Source fournie [' + reference['alias'] + '] : ' + target
+                          + (' ; citée dans le texte' if reference['cited'] else ' ; non citée')))
                 print('Trace : ' + terminal_text(receipt['cycle_glyph_id']))
                 if args.message is not None:
                     break

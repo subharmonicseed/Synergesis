@@ -116,7 +116,8 @@ def _call(factory, messages, *, session=None, profile=None):
             proxy.reply(messages)
         else:
             stage = 'syn_session_or_delivery'
-            with open_conversation(session, proxy, profile=profile, max_turns=1) as syn:
+            with open_conversation(session, proxy, profile=profile, max_turns=1,
+                                   profile_format='json') as syn:
                 delivered = syn.turn(messages[-1]['content'])
             record['delivery'] = {k: delivered[k] for k in
                                   ('cycle_glyph_id', 'reality_status',

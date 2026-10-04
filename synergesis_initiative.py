@@ -31,8 +31,26 @@ def _text(value):
     return value.strip()
 
 
+# Grammatical words do not identify a memory or a document topic. This is a
+# lexical selector, not a greeting detector or a semantic relevance verdict.
+_COMMON_WORDS = frozenset("""
+    alors au aucun aussi autre aux avec avoir ce ceci cela ces cet cette ceux
+    chaque comme comment dans de des du elle elles en entre est et être eux
+    fait ici il ils je la le les leur leurs lui ma mais me même mes moi mon
+    ne ni nos notre nous on ou où par pas pour pourquoi que quel quelle quelles
+    quels qui sa sans se ses si son sont sous sur ta te tes toi ton tous tout
+    toute toutes tu un une vos votre vous ai as avons avez ont était étaient
+    suis sommes êtes sera seront soit être été avoir avais avait avaient
+    a an and are as at be been being but by can could did do does for from had
+    has have he her hers him his how if in into is it its me mine more my no
+    not of on or our ours shall she should so some than that the their theirs
+    them then there these they this those to too us was we were what when where
+    which who why will with would you your yours
+""".split())
+
+
 def _tokens(value):
-    return set(re.findall(r"[^\W_]{2,}", value.casefold(), re.UNICODE))
+    return set(re.findall(r"[^\W_]{2,}", value.casefold(), re.UNICODE)) - _COMMON_WORDS
 
 
 def _snapshot(path, remaining=1_048_576):
@@ -145,7 +163,7 @@ class InitiativeProfile:
         with self.ledger.transaction():
             glyphs = self._state()
             matches = [g for g in glyphs if g.content["kind"] == "user_claim" and needles & _tokens(g.content["text"])]
-            pending = self._pending(glyphs)
+            pending = [q for q in self._pending(glyphs) if needles & _tokens(q["text"])]
             questions = {g.glyph_id: g.content["text"] for g in glyphs if g.content["kind"] == "question"}
             receipts = [g for g in reversed(glyphs) if g.content["kind"] == "receipt" and (needles & _tokens(questions.get(g.content["question_id"], "")) or any(needles & _tokens(e["text"]) for e in g.content["evidence"]))]
             packet = {"kind": "initiative_context", "search_query_truncated": len(query) > 2048,

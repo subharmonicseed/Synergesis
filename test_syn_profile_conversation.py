@@ -60,10 +60,10 @@ def test_document_receipt_reaches_next_chat_after_restart(tmp_path):
     restored=InitiativeProfile(tmp_path/'profile')
     backend=Backend()
     with open_conversation(tmp_path/'session',backend,profile=restored) as session:
-        session.turn('Explique QUOTA-EXEMPLE en citant la source disponible.')
+        receipt=session.turn('Explique QUOTA-EXEMPLE en citant la source disponible.')
     supplied=backend.calls[0][-1]['content']
-    assert result['receipt_id'] in supplied
-    assert result['evidence'][0]['sha256'] in supplied
+    assert receipt['source_references'][0]['receipt_id'] == result['receipt_id']
+    assert receipt['source_references'][0]['sha256'] == result['evidence'][0]['sha256']
     assert 'le plafond est trois recherches locales.' in supplied
     assert 'local_snapshot_unverified' in supplied
 
