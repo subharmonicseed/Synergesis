@@ -39,7 +39,44 @@ Choisir un nouveau dossier à chaque lancement. Le programme conserve les échan
 et les événements dans ses journaux locaux ; utiliser un dossier personnel.
 Il ne recharge pas automatiquement une ancienne conversation.
 
-## Brancher un vrai modèle
+## Discuter avec un modèle local Ollama
+
+Avec Ollama déjà lancé et un modèle déjà installé sur la même machine, utiliser
+son nom exact (visible dans `ollama list`) :
+
+```bash
+python -m synergesis_chat --provider ollama --model mistral \
+  --profile ./profil-syn --output ./conversation-locale-1
+```
+
+Remplacer `mistral` si le modèle porte un autre nom. Syn contacte uniquement
+`http://127.0.0.1:11434/api/chat` ; `--port` permet un autre port local. Sous WSL
+ou Docker, le serveur doit être joignable sur cette adresse depuis l'environnement
+où Syn tourne. Syn ne lance pas Ollama, ne télécharge aucun modèle et ne demande
+aucune clé API. Utiliser un modèle local : cette adresse ne garantit pas à elle
+seule que le serveur Ollama n'est pas configuré pour appeler un service distant.
+
+La conversation demande du texte ordinaire ; le banc `synergesis_compare`
+conserve son format JSON. Les appels n'utilisent ni proxy, ni redirection, ni outil.
+Chaque tour effectue un appel, sans relance automatique ; 10 tours par défaut,
+ajustables de 1 à 20 avec `--max-turns`. La sortie est plafonnée à 512 tokens
+demandés et 16000 caractères acceptés. Le délai de 60 secondes est un timeout
+réseau, pas une garantie de durée totale maximale.
+
+Pour vérifier la mémoire explicite, saisir `/memoriser Mon atelier est à Jarrie.`,
+puis `/quitter`. Relancer avec le même `--profile` et un nouveau dossier
+`--output`, puis saisir `/memoire Jarrie`. Cette commande locale relit la déclaration
+sans appeler le modèle. Une question comme « Où est mon atelier ? » transmet les
+souvenirs correspondants au modèle ; leur présence ne garantit pas sa réponse.
+Les commandes `/question` et `/initiative` restent celles de
+[l'initiative locale](SYN_INITIATIVE_V0.md).
+
+Les tests de ce raccordement utilisent un serveur HTTP local contrôlé, pas Mistral.
+Ils vérifient le format texte, l'historique, la transmission des souvenirs, les
+traces, le plafond de tours et l'arrêt sur erreur sans afficher le corps serveur.
+L'essai avec le véritable modèle du PC reste à effectuer.
+
+## Brancher un modèle OpenAI
 
 Choisir un identifiant de modèle compatible Responses API et accessible sur son
 compte API. Remplacer `IDENTIFIANT_MODELE` dans cette commande :
@@ -75,8 +112,8 @@ une session API sur la machine de Gabriel, avec son modèle et son budget, puis 
 
 La conversation est textuelle et tour par tour : pas encore de voix, streaming,
 interface graphique ou activité autonome prolongée. Le backend OpenAI n'est pas
-un modèle local ; le protocole `reply(messages) -> str` permet un autre backend
-ultérieurement. Le ModelContextBridge de la PR précédente reste un outil de
+un modèle local ; le mode Ollama ci-dessus utilise le même protocole
+`reply(messages) -> str`. Le ModelContextBridge de la PR précédente reste un outil de
 préparation de dossiers de développement, distinct de cette conversation.
 
 Les droits sur les autres outils, la reprise après coupure et le remplacement

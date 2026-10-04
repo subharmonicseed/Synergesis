@@ -26,8 +26,9 @@ def terminal_text(text):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description="Première conversation texte bornée avec Syn")
-    parser.add_argument('--provider', choices=('demo', 'openai'), default='demo')
-    parser.add_argument('--model', help="Identifiant du modèle disponible sur votre compte API")
+    parser.add_argument('--provider', choices=('demo', 'openai', 'ollama'), default='demo')
+    parser.add_argument('--model', help="Identifiant API ou nom exact du modèle installé dans Ollama")
+    parser.add_argument('--port', type=int, help="Port Ollama sur 127.0.0.1 (défaut : 11434)")
     parser.add_argument('--output', type=Path, required=True, help="Nouveau dossier de journaux")
     parser.add_argument('--message', help="Un seul message, puis quitter")
     parser.add_argument('--max-turns', type=int, default=10)
@@ -47,12 +48,23 @@ def main(argv=None):
         parser.error('Le message doit contenir entre 1 et 8192 caractères')
     if args.output.exists():
         parser.error('Le dossier de sortie doit être nouveau')
-    if args.provider == 'openai' and not args.model:
-        parser.error('--model est obligatoire avec --provider openai')
-    if args.provider == 'demo' and args.model:
-        parser.error('--model ne sert que pour --provider openai')
+    if args.provider in ('openai', 'ollama') and (not args.model or not args.model.strip()):
+        parser.error('--model est obligatoire avec --provider openai ou ollama')
+    if args.provider == 'demo' and args.model is not None:
+        parser.error('--model nécessite --provider openai ou ollama')
+    if args.port is not None and args.provider != 'ollama':
+        parser.error('--port nécessite --provider ollama')
     if sys.platform == 'win32':
         parser.error('Utiliser Linux, macOS ou Ubuntu dans WSL sous Windows')
+    local_backend = None
+    if args.provider == 'ollama':
+        from synergesis_ollama_backend import OllamaBackend
+        try:
+            # Validate before creating a profile or session. No connection here.
+            local_backend = OllamaBackend(args.model,
+                port=args.port if args.port is not None else 11434, response_format=None)
+        except ValueError:
+            parser.error('Configuration Ollama invalide : modèle de 1 à 128 caractères, port de 1 à 65535')
     try:
         profile = None
         if args.profile is not None:
@@ -76,6 +88,13 @@ def main(argv=None):
                     api_key = getpass.getpass('Clé API neuve (saisie masquée, hors dépôt) : ')
             backend = OpenAIResponsesBackend(api_key, args.model, max_calls=args.max_turns)
             del api_key
+        elif args.provider == 'ollama':
+            backend = local_backend
+            print('Mode Ollama : messages, historique et souvenirs retrouvés envoyés au serveur '
+                  'sur 127.0.0.1.\n'
+                  'Utiliser un modèle installé localement ; Syn ne télécharge aucun modèle '
+                  'et ne demande aucune clé API.\n'
+                  'Chaque tour effectue un appel, sans outil ni navigation Internet.')
         else:
             backend = DemoBackend()
             print('Mode démonstration : réponse programmée, sans modèle ni réseau.')
