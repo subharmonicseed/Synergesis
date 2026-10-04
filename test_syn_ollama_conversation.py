@@ -59,7 +59,9 @@ def test_text_history_and_turn_limit(server, tmp_path, monkeypatch, capsys):
     assert first['stream'] is False
     assert 'format' not in first and 'tools' not in first
     assert first['options']['num_predict'] == 512
-    assert second['messages'] == [
+    assert second['messages'][0]['role'] == 'system'
+    assert first['messages'][0] == second['messages'][0]
+    assert second['messages'][1:] == [
         {'role': 'user', 'content': 'Bonjour'},
         {'role': 'assistant', 'content': 'Réponse contrôlée du serveur de test.'},
         {'role': 'user', 'content': 'Et ensuite ?'},

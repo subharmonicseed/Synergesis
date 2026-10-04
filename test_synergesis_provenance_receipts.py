@@ -1,4 +1,5 @@
 from dataclasses import replace
+import os
 
 import pytest
 
@@ -296,6 +297,43 @@ def test_tampered_receipt_store_is_detected(tmp_path):
     store.path.write_text(raw.replace('"rank":1', '"rank":5'), encoding="utf-8")
     with pytest.raises(ValueError, match="integrity failure"):
         store.events()
+
+
+@pytest.mark.parametrize("operation", ["events", "receipts", "get", "get_optional", "append", "verify"])
+def test_equal_size_tampering_with_restored_mtime_invalidates_every_cached_access(tmp_path, operation):
+    graph, _, _, store, _, _, ingress, _ = setup(tmp_path)
+    origin = graph.create("evidence", actor="web", content={"x": 1})
+    receipt = ingress.issue_origin(glyph_id=origin.glyph_id,
+        authority_class="external_untrusted", rank=1)
+    store.append(receipt)
+    # Ensure the cache is populated independently of the append path.
+    assert store.get(receipt.receipt_id) == receipt
+    before = store.path.stat()
+    original = store.path.read_bytes()
+    changed = original.replace(b'"rank":1', b'"rank":5')
+    assert changed != original and len(changed) == len(original)
+    store.path.write_bytes(changed)
+    os.utime(store.path, ns=(before.st_atime_ns, before.st_mtime_ns))
+    assert store.path.stat().st_mtime_ns == before.st_mtime_ns
+    assert store.path.stat().st_size == before.st_size
+    accessor = getattr(store, operation)
+    args = (receipt,) if operation == "append" else ((receipt.receipt_id,) if operation in {"get", "get_optional"} else ())
+    with pytest.raises(ValueError, match="integrity failure"):
+        accessor(*args)
+
+
+def test_deleted_receipt_store_cannot_return_stale_cached_receipts(tmp_path):
+    graph, _, _, store, _, _, ingress, _ = setup(tmp_path)
+    origin = graph.create("evidence", actor="web", content={"x": 1})
+    receipt = ingress.issue_origin(glyph_id=origin.glyph_id,
+        authority_class="external_untrusted", rank=1)
+    store.append(receipt)
+    assert store.get(receipt.receipt_id) == receipt
+    store.path.unlink()
+    assert store.events() == () and store.receipts() == ()
+    assert store.get_optional(receipt.receipt_id) is None
+    with pytest.raises(KeyError, match="unknown provenance receipt"):
+        store.get(receipt.receipt_id)
 
 
 def test_origin_rank_must_match_aegis_policy(tmp_path):

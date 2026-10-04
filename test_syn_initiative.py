@@ -214,3 +214,59 @@ def test_receipt_packet_bounded_deduplicated_and_omissions_explicit(tmp_path):
     assert packet['omitted']['evidence'] > 0
     keys = [(e['path'], e['sha256'], e['line']) for r in packet['receipts'] for e in r['evidence']]
     assert len(set(keys)) == len(keys)
+
+
+def test_common_french_and_english_words_do_not_select_profile_content(tmp_path):
+    from synergesis_initiative import _tokens
+    assert _tokens('Où est le cuivre et where is the copper?') == {'cuivre', 'copper'}
+    profile = InitiativeProfile(tmp_path)
+    profile.remember('Le cuivre est dans notre atelier.')
+    profile.add_question('Where is the copper in our workshop?')
+    packet = profile.packet('Le et de pour nous the and is in our')
+    assert packet['memories'] == []
+    assert packet['questions'] == []
+    assert packet['receipts'] == []
+
+
+def test_packet_filters_pending_questions_without_changing_the_agenda(tmp_path):
+    profile = InitiativeProfile(tmp_path)
+    relevant = profile.add_question('Quel est le plafond QUOTA-EXEMPLE ?')
+    unrelated = profile.add_question('Où se trouve le cuivre ?')
+    original = profile.path.read_bytes()
+    packet = profile.packet('Explique QUOTA-EXEMPLE en citant la source.')
+    assert [q['id'] for q in packet['questions']] == [relevant]
+    assert packet['omitted']['questions'] == 0
+    assert [q['id'] for q in profile.pending()] == [relevant, unrelated]
+    assert profile.path.read_bytes() == original
+    # The selector handles all lexical requests identically; no canned greeting
+    # or special conversation response is involved.
+    assert profile.packet('Bonjour')['questions'] == []
+
+
+@pytest.mark.parametrize('status', ['no_evidence', 'failed'])
+def test_matching_empty_receipt_retains_its_status_after_restart(tmp_path, status):
+    profile = InitiativeProfile(tmp_path / 'profile')
+    question_id = profile.add_question('Quel est le plafond QUOTA-ABSENT ?')
+    source = tmp_path / 'allowed.md'
+    source.write_text('Cuivre : conducteur électrique.\n')
+    documents = [tmp_path / 'missing.md'] if status == 'failed' else [source]
+    result = profile.step(documents)
+    assert result['status'] == status and result['evidence'] == []
+    restored = InitiativeProfile(tmp_path / 'profile')
+    packet = restored.packet('Quelle information as-tu sur QUOTA-ABSENT ?')
+    receipt = packet['receipts'][0]
+    assert receipt['receipt_id'] == result['receipt_id']
+    assert receipt['question_id'] == question_id
+    assert receipt['status'] == status and receipt['solved'] is False
+    assert receipt['evidence'] == []
+    assert restored.packet('Quelle information as-tu sur cuivre ?')['receipts'] == []
+
+
+def test_common_words_do_not_create_false_document_evidence(tmp_path):
+    profile = InitiativeProfile(tmp_path / 'profile')
+    profile.add_question('Quel est le quota QUOTA-ABSENT ?')
+    source = tmp_path / 'allowed.md'
+    source.write_text('Le cuivre est disponible dans le laboratoire.\n')
+    result = profile.step([source])
+    assert result['status'] == 'no_evidence'
+    assert result['evidence'] == []
