@@ -183,7 +183,7 @@ class ConversationSession:
                 "sha256": sha256(box.get("text", "").encode("utf-8")).hexdigest(),
             }),)
 
-    def turn(self, text: str) -> dict:
+    def turn(self, text: str, *, source_receipt_id=None) -> dict:
         if not self._active or self._busy:
             raise RuntimeError("Conversation is closed or already processing a turn")
         if not isinstance(text, str) or not text.strip() or len(text) > MAX_INPUT_CHARS:
@@ -192,8 +192,15 @@ class ConversationSession:
         if self._attempts >= self._max_turns:
             raise ValueError("Conversation has reached its configured turn limit")
         messages = [dict(m) for m in self._history] + [{"role": "user", "content": text}]
-        packet = self._profile.packet(text) if self._profile is not None else None
-        model_messages = [dict(m) for m in messages]
+        if source_receipt_id is not None and self._profile is None:
+            raise ValueError("A source receipt requires an active profile")
+        packet = (self._profile.packet(text, receipt_id=source_receipt_id)
+                  if source_receipt_id is not None else
+                  self._profile.packet(text) if self._profile is not None else None)
+        # An explicitly scoped document question must not inherit answers or
+        # excerpts from another document through the conversational history.
+        model_messages = ([{"role": "user", "content": text}] if source_receipt_id is not None
+                          else [dict(m) for m in messages])
         references = []
         reference_aliases = dict(self._reference_aliases)
         if packet is not None:
@@ -208,7 +215,9 @@ class ConversationSession:
                     + '\nMessage utilisateur :\n' + text)
             elif context_text:
                 model_messages[-1]['content'] = context_text + '\n\nDemande utilisateur :\n' + text
-        if sum(len(m["content"]) for m in model_messages) + MAX_REPLY_CHARS > MAX_HISTORY_CHARS:
+        history_chars = max(sum(len(m["content"]) for m in messages),
+                            sum(len(m["content"]) for m in model_messages))
+        if history_chars + MAX_REPLY_CHARS > MAX_HISTORY_CHARS:
             raise ValueError("Conversation history plus reserved reply exceeds 32000 characters; start a new session")
         self._reference_aliases = reference_aliases
         self._attempts += 1

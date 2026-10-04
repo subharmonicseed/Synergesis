@@ -26,10 +26,12 @@ test = [
 ]
 
 [tool.setuptools]
+packages = ["synergesis_ui_assets"]
 # The project intentionally remains a flat-module distribution. Keep this list
 # explicit so retired prototypes and one-off scripts are never installed as the
 # advertised API by an import glob.
 py-modules = [
+    "synergesis_ui",
     "synergesis_web_research",
     "synergesis_benchmark",
     "synergesis_compare",
@@ -102,6 +104,9 @@ py-modules = [
     "SynergesisCore_MathVerified",
     "SynergesisCore_Production",
 ]
+
+[tool.setuptools.package-data]
+synergesis_ui_assets = ["*.html", "*.css", "*.js"]
 
 [tool.pytest.ini_options]
 testpaths = ["."]

@@ -155,7 +155,8 @@ class InitiativeProfile:
         with self.ledger.transaction():
             return self._pending(self._state())
 
-    def packet(self, query):
+    def packet(self, query, *, receipt_id=None):
+        """Retrieve context, optionally confined to one explicit search receipt."""
         if not isinstance(query, str) or not query.strip() or len(query) > 8192:
             raise InitiativeError("packet query must contain 1..8192 characters")
         search_query = query[:2048]
@@ -166,6 +167,11 @@ class InitiativeProfile:
             pending = [q for q in self._pending(glyphs) if needles & _tokens(q["text"])]
             questions = {g.glyph_id: g.content["text"] for g in glyphs if g.content["kind"] == "question"}
             receipts = [g for g in reversed(glyphs) if g.content["kind"] == "receipt" and (needles & _tokens(questions.get(g.content["question_id"], "")) or any(needles & _tokens(e["text"]) for e in g.content["evidence"]))]
+            if receipt_id is not None:
+                receipts = [g for g in glyphs if g.content["kind"] == "receipt" and g.glyph_id == receipt_id]
+                if not receipts:
+                    raise InitiativeError("unknown search receipt")
+                matches, pending = [], []
             packet = {"kind": "initiative_context", "search_query_truncated": len(query) > 2048,
                       "memories": [{"id": g.glyph_id, "text": g.content["text"][:512], "source": "user", "claim_status": "unverified", "excerpt_truncated": len(g.content["text"]) > 512} for g in matches[:2]],
                       "questions": [{**q, "text": q["text"][:256], "excerpt_truncated": len(q["text"]) > 256} for q in pending[:3]],
@@ -243,7 +249,14 @@ class InitiativeProfile:
             return {'status': status, 'evidence': evidence, 'receipt_id': receipt.glyph_id,
                     'question_id': question.glyph_id, 'solved': False}
 
-    def step(self, documents):
+    def step(self, documents, *, question_id=None):
+        """Search explicit documents for a pending question.
+
+        A caller may target the question it just registered without consuming an
+        older pending question. The default preserves the FIFO CLI behavior.
+        """
+        if question_id is not None and (not isinstance(question_id, str) or not question_id):
+            raise InitiativeError("invalid question id")
         if not isinstance(documents, (list, tuple)) or len(documents) > 16:
             raise InitiativeError("register at most 16 explicit documents")
         if any(not isinstance(p, (str, Path)) or len(os.path.abspath(os.fspath(p)).encode("utf-8")) > 512 or any(ord(c) < 32 for c in os.fspath(p)) for p in documents):
@@ -256,11 +269,18 @@ class InitiativeProfile:
             if any(q["status"] == "running" for q in pending):
                 raise InitiativeError("unfinished running attempt requires human inspection")
             if not pending:
+                if question_id is not None:
+                    raise InitiativeError("question is not pending")
                 return {"status": "idle", "question_id": None, "evidence": [], "receipt_id": None}
             size_bytes = self.path.stat().st_size if self.path.exists() else 0
             if self.ledger.max_journal_bytes - size_bytes < 2 * self.ledger.max_event_bytes:
                 raise InitiativeError("insufficient journal byte capacity for attempt and receipt")
-            question = pending[0]
+            if question_id is None:
+                question = pending[0]
+            else:
+                question = next((q for q in pending if q["id"] == question_id), None)
+                if question is None:
+                    raise InitiativeError("question is not pending")
             attempt = self._append("attempt", {"question_id": question["id"], "status": "running", "document_count": len(documents)}, slots=2)
             self._attempts += 1
             evidence, total = [], 0
