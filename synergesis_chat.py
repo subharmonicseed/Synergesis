@@ -14,7 +14,7 @@ from synergesis_conversation import open_conversation
 class DemoBackend:
     """Deterministic echo, deliberately not presented as a language model."""
     def reply(self, messages):
-        return ("[Démonstration programmée, sans IA ni réseau] "
+        return ("[Démonstration programmée, sans appel à un modèle] "
                 "Syn a reçu : " + messages[-1]["content"] +
                 "\nLe contrôle porte sur la remise de cette réponse, pas sur sa vérité.")
 
@@ -33,9 +33,13 @@ def main(argv=None):
     parser.add_argument('--message', help="Un seul message, puis quitter")
     parser.add_argument('--max-turns', type=int, default=10)
     parser.add_argument('--profile', type=Path, help="Dossier persistant de souvenirs et questions explicites")
+    parser.add_argument('--internet', action='store_true',
+                        help="Autoriser /web SUJET : recherche arXiv en lecture seule")
     parser.add_argument('--document', action='append', type=Path, default=[],
                         help="Document .txt/.md autorisé pour /initiative (maximum 16)")
     args = parser.parse_args(argv)
+    if args.internet and args.profile is None:
+        parser.error('--internet nécessite --profile pour conserver les sources')
     if args.profile is not None and args.profile.expanduser().resolve() == args.output.expanduser().resolve():
         parser.error('Le profil et le dossier de session doivent être distincts')
     if args.document and args.profile is None:
@@ -70,9 +74,13 @@ def main(argv=None):
         if args.profile is not None:
             from synergesis_initiative import InitiativeProfile
             profile = InitiativeProfile(args.profile)
-            print('Profil persistant actif : souvenirs déclarés et questions, sans navigation Internet.\n'
+            print('Profil persistant actif : souvenirs déclarés et questions.\n'
                   'Les souvenirs retrouvés seront transmis au modèle choisi.\n'
                   'Commandes : /memoriser TEXTE, /memoire MOTS, /question TEXTE, /initiative')
+        if args.internet:
+            print('Internet actif : /web SUJET recherche sur arXiv (résumés scientifiques).\n'
+                  'Seul le texte de la requête est envoyé à arXiv, pas vos souvenirs.\n'
+                  'Maximum trois recherches par session, partagées avec /initiative.')
         if args.provider == 'openai':
             from synergesis_responses_backend import OpenAIResponsesBackend
             print('Mode API OpenAI : les messages et leur historique seront envoyés au fournisseur.\n'
@@ -94,10 +102,11 @@ def main(argv=None):
                   'sur 127.0.0.1.\n'
                   'Utiliser un modèle installé localement ; Syn ne télécharge aucun modèle '
                   'et ne demande aucune clé API.\n'
-                  'Chaque tour effectue un appel, sans outil ni navigation Internet.')
+                  'Le modèle produit du texte ; les recherches /web sont déclenchées par vous.')
         else:
             backend = DemoBackend()
-            print('Mode démonstration : réponse programmée, sans modèle ni réseau.')
+            print('Mode démonstration : réponse programmée, sans modèle ; /web utilise Internet.'
+                  if args.internet else 'Mode démonstration : réponse programmée, sans modèle ni réseau.')
         print('Les échanges sont conservés dans les journaux locaux.\n'
               'REALITY vérifie la remise du texte au programme, pas sa véracité.\n'
               'Pour quitter : /quitter')
@@ -116,11 +125,38 @@ def main(argv=None):
                     if message.strip() in ('/quitter', '/exit'):
                         break
                     if not message.strip():
-                        print('Message vide : session terminée.')
-                        break
+                        continue
                     if len(message) > 8192:
                         print('Message trop long : session terminée avant appel au modèle.')
                         return 1
+                if message == '/web' or message.startswith('/web '):
+                    if not args.internet:
+                        print('Recherche désactivée : relancer avec --internet et --profile.')
+                        if args.message is not None:
+                            return 1
+                        continue
+                    if turns >= args.max_turns:
+                        break
+                    query = message.partition(' ')[2].strip()
+                    if not query:
+                        print('Usage : /web MOTS-CLÉS (arXiv, de préférence en anglais).')
+                        if args.message is not None:
+                            return 1
+                        continue
+                    result = profile.web_search(query)
+                    print('Recherche arXiv : ' + result['status'] + '\nReçu : ' + result['receipt_id'])
+                    for source in result['evidence']:
+                        print(terminal_text(source['title'] + '\n' + source['path']
+                              + '\nConsulté : ' + source['retrieved_at'] + '\n' + source['text']))
+                    if result['status'] != 'evidence_found':
+                        print('Source indisponible.' if result['status'] == 'failed'
+                              else 'Aucun résultat pour ces mots-clés. Essayez une expression plus courte en anglais.')
+                        if args.message is not None:
+                            return 1 if result['status'] == 'failed' else 0
+                        continue
+                    message = ('Résume en français les extraits de la recherche suivante : ' + query
+                        + '. Cite les URL présentes dans le contexte et distingue les hypothèses '
+                          'des résultats. Les résumés arXiv ne prouvent pas que leurs conclusions sont vraies.')
                 if message.startswith(('/memoriser ', '/memoire', '/question ', '/initiative')):
                     if profile is None:
                         raise ValueError('Ces commandes nécessitent --profile')
