@@ -209,13 +209,17 @@ class InitiativeProfile:
             packet["omitted"]["evidence"] += sum(len(g.content["evidence"]) for g in receipts[2:])
             return packet
 
-    def web_search(self, query):
+    def web_search(self, query, *, operation_id=None):
         """User-authorized arXiv query; shares the local inquiry step budget.
 
         Journal the attempt before HTTP. A crash leaves an unresolved attempt,
         preventing automatic replay. Never send memories/history to the source.
         """
         query = _text(query)
+        if operation_id is not None and (not isinstance(operation_id, str)
+                or not operation_id or len(operation_id) > 128):
+            raise InitiativeError('invalid operation identifier')
+        correlation = {} if operation_id is None else {'operation_id': operation_id}
         if len(query) > 300 or any(ord(c) < 32 for c in query):
             raise InitiativeError('web query must contain at most 300 printable characters')
         with self.ledger.transaction():
@@ -230,9 +234,9 @@ class InitiativeProfile:
             if self.ledger.max_journal_bytes - size < 3 * self.ledger.max_event_bytes:
                 raise InitiativeError('insufficient journal capacity')
             question = self._append('question', {'text': query, 'source': 'user',
-                'status': 'pending'}, slots=3)
+                'status': 'pending', **correlation}, slots=3)
             attempt = self._append('attempt', {'question_id': question.glyph_id,
-                'status': 'running', 'source': 'arxiv', 'query': query}, slots=2)
+                'status': 'running', 'source': 'arxiv', 'query': query, **correlation}, slots=2)
             self._attempts += 1
             try:
                 if self._web_research is None:
@@ -245,7 +249,7 @@ class InitiativeProfile:
                 status, evidence = 'failed', []
             receipt = self._append('receipt', {'question_id': question.glyph_id,
                 'attempt_id': attempt.glyph_id, 'source': 'arxiv',
-                'status': status, 'evidence': evidence, 'solved': False})
+                'status': status, 'evidence': evidence, 'solved': False, **correlation})
             return {'status': status, 'evidence': evidence, 'receipt_id': receipt.glyph_id,
                     'question_id': question.glyph_id, 'solved': False}
 

@@ -2,6 +2,8 @@
 
 Une interface française légère, servie par Python sur `127.0.0.1` uniquement. Elle réutilise la conversation auditée, le profil persistant, la recherche documentaire et arXiv existants. HTML, CSS et JavaScript sont fournis localement ; aucune dépendance frontend, CDN, télémétrie, clé API ou modèle supplémentaire.
 
+Le panneau **Mission scientifique** ajoute un [superviseur borné](docs/AUTONOMY_SUPERVISOR_V0.md) : requêtes arXiv explicitement autorisées, budgets persistants, pause/arrêt et résultats accessibles après relance. Voir la [validation réelle et les limites](docs/VALIDATION_AUTONOMY_V0.md).
+
 ## Lancer et arrêter
 
 Sous Linux/WSL, depuis les sources installées, avec les dépendances et un modèle Ollama déjà disponibles :

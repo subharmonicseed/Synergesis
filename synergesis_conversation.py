@@ -183,7 +183,13 @@ class ConversationSession:
                 "sha256": sha256(box.get("text", "").encode("utf-8")).hexdigest(),
             }),)
 
-    def turn(self, text: str, *, source_receipt_id=None) -> dict:
+    def turn(self, text: str, *, source_receipt_id=None, receipt_hook=None, operation_id=None) -> dict:
+        if receipt_hook is not None and not callable(receipt_hook):
+            raise ValueError("A receipt hook must be callable")
+        if operation_id is not None and (not isinstance(operation_id, str)
+                or not operation_id or len(operation_id) > 128
+                or any(ord(c) < 32 for c in operation_id)):
+            raise ValueError("An operation ID must be bounded single-line text")
         if not self._active or self._busy:
             raise RuntimeError("Conversation is closed or already processing a turn")
         if not isinstance(text, str) or not text.strip() or len(text) > MAX_INPUT_CHARS:
@@ -229,6 +235,7 @@ class ConversationSession:
             recorded = self._stack.agent_audit.run_cycle(
                 goal=Goal.create("Deliver the current conversation reply to the runtime mailbox"),
                 observation=AgentObservation("conversation_turn", {"text": text, "turn_id": turn_id,
+                    **({"operation_id": operation_id} if operation_id is not None else {}),
                     **({"retrieved_profile_context": packet,
                         "retrieved_source_references": references} if packet is not None else {})}, "user"),
             )
@@ -240,13 +247,16 @@ class ConversationSession:
             self._stack.graph.ledger.verify()
             reply = self._mailbox["text"]
             self._history = messages + [{"role": "assistant", "content": reply}]
-            return {"text": reply, "turn_id": turn_id,
+            receipt = {"text": reply, "turn_id": turn_id,
                     "cycle_glyph_id": recorded.cycle_glyph_id,
                     "reality_status": reality["status"], "effective_success": True,
                     "source_references": [{**reference,
                         "cited": '[' + reference['alias'] + ']' in reply}
                         for reference in references],
                     "verification_scope": "in-process mailbox delivery only"}
+            if receipt_hook is not None:
+                receipt_hook(receipt)
+            return receipt
         finally:
             self._pending = None
             self._mailbox = None

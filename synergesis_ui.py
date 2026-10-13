@@ -25,6 +25,9 @@ from uuid import UUID, uuid4
 from synergesis_conversation import MAX_INPUT_CHARS, MAX_TURNS, open_conversation
 from synergesis_initiative import InitiativeError, InitiativeProfile
 from synergesis_ollama_backend import OllamaBackend, _NoRedirect
+from synergesis_supervisor import (
+    Supervisor, SupervisorError, KnownEffectFailure, _write_atomic, _read_atomic,
+)
 
 APP_NAME = "synergesis-local-ui"
 MAX_DOCUMENT_BYTES = 256 * 1024
@@ -122,6 +125,57 @@ class _TraceOpener:
         return _TraceResponse(response, finish)
 
 
+class _BufferedHTTPResponse:
+    """Actual bounded HTTP bytes, marshalled back to the engine owner."""
+    def __init__(self, data, status):
+        self.data, self.status = data, status
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *_):
+        return False
+
+    def read(self, size):
+        return self.data[:size]
+
+
+class _MissionOpener:
+    def __init__(self, owner, delegate):
+        self.owner, self.delegate = owner, delegate
+
+    def open(self, request, *, timeout):
+        if self.owner._mission_effect is None:
+            return self.delegate.open(request, timeout=timeout)
+        self.owner._mission_boundary()
+        remaining = self.owner._mission_effect["deadline"] - time.time()
+        timeout = min(timeout, max(0.001, remaining))
+        def retrieve():
+            with self.delegate.open(request, timeout=timeout) as response:
+                return response.read(262145), getattr(response, "status", None)
+        data, status = self.owner._wait_external(retrieve)
+        return _BufferedHTTPResponse(data, status)
+
+
+class _MissionResearch:
+    """Pure arXiv retrieval offloaded; profile receipts stay on the owner."""
+    def __init__(self, owner):
+        from synergesis_web_research import ArxivWebResearch
+        self.owner = owner
+        remaining = max(0.001, owner._mission_effect["deadline"] - time.time())
+        self.delegate = ArxivWebResearch(timeout_seconds=min(15, remaining),
+                                       max_total_seconds=min(20, remaining))
+        self.error = None
+
+    def search(self, query):
+        self.owner._mission_boundary()
+        try:
+            return self.owner._wait_external(lambda: self.delegate.search(query))
+        except Exception as exc:
+            self.error = type(exc).__name__
+            raise
+
+
 def probe_provider(model, port):
     """Read installed models only; never call pull or send the profile to tags."""
     result = {"available": False, "model_available": False, "model": model,
@@ -176,6 +230,12 @@ class LocalUIService:
         self._documents = []
         self._sources = []
         self._profile_commands = 0
+        self._supervisor = None
+        self._controls = queue.Queue(maxsize=8)
+        self._mission_effect = None
+        self._cancelled_before_effect = False
+        self._performing_request_id = None
+        self._supervisor_failure = None
         self._shutdown_callback = None
         self._provider_probe = provider_probe or (lambda: probe_provider(model, ollama_port))
         self._state = {"app": APP_NAME, "instance_id": self.instance_id,
@@ -195,7 +255,7 @@ class LocalUIService:
             "limits": {"max_document_bytes": MAX_DOCUMENT_BYTES,
                 "max_documents": MAX_DOCUMENTS, "search_remaining": 3,
                 "profile_commands_remaining": MAX_PROFILE_COMMANDS},
-            "last_error": None}
+            "last_error": None, "supervisor": {"mission": None}, "mission_control": None}
         try:
             self._locks.append(ServiceLock(self.profile_dir / ".local-ui-service.lock"))
             if self.root_dir != self.profile_dir:
@@ -208,7 +268,7 @@ class LocalUIService:
             if trace.is_symlink():
                 raise RuntimeError("Le journal de transport ne doit pas être un lien symbolique.")
             if isinstance(self.backend, OllamaBackend):
-                self.backend._opener = _TraceOpener(self.backend._opener, trace)
+                self.backend._opener = _TraceOpener(_MissionOpener(self, self.backend._opener), trace)
             self._worker = threading.Thread(target=self._run, name="syn-ui-worker", daemon=True)
             self._worker.start()
             if not self._ready.wait(30):
@@ -311,6 +371,11 @@ class LocalUIService:
                         source.update({k: old[k] for k in ("supplied", "cited", "alias") if k in old})
                     sources.append(source)
         self._sources = sources
+        if self._supervisor:
+            mission = self._supervisor.snapshot()
+            for step in mission["steps"] if mission else []:
+                if step["kind"] == "synthesis" and step["status"] == "confirmed":
+                    self._mark_sources(step.get("result", {}))
         with self._guard:
             self._state["memories"] = memories
             self._state["sources"] = deepcopy(sources)
@@ -330,10 +395,313 @@ class LocalUIService:
             provider["last_model"] = getattr(getattr(self.backend, "_opener", None), "last_model", None)
             self._state["provider"] = provider
 
+    def _snapshot_supervisor(self):
+        mission = self._supervisor.snapshot() if self._supervisor else None
+        with self._guard:
+            self._state["supervisor"] = {"mission": mission, "service_error": self._supervisor_failure}
+
+    def _mission_authorized(self, mission):
+        return (self.internet is True and mission["model"] == self.model
+                and (not isinstance(self.backend, OllamaBackend)
+                     or self.backend.model == self.model)
+                and not self._stop.is_set())
+
+    def _drain_controls(self):
+        """Only the owner persists controls, also while awaiting raw network IO."""
+        while True:
+            try:
+                request_id, payload = self._controls.get_nowait()
+            except queue.Empty:
+                break
+            error = None
+            try:
+                self._perform_mission_control(payload)
+            except (UIError, SupervisorError) as exc:
+                error = str(exc)
+            except Exception:
+                error = "La commande de mission nécessite l’examen de ses traces."
+            self._snapshot_supervisor()
+            with self._guard:
+                self._requests[request_id]["operation"] = {
+                    "id": request_id, "action": payload["action"],
+                    "status": "failed" if error else "succeeded",
+                    "message": error or "Commande de mission enregistrée durablement.",
+                    "error": error}
+                self._state["mission_control"] = None
+                self._state["operation"] = deepcopy(self._requests[request_id]["operation"])
+                if error:
+                    self._state["last_error"] = error
+            self._controls.task_done()
+
+    def _perform_mission_control(self, payload):
+        mission = self._supervisor.snapshot()
+        if not mission or payload["mission_id"] != mission["mission_id"]:
+            raise UIError("Cette commande concerne une autre mission.", 409)
+        action = payload["action"]
+        {"mission_pause": self._supervisor.pause,
+         "mission_resume": self._supervisor.resume,
+         "mission_stop": self._supervisor.stop}[action]()
+
+    def _mission_boundary(self):
+        self._drain_controls()
+        mission = self._supervisor.snapshot()
+        current = self._mission_effect
+        if (not current or not mission or current["mission_id"] != mission["mission_id"]
+                or mission["status"] != "active" or not self._mission_authorized(mission)
+                or time.time() >= mission["deadline"]):
+            self._cancelled_before_effect = True
+            raise KnownEffectFailure("Appel annulé avant son engagement ; pause, arrêt ou échéance.")
+        reserved = next((s for s in mission["steps"] if s["step_id"] == current["step_id"]), None)
+        if not reserved or reserved["status"] != "reserved":
+            self._cancelled_before_effect = True
+            raise KnownEffectFailure("Aucune réservation durable ne correspond à cet appel.")
+
+    def _wait_external(self, retrieve):
+        """One raw IO helper, always awaited; engine/file writes remain here.
+
+        A control becomes durable within an owner checkpoint, but cannot undo an
+        already engaged remote call. Socket timeouts are cooperative, not hard
+        wall-clock deadlines. Idle work never enters this loop.
+        """
+        done, outcome = threading.Event(), {}
+        def raw_io():
+            try:
+                outcome["value"] = retrieve()
+            except BaseException as exc:
+                outcome["error"] = exc
+            finally:
+                done.set()
+        helper = threading.Thread(target=raw_io, name="syn-mission-raw-io", daemon=True)
+        helper.start()
+        while not done.wait(0.2):
+            self._drain_controls()
+            self._snapshot_supervisor()
+        self._drain_controls()
+        helper.join()
+        if "error" in outcome:
+            raise outcome["error"]
+        return outcome["value"]
+
+    def _effect_path(self, step_id):
+        if not re.fullmatch(r"[0-9a-f]{32}", step_id):
+            raise UIError("Identifiant d’étape invalide.")
+        directory = self.root_dir / "mission-effects"
+        if directory.is_symlink():
+            raise UIError("Le dossier de preuves ne doit pas être un lien symbolique.")
+        directory.mkdir(exist_ok=True)
+        return directory / (step_id + ".json")
+
+    def _save_effect(self, kind, result):
+        current = self._mission_effect
+        _write_atomic(self._effect_path(current["step_id"]), {
+            "mission_id": current["mission_id"], "step_id": current["step_id"],
+            "kind": kind, "query": current["query"], "result": result})
+
+    @staticmethod
+    def _fsync_file(path):
+        with Path(path).open("rb") as stream:
+            os.fsync(stream.fileno())
+
+    def _mission_search(self, **effect):
+        self._mission_effect, self._cancelled_before_effect = effect, False
+        try:
+            self._mission_boundary()
+            # Same owner and persistent ledger, with mission counters separately
+            # reserved durably by the supervisor rather than UI session resets.
+            profile = InitiativeProfile(self.profile_dir)
+            profile._web_research = _MissionResearch(self)
+            result = profile.web_search(effect["query"], operation_id=effect["step_id"])
+            self._fsync_file(profile.path)
+            if self._cancelled_before_effect:
+                raise KnownEffectFailure("Recherche annulée avant tout appel arXiv.")
+            if profile._web_research.error is not None or result["status"] == "failed":
+                raise RuntimeError("Recherche arXiv engagée sans résultat fiable ; examen requis.")
+            result = {**result, "sources": result["evidence"]}
+            self._save_effect("search", result)
+            return result
+        finally:
+            self._mission_effect = None
+
+    def _mission_synthesis(self, **effect):
+        self._mission_effect, self._cancelled_before_effect = effect, False
+        try:
+            self._mission_boundary()
+            profile = InitiativeProfile(self.profile_dir)
+            directory = (self.root_dir / "mission-conversations" / effect["mission_id"]
+                         / effect["step_id"] / uuid4().hex)
+            directory.parent.mkdir(parents=True, exist_ok=True)
+            request = ("Résume en français les extraits arXiv de la recherche suivante : "
+                + effect["query"] + ". Cite seulement les références [W…] et URL du contexte. "
+                "Distingue les hypothèses des résultats ; les résumés ne prouvent pas leurs conclusions.")
+            with open_conversation(directory, self.backend, max_turns=1, profile=profile) as session:
+                def record(receipt):
+                    audit_path = str(session._stack.graph.ledger.path)
+                    self._fsync_file(audit_path)
+                    result = {**receipt, "receipt_id": receipt["cycle_glyph_id"],
+                              "conversation_output": str(directory), "audit_path": audit_path}
+                    self._save_effect("synthesis", result)
+                try:
+                    receipt = session.turn(request, source_receipt_id=effect["search_result"]["receipt_id"],
+                                           receipt_hook=record, operation_id=effect["step_id"])
+                except Exception:
+                    if self._cancelled_before_effect:
+                        raise KnownEffectFailure("Synthèse annulée avant tout appel Ollama.") from None
+                    raise
+            return _read_atomic(self._effect_path(effect["step_id"]))["result"]
+        finally:
+            self._mission_effect = None
+
+    def _reconcile_effect(self, step_id, kind):
+        mission = self._supervisor.snapshot()
+        step = next(s for s in mission["steps"] if s["step_id"] == step_id)
+        path = self._effect_path(step_id)
+        if path.exists():
+            proof = _read_atomic(path)
+            if any(proof.get(key) != value for key, value in {
+                "mission_id": mission["mission_id"], "step_id": step_id,
+                "kind": kind, "query": step["query"]}.items()):
+                raise SupervisorError("Les preuves de reprise ne correspondent pas à l’étape.")
+            result = proof["result"]
+            if kind == "synthesis":
+                recovered = self._synthesis_receipt(Path(result["audit_path"]), mission, step)
+                if recovered is None or recovered != result:
+                    raise SupervisorError("La remise de la synthèse n’est pas prouvée.")
+            else:
+                self._verify_search_receipt(step_id, result["receipt_id"])
+            return result
+        if kind == "search":
+            with self._profile.ledger.transaction():
+                glyphs = self._profile._state()
+            receipt = next((g for g in glyphs if g.content["kind"] == "receipt"
+                            and g.content.get("operation_id") == step_id), None)
+            if receipt:
+                content = receipt.content
+                if content["status"] == "failed":
+                    return None
+                return {"status": content["status"], "evidence": content["evidence"],
+                        "sources": content["evidence"], "receipt_id": receipt.glyph_id,
+                        "question_id": content["question_id"], "solved": False}
+        else:
+            directory = self.root_dir / "mission-conversations" / mission["mission_id"] / step_id
+            if directory.is_symlink():
+                raise SupervisorError("Dossier de reprise invalide.")
+            candidates = list(directory.glob("*/stack/glyph_ledger.jsonl")) if directory.exists() else []
+            if len(candidates) > 4:
+                raise SupervisorError("Trop de tentatives de synthèse à réconcilier.")
+            receipts = [r for audit in candidates
+                        if (r := self._synthesis_receipt(audit, mission, step)) is not None]
+            if len(receipts) > 1:
+                raise SupervisorError("Plusieurs remises correspondent à cette étape ; examen requis.")
+            if receipts:
+                result = receipts[0]
+                self._fsync_file(result["audit_path"])
+                _write_atomic(path, {"mission_id": mission["mission_id"], "step_id": step_id,
+                              "kind": kind, "query": step["query"], "result": result})
+                return result
+        return None
+
+    def _synthesis_receipt(self, audit, mission, step):
+        """Recover a completed, correlated delivery cycle, never raw model bytes.
+
+        A transport response without the mailbox observation/cycle is unknown.
+        This reads local evidence only; it cannot repeat the external call.
+        """
+        from synergesis_glyph_protocol import GlyphLedger
+        expected = self.root_dir / "mission-conversations" / mission["mission_id"] / step["step_id"]
+        audit = audit.absolute()
+        if (not audit.resolve().is_relative_to(expected.resolve())
+                or any(p.is_symlink() for p in (audit, *audit.parents))):
+            raise SupervisorError("Chemin du reçu de remise invalide.")
+        ledger = GlyphLedger(audit)
+        ledger.verify()
+        glyphs = {g.glyph_id: g for g in ledger.glyphs()}
+        parents = {}
+        for edge in ledger.edges():
+            if edge.relation == "derived_from":
+                parents.setdefault(edge.source, []).append(edge.target)
+        found = []
+        for cycle in glyphs.values():
+            if cycle.glyph_type != "cycle":
+                continue
+            components = [glyphs[i] for i in parents.get(cycle.glyph_id, [])]
+            def one(kind):
+                matches = [g for g in components if g.glyph_type == kind]
+                return matches[0] if len(matches) == 1 else None
+            observation, action, policy, outcome = (one(k) for k in ("observation", "action", "policy", "outcome"))
+            if not observation or observation.content.get("payload", {}).get("operation_id") != step["step_id"]:
+                continue
+            if not all((action, policy, outcome)):
+                raise SupervisorError("Le cycle de remise est incomplet.")
+            payload, parameters = observation.content["payload"], action.content["parameters"]
+            text, turn_id = parameters.get("text"), parameters.get("turn_id")
+            reality = outcome.content.get("output", {}).get("reality", {})
+            verdict = glyphs.get(reality.get("verdict_glyph_id"))
+            if (observation.content.get("kind") != "conversation_turn"
+                    or action.content.get("action_type") != "emit_reply"
+                    or outcome.content.get("action_type") != "emit_reply"
+                    or policy.content.get("allowed") is not True
+                    or outcome.content.get("success") is not True
+                    or reality.get("status") != "confirmed" or reality.get("effect_observed") is not True
+                    or not isinstance(text, str) or not text or len(text) > 16000
+                    or payload.get("turn_id") != turn_id or not verdict
+                    or verdict.content.get("status") != "confirmed"):
+                raise SupervisorError("Le cycle ne prouve pas la remise de cette synthèse.")
+            observations = [glyphs[i] for i in parents.get(verdict.glyph_id, []) if i in glyphs
+                            and glyphs[i].content.get("observer_id") == "runtime:reply-mailbox"]
+            if not any(g.content.get("facts") == {"present": True, "turn_id": turn_id,
+                        "sha256": hashlib.sha256(text.encode("utf-8")).hexdigest()} for g in observations):
+                raise SupervisorError("Le texte ne correspond pas à l’observation de remise.")
+            found.append({"text": text, "turn_id": turn_id, "cycle_glyph_id": cycle.glyph_id,
+                "reality_status": "confirmed", "effective_success": True,
+                "source_references": [{**r, "cited": '[' + r['alias'] + ']' in text}
+                                      for r in payload.get("retrieved_source_references", [])],
+                "verification_scope": "in-process mailbox delivery only",
+                "receipt_id": cycle.glyph_id, "conversation_output": str(audit.parent.parent),
+                "audit_path": str(audit)})
+        if len(found) > 1:
+            raise SupervisorError("Plusieurs cycles de remise correspondent à cette étape.")
+        return found[0] if found else None
+
+    def _verify_search_receipt(self, step_id, receipt_id):
+        with self._profile.ledger.transaction():
+            glyphs = self._profile._state()
+        if not any(g.glyph_id == receipt_id and g.content["kind"] == "receipt"
+                   and g.content.get("operation_id") == step_id for g in glyphs):
+            raise SupervisorError("Le reçu de recherche persistant est introuvable.")
+
+    def _run_mission_tick(self):
+        self._drain_controls()
+        with self._guard:
+            if self._state["busy"] or not self._jobs.empty():
+                return
+            self._state["busy"] = True
+            self._state["operation"] = {"id": None, "action": "mission_tick", "status": "running",
+                "message": "La mission avance sur le service local.", "error": None}
+        error = None
+        try:
+            self._supervisor.tick(self._mission_search, self._mission_synthesis,
+                authorization_check=self._mission_authorized, reconcile=self._reconcile_effect)
+            self._snapshot_engine()
+        except Exception:
+            error = "Le superviseur nécessite l’examen de ses traces ; aucune relance automatique."
+            self._supervisor_failure = error
+        self._snapshot_supervisor()
+        with self._guard:
+            self._state["busy"] = False
+            self._state["operation"] = {"id": None, "action": "mission_tick",
+                "status": "failed" if error else "succeeded",
+                "message": error or "Étape de mission enregistrée.", "error": error}
+            if error:
+                self._state["last_error"] = error
+            self._state["provider"]["last_model"] = getattr(
+                getattr(self.backend, "_opener", None), "last_model", None)
+
     def _run(self):
         try:
             self._load_documents()
             self._new_conversation()
+            self._supervisor = Supervisor(self.root_dir / "supervisor", model=self.model)
+            self._snapshot_supervisor()
             self._snapshot_engine()
             self._provider_status()
         except Exception:
@@ -344,14 +712,23 @@ class LocalUIService:
             if self._startup_error:
                 return
             while not self._stop.is_set():
+                self._drain_controls()
+                delay = self._supervisor.next_delay() if not self._supervisor_failure else None
+                if delay is not None and delay <= 0 and self._jobs.empty():
+                    self._run_mission_tick()
+                    continue
                 try:
-                    job = self._jobs.get(timeout=5)
+                    job = self._jobs.get(timeout=min(5, max(0.05, delay)) if delay is not None else 5)
                 except queue.Empty:
                     self._provider_status()
                     continue
                 if job is None:
                     break
                 request_id, payload = job
+                if payload["action"] == "_control_wakeup":
+                    self._jobs.task_done()
+                    continue
+                self._performing_request_id = request_id
                 error, message = None, "Opération terminée."
                 try:
                     message = self._perform(payload)
@@ -377,6 +754,7 @@ class LocalUIService:
                 except Exception:
                     error = "La lecture des traces du profil a échoué. Les journaux restent conservés."
                 self._provider_status()
+                self._snapshot_supervisor()
                 with self._guard:
                     operation = {"id": request_id, "action": payload["action"],
                         "status": "failed" if error else "succeeded",
@@ -389,6 +767,7 @@ class LocalUIService:
                     if error:
                         self._state["last_error"] = error
                 self._jobs.task_done()
+                self._performing_request_id = None
                 if payload["action"] == "shutdown" and not error:
                     self._stop.set()
                     if self._shutdown_callback:
@@ -418,6 +797,11 @@ class LocalUIService:
         self._add_message("user", display_text if display_text is not None else text)
         receipt = self._session.turn(text, source_receipt_id=source_receipt_id)
         self._snapshot_engine()
+        self._mark_sources(receipt)
+        self._add_message("assistant", receipt["text"], receipt=receipt)
+        return "Réponse reçue du modèle local."
+
+    def _mark_sources(self, receipt):
         for reference in receipt.get("source_references", []):
             if reference["kind"] not in {"document", "web"}:
                 continue
@@ -425,8 +809,6 @@ class LocalUIService:
                 if all(source.get(key) == reference.get(key) for key in ("receipt_id", "path", "sha256", "line")):
                     source.update(alias=reference["alias"], supplied=True,
                                   cited=source.get("cited", False) or reference["cited"])
-        self._add_message("assistant", receipt["text"], receipt=receipt)
-        return "Réponse reçue du modèle local."
 
     def _consume_profile_command(self, count=1):
         if self._profile_commands + count > MAX_PROFILE_COMMANDS:
@@ -435,6 +817,17 @@ class LocalUIService:
 
     def _perform(self, payload):
         action, text = payload["action"], payload.get("text", "")
+        if action == "mission_start":
+            if not self.internet:
+                raise UIError("Lancez Syn avec --internet pour autoriser la mission arXiv.")
+            self._supervisor.create(payload["queries"], authorized=payload["authorized"],
+                title=text, request_id=self._performing_request_id)
+            self._snapshot_supervisor()
+            return "Mission explicitement autorisée et enregistrée. Le service poursuit son plan."
+        if action in {"mission_pause", "mission_resume", "mission_stop"}:
+            self._perform_mission_control(payload)
+            self._snapshot_supervisor()
+            return "Commande de mission enregistrée durablement."
         if action == "new_conversation":
             self._new_conversation()
             with self._guard:
@@ -515,7 +908,8 @@ class LocalUIService:
     def submit(self, request):
         if not isinstance(request, dict):
             raise UIError("Un objet JSON est requis.")
-        allowed = {"request_id", "action", "text", "message", "name", "content", "document_id"}
+        allowed = {"request_id", "action", "text", "message", "name", "content", "document_id",
+                   "queries", "authorized", "mission_id"}
         if set(request) - allowed:
             raise UIError("Champ de requête inconnu.")
         try:
@@ -523,7 +917,8 @@ class LocalUIService:
         except (ValueError, TypeError, AttributeError):
             raise UIError("Un request_id UUID est requis.") from None
         action = request.get("action")
-        if not isinstance(action, str) or action not in {"message", "remember", "recall", "new_conversation", "web", "upload_document", "document_question", "shutdown"}:
+        if not isinstance(action, str) or action not in {"message", "remember", "recall", "new_conversation", "web", "upload_document", "document_question", "shutdown",
+                "mission_start", "mission_pause", "mission_resume", "mission_stop"}:
             raise UIError("Action inconnue.")
         payload = {k: v for k, v in request.items() if k != "request_id"}
         if "text" in payload and "message" in payload and payload["text"] != payload["message"]:
@@ -531,6 +926,24 @@ class LocalUIService:
         if "message" in payload:
             payload["text"] = payload.pop("message")
         text = payload.get("text", "")
+        mission_control = action in {"mission_pause", "mission_resume", "mission_stop"}
+        if action == "mission_start":
+            if payload.get("authorized") is not True:
+                raise UIError("Autorisez explicitement les requêtes arXiv et le modèle local.")
+            try:
+                Supervisor._validate_queries(payload.get("queries"))
+            except SupervisorError:
+                raise UIError("Indiquez une à trois requêtes arXiv uniques, de 300 caractères au maximum.") from None
+            if not isinstance(text, str) or not text.strip() or len(text) > 2048:
+                raise UIError("Décrivez la mission en 1 à 2048 caractères.")
+            try:
+                text.encode("utf-8")
+                json.dumps(payload["queries"], ensure_ascii=False).encode("utf-8")
+            except UnicodeError:
+                raise UIError("La mission doit être un texte UTF-8 valide.") from None
+        if mission_control and (not isinstance(payload.get("mission_id"), str)
+                or not re.fullmatch(r"[0-9a-f]{32}", payload["mission_id"])):
+            raise UIError("Un identifiant de mission est requis.")
         if action in {"message", "remember", "recall", "web", "document_question"}:
             maximum = 300 if action == "web" else (MAX_INPUT_CHARS if action == "message" else 2048)
             if not isinstance(text, str) or len(text) > maximum:
@@ -562,8 +975,18 @@ class LocalUIService:
                 if previous["fingerprint"] != fingerprint:
                     raise UIError("Ce request_id a déjà été utilisé pour une autre demande.", 409)
                 return {"operation": deepcopy(previous["operation"]), "duplicate": True}
-            if self._state["busy"]:
+            mission = self._state["supervisor"]["mission"]
+            if mission_control:
+                if not mission or payload["mission_id"] != mission["mission_id"]:
+                    raise UIError("Cette commande concerne une autre mission.", 409)
+                if self._state["mission_control"] is not None:
+                    raise UIError("Une commande de mission attend déjà son enregistrement.", 409)
+                if self._controls.full():
+                    raise UIError("La file de contrôle est pleine.", 429)
+            elif self._state["busy"]:
                 raise UIError("Une opération est déjà en cours. Attendez sa fin.", 409)
+            elif mission and mission["status"] == "active" and action != "shutdown":
+                raise UIError("Mettez la mission en pause avant de modifier le dialogue ou le profil.", 409)
             if self._stop.is_set() or self._stopped.is_set():
                 raise UIError("L’interface est arrêtée.", 503)
             if len(self._requests) >= 2048:
@@ -576,6 +999,12 @@ class LocalUIService:
             operation = {"id": request_id, "action": action, "status": "running",
                          "message": "Traitement en cours…", "error": None}
             self._requests[request_id] = {"fingerprint": fingerprint, "operation": deepcopy(operation)}
+            if mission_control:
+                self._state["mission_control"] = {"action": action, "status": "pending", "request_id": request_id}
+                self._controls.put_nowait((request_id, payload))
+                # Wake an idle queue wait without taking the engine from its owner.
+                self._jobs.put((None, {"action": "_control_wakeup"}))
+                return {"operation": deepcopy(operation)}
             self._state.update(busy=True, operation=operation, last_error=None)
             self._jobs.put((request_id, payload))
             return {"operation": deepcopy(operation)}

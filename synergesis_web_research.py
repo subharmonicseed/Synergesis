@@ -12,12 +12,12 @@ from synergesis_live_sources import (
 
 class ArxivWebResearch:
     """One HTTPS request per search; no page following, tools or model queries."""
-    def __init__(self):
+    def __init__(self, *, timeout_seconds=15, max_total_seconds=20):
         self.adapter = ArxivSearchAdapter(
             client=PoliteHttpClient(policy=arxiv_documented_http_policy(
-                timeout_seconds=15, max_response_bytes=262144, max_retries=0,
+                timeout_seconds=timeout_seconds, max_response_bytes=262144, max_retries=0,
                 retry_backoff_seconds=0, max_redirects=0, cache_ttl_seconds=0,
-                max_total_seconds=20)),
+                max_total_seconds=max_total_seconds)),
             cost_units_per_item=0,
             user_agent='Synergesis/1.0 (https://github.com/subharmonicseed/Synergesis)',
         )
