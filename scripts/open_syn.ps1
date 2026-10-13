@@ -21,7 +21,7 @@ function Assert-SynInstance($state, $manifest) {
     }
 }
 try {
-    Write-Host 'Ouverture de Syn avec votre Mistral local...'
+    Write-Host 'Ouverture de Syn avec votre Mistral local et les missions scientifiques...'
     $synPreflight = Join-Path $synOutputs 'LANCER_SYN_OLLAMA_51.ps1'
     if (-not (Test-Path -LiteralPath $synPreflight)) { throw 'Le contrôle de votre installation Mistral est introuvable.' }
     & $synPreflight -CheckOnly
@@ -38,7 +38,7 @@ try {
         Assert-SynInstance $synState $synManifest
         Write-Host 'Syn est déjà ouvert ; le serveur existant est réutilisé.'
     } else {
-        $synLogDir = Join-Path $synOutputs 'SynUILogs'
+        $synLogDir = Join-Path $synOutputs 'SynSupervisorLogs'
         New-Item -ItemType Directory -Path $synLogDir -Force | Out-Null
         $synRunId = [DateTime]::UtcNow.ToString('yyyyMMdd-HHmmss') + '-' + [Guid]::NewGuid().ToString('N').Substring(0,8)
         $synOutLog = Join-Path $synLogDir ($synRunId + '.out.log')
@@ -59,6 +59,8 @@ try {
     }
     if (-not $NoBrowser) { Start-Process $synAddress | Out-Null }
     Write-Host ('Syn est disponible : ' + $synAddress)
+    Write-Host 'Mission scientifique : indiquez vos requêtes arXiv puis autorisez explicitement la mission dans Syn.'
+    Write-Host 'Pause et arrêt empêchent les appels suivants ; un appel déjà engagé peut encore se terminer.'
     Write-Host 'Pour arrêter le serveur : bouton Arrêter dans la navigation de Syn. Ollama reste disponible.'
 } catch {
     Write-Host ('Syn ne peut pas être ouvert : ' + $_.Exception.Message) -ForegroundColor Red

@@ -4,7 +4,7 @@
 (() => {
   const byId = (id) => document.getElementById(id);
   const ui = Object.fromEntries([
-    "new-conversation", "nav-conversation", "nav-memory", "nav-sources",
+    "new-conversation", "nav-conversation", "nav-memory", "nav-sources", "nav-mission",
     "nav-memory-count", "nav-source-count", "server-dot", "server-status", "shutdown",
     "model-name", "ollama-status", "model-status", "notification", "notification-text",
     "refresh", "turns-label", "message-scroll", "welcome", "messages", "processing",
@@ -13,7 +13,14 @@
     "message-form", "message-label", "message", "send", "send-label", "mode-explanation",
     "context-panel", "close-panel", "tab-memory", "tab-sources", "panel-memory", "panel-sources",
     "memory-count", "source-count", "memory-form", "memory-text", "remember", "recall-all",
-    "memories", "recall-form", "recall-query", "recall", "source-list"
+    "memories", "recall-form", "recall-query", "recall", "source-list",
+    "workspace-eyebrow", "workspace-title", "conversation-meta", "composer-area",
+    "mission-panel", "mission-heading", "mission-unavailable", "mission-form", "mission-description",
+    "mission-queries", "mission-consent", "mission-start", "mission-current",
+    "mission-status", "mission-goal", "mission-control-message", "mission-pause",
+    "mission-resume", "mission-stop", "mission-last-step", "mission-next-wake",
+    "mission-deadline", "mission-budgets", "mission-reason", "mission-step-count",
+    "mission-steps", "mission-details"
   ].map((id) => [id, byId(id)]));
 
   let state = null;
@@ -22,6 +29,9 @@
   let shutdownRequested = false;
   let shutdownConfirmed = false;
   let localPending = false;
+  let localAction = null;
+  let missionControlPending = false;
+  let missionView = false;
   let fileChooserOpen = false;
   let mode = "message";
   let pollTimer = null;
@@ -33,6 +43,7 @@
   let sourcesSignature = "";
   let documentsSignature = "";
   let selectedDocumentId = "";
+  let missionSignature = "";
   // arXiv retrieval can precede the model's 180-second timeout.
   const POLL_WINDOW_MS = 240000;
   const actionLabels = {
@@ -43,7 +54,12 @@
     web: "Recherche arXiv et préparation de la synthèse…",
     upload_document: "Import du document…",
     document_question: "Lecture du document et préparation de la réponse…",
-    shutdown: "Arrêt de l’application…"
+    shutdown: "Arrêt de l’application…",
+    mission_start: "Préparation de la mission scientifique…",
+    mission_step: "La mission scientifique poursuit son étape…",
+    mission_pause: "Mise en pause de la mission demandée…",
+    mission_resume: "Reprise de la mission demandée…",
+    mission_stop: "Arrêt de la mission demandé…"
   };
 
   function element(tag, className, text) {
@@ -82,7 +98,15 @@
   }
 
   function activeLock() {
-    return localPending || Boolean(state?.busy) || !connected || stopped;
+    return localPending || missionControlPending || Boolean(state?.busy) || missionIsActive() || !connected || stopped;
+  }
+
+  function missionIsActive() {
+    return state?.supervisor?.mission?.status === "active";
+  }
+
+  function missionNeedsPolling() {
+    return missionIsActive() || Boolean(state?.mission_control);
   }
 
   function modelReady() {
@@ -134,6 +158,71 @@
     if (state?.busy && !localPending) {
       ui["processing-text"].textContent = actionLabels[state.operation?.action] || "Traitement en cours…";
     }
+    updateMissionControls();
+  }
+
+  function updateMissionControls() {
+    const mission = state?.supervisor?.mission;
+    const available = state?.supervisor && typeof state.supervisor === "object";
+    const queries = ui["mission-queries"].value.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+    const validQueries = queries.length >= 1 && queries.length <= 3 && queries.every((query) => query.length <= 300 && !/[\u0000-\u001f]/.test(query))
+      && new Set(queries.map((query) => query.toLocaleLowerCase("fr-FR"))).size === queries.length;
+    const unfinished = mission && ["active", "paused", "suspended"].includes(mission.status);
+    ui["mission-start"].disabled = !available || activeLock() || Boolean(unfinished) || !modelReady() || state?.internet !== true
+      || !ui["mission-description"].value.trim() || !validQueries || !ui["mission-consent"].checked;
+    ui["mission-start"].title = !available ? "Le superviseur n’est pas disponible dans ce lancement."
+      : unfinished ? "Terminez ou arrêtez la mission courante avant d’en lancer une autre."
+      : state?.internet !== true ? "La recherche arXiv est désactivée pour ce lancement."
+      : !ui["mission-consent"].checked ? "L’autorisation explicite est requise."
+      : !validQueries ? "Indiquez de 1 à 3 requêtes différentes, une par ligne, de 300 caractères maximum."
+      : "";
+    const control = state?.mission_control;
+    const controlLocked = !connected || stopped || missionControlPending || Boolean(control) || localPending;
+    ui["mission-pause"].hidden = mission?.status !== "active";
+    ui["mission-pause"].disabled = controlLocked || mission?.status !== "active";
+    ui["mission-resume"].hidden = !mission || !["paused", "suspended"].includes(mission.status);
+    ui["mission-resume"].disabled = controlLocked || Boolean(state?.busy) || !["paused", "suspended"].includes(mission?.status) || !modelReady();
+    ui["mission-stop"].disabled = controlLocked || !mission || !["active", "paused", "suspended"].includes(mission.status);
+    ui["mission-description"].disabled = stopped || Boolean(unfinished);
+    ui["mission-queries"].disabled = stopped || Boolean(unfinished);
+    ui["mission-consent"].disabled = stopped || Boolean(unfinished);
+    const pendingLabel = control?.action === "mission_stop" ? "Arrêt demandé."
+      : control?.action === "mission_pause" ? "Pause demandée."
+      : control?.action === "mission_resume" ? "Reprise demandée." : "Contrôle de mission demandé.";
+    ui["mission-control-message"].hidden = !(control || missionControlPending);
+    if (control || missionControlPending) {
+      ui["mission-control-message"].textContent = `${pendingLabel} Le serveur doit confirmer le contrôle ; un appel déjà engagé peut encore se terminer.`;
+    }
+  }
+
+  function openMission(focus = false) {
+    missionView = true;
+    closePanel();
+    ui["nav-conversation"].classList.remove("active");
+    ui["nav-conversation"].removeAttribute("aria-current");
+    ui["nav-mission"].classList.add("active");
+    ui["nav-mission"].setAttribute("aria-current", "page");
+    ui["workspace-eyebrow"].textContent = "MISSION SCIENTIFIQUE";
+    ui["workspace-title"].textContent = "Un objectif, des étapes vérifiables.";
+    ui["mission-panel"].hidden = false;
+    ui["conversation-meta"].hidden = true;
+    ui["message-scroll"].hidden = true;
+    ui["composer-area"].hidden = true;
+    if (focus) ui["mission-heading"].focus();
+  }
+
+  function openConversation() {
+    missionView = false;
+    ui["nav-mission"].classList.remove("active");
+    ui["nav-mission"].removeAttribute("aria-current");
+    ui["nav-conversation"].classList.add("active");
+    ui["nav-conversation"].setAttribute("aria-current", "page");
+    ui["workspace-eyebrow"].textContent = "CONVERSATION";
+    ui["workspace-title"].textContent = "Un peu de place pour vos idées.";
+    ui["mission-panel"].hidden = true;
+    ui["conversation-meta"].hidden = false;
+    ui["message-scroll"].hidden = false;
+    ui["composer-area"].hidden = false;
   }
 
   function setMode(nextMode, focus = true) {
@@ -174,7 +263,7 @@
 
   function closePanel() {
     ui["context-panel"].classList.remove("open");
-    ui["nav-conversation"].classList.add("active");
+    ui[missionView ? "nav-mission" : "nav-conversation"].classList.add("active");
     ui["nav-memory"].classList.remove("active");
     ui["nav-sources"].classList.remove("active");
   }
@@ -318,6 +407,107 @@
     selectedDocumentId = ui["document-select"].value;
   }
 
+  function missionDate(raw) {
+    return typeof raw === "number" && Number.isFinite(raw) ? dateLabel(raw * 1000) : "Non prévue";
+  }
+
+  function renderMission(supervisor) {
+    const available = supervisor && typeof supervisor === "object";
+    const mission = available ? supervisor.mission : null;
+    ui["mission-unavailable"].hidden = Boolean(available);
+    ui["mission-form"].hidden = !available || Boolean(mission && ["active", "paused", "suspended"].includes(mission.status));
+    ui["mission-current"].hidden = !mission;
+    const signature = JSON.stringify(mission);
+    if (signature === missionSignature) return;
+    missionSignature = signature;
+    if (!mission) return;
+    const statusLabels = {
+      active: "En cours", paused: "En pause", suspended: "Suspendue · reprise explicite requise",
+      blocked: "Bloquée", stopped: "Arrêtée", completed: "Terminée"
+    };
+    const stepLabels = { search: "Recherche arXiv", synthesis: "Examen par le modèle local" };
+    const stepStatusLabels = {
+      pending: "À effectuer", reserved: "Appel réservé · résultat en attente", confirmed: "Résultat enregistré",
+      failed: "Échec enregistré", skipped: "Étape non effectuée"
+    };
+    ui["mission-status"].textContent = statusLabels[mission.status] || "État inconnu";
+    ui["mission-status"].className = `status-pill ${["blocked", "suspended"].includes(mission.status) ? "error" : mission.status === "active" || mission.status === "completed" ? "ok" : ""}`;
+    ui["mission-goal"].textContent = mission.title || "Mission scientifique";
+    const steps = Array.isArray(mission.steps) ? mission.steps : [];
+    const lastStep = steps.find((step) => step.step_id === mission.last_step);
+    ui["mission-last-step"].textContent = lastStep
+      ? `${stepLabels[lastStep.kind] || "Étape"} · ${lastStep.query || "requête non fournie"} · ${stepStatusLabels[lastStep.status] || lastStep.status || "état inconnu"}`
+      : "Aucune étape terminée";
+    ui["mission-next-wake"].textContent = missionDate(mission.next_wake);
+    ui["mission-deadline"].textContent = missionDate(mission.deadline);
+    const budget = mission.budget || {};
+    const budgets = document.createDocumentFragment();
+    const remaining = (value) => typeof value === "number" ? String(value) : "?";
+    budgets.append(element("div", "mission-budget", `${remaining(budget.searches_remaining)} / ${remaining(budget.max_searches)} recherches arXiv restantes`));
+    budgets.append(element("div", "mission-budget", `${remaining(budget.model_calls_remaining)} / ${remaining(budget.max_model_calls)} appels au modèle restants`));
+    budgets.append(element("div", "mission-budget", "Une seule action extérieure par étape"));
+    ui["mission-budgets"].replaceChildren(budgets);
+    ui["mission-reason"].hidden = !mission.reason;
+    ui["mission-reason"].textContent = mission.reason ? `Motif communiqué par le superviseur : ${mission.reason}` : "";
+    ui["mission-step-count"].textContent = `${steps.filter((step) => step.status === "confirmed").length} / ${steps.length} résultats enregistrés`;
+    const fragment = document.createDocumentFragment();
+    if (!steps.length) fragment.append(emptyPanel("⌕", "La mission n’a pas encore commencé.", "Les étapes apparaîtront une fois enregistrées par le serveur."));
+    steps.forEach((step) => {
+      const card = element("article", `mission-step ${step.status === "reserved" ? "in-progress" : ""}`);
+      const heading = element("div", "mission-step-heading");
+      heading.append(element("h4", "", `${typeof step.index === "number" ? step.index + 1 : ""}. ${stepLabels[step.kind] || "Étape"}`));
+      heading.append(element("span", "status-pill", stepStatusLabels[step.status] || "État inconnu"));
+      card.append(heading, element("p", "mission-step-query", step.query || ""));
+      if (step.status === "reserved") card.append(element("p", "mission-step-note", "L’appel a été réservé. Aucun résultat n’est encore confirmé."));
+      const result = step.result && typeof step.result === "object" ? step.result : null;
+      if (result && typeof result.text === "string") card.append(element("div", "message-text mission-result-text", result.text));
+      if (result && Array.isArray(result.source_references) && result.source_references.length) {
+        const references = element("div", "response-references");
+        result.source_references.forEach((reference) => {
+          const badge = element("span", `reference-badge${reference.cited === true ? " cited" : ""}`, `${reference.alias ? `[${reference.alias}]` : "Source"} · ${reference.cited === true ? "citée dans le texte" : "fournie au modèle"}`);
+          badge.title = String(reference.path || reference.id || "");
+          references.append(badge);
+        });
+        card.append(references);
+      }
+      if (result && Array.isArray(result.sources)) {
+        result.sources.forEach((source) => {
+          const sourceCard = element("article", "source-card mission-source");
+          sourceCard.append(element("h5", "source-title", source.title || "Résumé arXiv"));
+          const location = element("div", "source-location");
+          const path = source.path || source.url || "";
+          const url = arxivUrl(path);
+          if (url) {
+            const link = element("a", "", path);
+            link.href = url; link.target = "_blank"; link.rel = "noopener noreferrer";
+            location.append(link);
+          } else location.textContent = path;
+          const tags = element("div", "source-tags");
+          tags.append(element("span", "source-tag", "Consultée"));
+          if (source.supplied === true) tags.append(element("span", "source-tag supplied", "Fournie au modèle"));
+          if (source.cited === true) tags.append(element("span", "source-tag cited", `Citée${source.alias ? ` [${source.alias}]` : ""}`));
+          sourceCard.append(location, tags, element("p", "source-excerpt", source.text || source.abstract || ""));
+          const details = element("details", "trace-details");
+          details.append(element("summary", "", "Détails de la source consultée"), element("pre", "", JSON.stringify(source, null, 2)));
+          sourceCard.append(details);
+          card.append(sourceCard);
+        });
+      }
+      if (step.error) card.append(element("p", "mission-notice", `Échec : ${step.error}`));
+      const receiptId = step.receipt_id || result?.receipt_id;
+      if (receiptId) card.append(element("p", "mission-step-note", `Reçu : ${receiptId}`));
+      if (step.confirmed_at) card.append(element("p", "mission-step-note", `Enregistrée le ${missionDate(step.confirmed_at)}`));
+      if (result) {
+        const details = element("details", "trace-details");
+        details.append(element("summary", "", "Détails · résultat réellement enregistré"), element("pre", "", JSON.stringify(result, null, 2)));
+        card.append(details);
+      }
+      fragment.append(card);
+    });
+    ui["mission-steps"].replaceChildren(fragment);
+    ui["mission-details"].textContent = JSON.stringify(mission, null, 2);
+  }
+
   function render(snapshot) {
     state = snapshot;
     const provider = snapshot.provider || {};
@@ -334,8 +524,12 @@
     renderMemories(Array.isArray(snapshot.memories) ? snapshot.memories : []);
     renderSources(Array.isArray(snapshot.sources) ? snapshot.sources : []);
     renderDocuments(Array.isArray(snapshot.documents) ? snapshot.documents : []);
+    renderMission(snapshot.supervisor);
     setMode(mode, false);
-    if (!snapshot.busy) localPending = false;
+    if (!snapshot.busy || localAction === "mission_start" && snapshot.supervisor?.mission) {
+      localPending = false;
+      localAction = null;
+    }
     const operation = snapshot.operation || {};
     if (operation.id && operation.id !== lastOperationId && ["succeeded", "failed"].includes(operation.status)) {
       lastOperationId = operation.id;
@@ -354,7 +548,11 @@
           recall: "Mémoire consultée. Le résultat apparaît dans la conversation.",
           upload_document: "Document importé. Vous pouvez maintenant poser une question à son sujet.",
           new_conversation: "Nouvelle conversation ouverte. Votre mémoire et vos documents restent disponibles.",
-          shutdown: "Application arrêtée. Pour la rouvrir, utilisez le raccourci « Ouvrir Syn »."
+          shutdown: "Application arrêtée. Pour la rouvrir, utilisez le raccourci « Ouvrir Syn ».",
+          mission_start: "Mission autorisée et enregistrée. Consultez ses étapes dans Mission scientifique.",
+          mission_pause: "La mise en pause a été confirmée par le serveur.",
+          mission_resume: "La reprise a été confirmée par le serveur.",
+          mission_stop: "L’arrêt de la mission a été confirmé par le serveur. Les résultats sont conservés."
         };
         showNotification(successLabels[operation.action] || "", operation.action === "shutdown" ? "stopped" : "success", false);
         if (operation.action === "upload_document") setMode("document", false);
@@ -397,7 +595,7 @@
 
   function schedulePoll() {
     clearPoll();
-    if (!state?.busy || !connected || stopped) return;
+    if (!(state?.busy || missionNeedsPolling()) || !connected || stopped) return;
     if (Date.now() >= pollDeadline) {
       showNotification("Le traitement dure plus longtemps que prévu. Il peut encore être en cours : actualisez pour vérifier son état. Aucune demande n’est relancée automatiquement.");
       updateControls();
@@ -423,6 +621,8 @@
       }
       if (snapshot.busy && (!state?.busy || !wasConnected)) pollDeadline = Date.now() + POLL_WINDOW_MS;
       render(snapshot);
+      const missionDeadline = snapshot.supervisor?.mission?.deadline;
+      if (missionNeedsPolling() && typeof missionDeadline === "number") pollDeadline = Math.max(pollDeadline, missionDeadline * 1000 + POLL_WINDOW_MS);
     } catch (error) {
       connected = false;
       localPending = false;
@@ -443,6 +643,7 @@
   async function executeAction(action, payload = {}, options = {}) {
     if (activeLock()) return;
     localPending = true;
+    localAction = action;
     clearPoll();
     ui["processing-text"].textContent = actionLabels[action] || "Traitement en cours…";
     showNotification("");
@@ -487,10 +688,63 @@
           : "Le serveur local ne répond plus. La demande a pu être reçue : actualisez son état avant de réessayer. Aucune demande n’est renvoyée automatiquement.");
       }
     } finally {
-      if (!state?.busy || !accepted) localPending = false;
+      if (!state?.busy || !accepted) {
+        localPending = false;
+        localAction = null;
+      }
       updateControls();
       schedulePoll();
     }
+  }
+
+  // Control signals use their own synchronous lock: pause and stop are allowed
+  // during a mission call. HTTP acceptance is not confirmation of persistence.
+  async function executeMissionControl(action) {
+    const mission = state?.supervisor?.mission;
+    const button = ui[action.replace("_", "-")];
+    if (!mission?.mission_id || !connected || stopped || localPending || missionControlPending || state?.mission_control || button?.disabled) return;
+    missionControlPending = true;
+    updateControls();
+    clearPoll();
+    let accepted = false;
+    try {
+      await fetchJson("/api/action", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-Syn-Token": state.csrf_token },
+        body: JSON.stringify({ request_id: crypto.randomUUID(), action, mission_id: mission.mission_id })
+      });
+      accepted = true;
+      showNotification("Contrôle de mission reçu. Le serveur doit confirmer le contrôle ; un appel déjà engagé peut encore se terminer.", "success", false);
+      const snapshot = await fetchJson("/api/state");
+      if (snapshot.app !== "synergesis-local-ui" || !snapshot.csrf_token || snapshot.instance_id !== state.instance_id) throw new Error("Le serveur local a changé. Actualisez avant de poursuivre.");
+      render(snapshot);
+      pollDeadline = Math.max(pollDeadline, Date.now() + POLL_WINDOW_MS);
+    } catch (error) {
+      if (error.httpStatus) {
+        showNotification(error.message);
+      } else {
+        connected = false;
+        showNotification(accepted
+          ? "Le contrôle a été reçu, mais son application n’a pas pu être confirmée. Actualisez pour consulter l’état. Aucun contrôle n’est renvoyé automatiquement."
+          : "La connexion locale est interrompue. Le contrôle a pu être reçu : actualisez son état avant de réessayer. Aucun contrôle n’est renvoyé automatiquement.");
+      }
+    } finally {
+      missionControlPending = false;
+      updateControls();
+      schedulePoll();
+    }
+  }
+
+  function startMission() {
+    if (ui["mission-start"].disabled || activeLock()) return;
+    const text = ui["mission-description"].value.trim();
+    const queries = ui["mission-queries"].value.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+    if (!text || text.length > 2048 || queries.length < 1 || queries.length > 3 || queries.some((query) => query.length > 300 || /[\u0000-\u001f]/.test(query))
+      || new Set(queries.map((query) => query.toLocaleLowerCase("fr-FR"))).size !== queries.length || !ui["mission-consent"].checked) {
+      showNotification("Indiquez un objectif, de 1 à 3 requêtes différentes de 300 caractères maximum et autorisez explicitement cette mission.", "error", false);
+      return;
+    }
+    executeAction("mission_start", { text, queries, authorized: true }, { onAccepted: () => { ui["mission-consent"].checked = false; } });
   }
 
   function sendMessage() {
@@ -565,7 +819,8 @@
   });
   ui.shutdown.addEventListener("click", () => executeAction("shutdown"));
   ui.refresh.addEventListener("click", () => refreshState(true));
-  ui["nav-conversation"].addEventListener("click", () => { closePanel(); ui.message.focus(); });
+  ui["nav-conversation"].addEventListener("click", () => { closePanel(); openConversation(); ui.message.focus(); });
+  ui["nav-mission"].addEventListener("click", () => openMission(true));
   ui["nav-memory"].addEventListener("click", () => openPanel("memory", true));
   ui["nav-sources"].addEventListener("click", () => openPanel("sources", true));
   ui["close-panel"].addEventListener("click", () => { closePanel(); ui["nav-conversation"].focus(); });
@@ -593,6 +848,10 @@
     if (text) executeAction("recall", { text });
   });
   ui["recall-all"].addEventListener("click", () => refreshState(true));
+  ui["mission-form"].addEventListener("submit", (event) => { event.preventDefault(); startMission(); });
+  ["mission-description", "mission-queries"].forEach((id) => ui[id].addEventListener("input", updateControls));
+  ui["mission-consent"].addEventListener("change", updateControls);
+  ["pause", "resume", "stop"].forEach((name) => ui[`mission-${name}`].addEventListener("click", () => executeMissionControl(`mission_${name}`)));
   ui["document-select"].addEventListener("change", () => { selectedDocumentId = ui["document-select"].value; updateControls(); });
   ui["choose-document"].addEventListener("click", () => {
     if (activeLock() || fileChooserOpen) return;

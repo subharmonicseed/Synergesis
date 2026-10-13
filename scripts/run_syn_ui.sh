@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 umask 077
-source_dir=/home/gabriel/Synergesis-LocalUI-final
+source_dir=/home/gabriel/Synergesis-AutonomySupervisor-final
 python=/home/gabriel/syn-ollama51-venv/bin/python
 profile=/home/gabriel/synergesis-ollama51/profil-utilisateur
 root=/home/gabriel/synergesis-ollama51/interface-locale
