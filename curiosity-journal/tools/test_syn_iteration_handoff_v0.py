@@ -101,5 +101,35 @@ class HandoffTests(unittest.TestCase):
             it.advance(s, [])
 
 
+    def test_fairness_surfaces_other_questions_without_false_completion(self):
+        s1 = it.advance(None, [report("a", score=.7), report("b", score=.68)],
+                        capacity=1)
+        self.assertEqual(s1["queue"][0]["entry_id"], "a")
+        s2 = it.advance(s1, [], capacity=1)
+        self.assertEqual(s2["queue"][0]["entry_id"], "b")
+        old_a = next(x for x in s2["ledger"] if x["entry_id"] == "a")
+        self.assertEqual(old_a["times_surfaced"], 1)
+        self.assertTrue(old_a["requires_independent_review"])
+        self.assertEqual(s1["ledger"][0]["times_surfaced"], 0)
+        self.assertNotIn("completed", it.canonical(s2))
+
+    def test_real_public_journal_replay_changes_the_queue(self):
+        """Replays the chronological 44 -> 45 -> 46 entries, without running SYN."""
+        entries = Path(__file__).resolve().parents[1] / "entries"
+        e = [json.loads((entries / f"2026-10-25-{n}.json").read_text())
+             for n in (44, 45, 46)]
+        s1 = it.advance(None, [e[0]], capacity=1)
+        s2 = it.advance(s1, [e[1]], capacity=1)
+        s3 = it.advance(s2, [e[2]], capacity=1)
+        self.assertEqual(
+            [s["queue"][0]["entry_id"] for s in (s1, s2, s3)],
+            ["chatgpt:2026-10-25:44", "chatgpt:2026-10-25:45",
+             "chatgpt:2026-10-25:46"])
+        self.assertEqual(s3["previous_digest"], s2["digest"])
+        self.assertEqual(len(s3["ledger"]), 3)
+        self.assertEqual(s3["queue"][0]["state"], "queued_not_executed")
+
+
+
 if __name__ == "__main__":
     unittest.main()
