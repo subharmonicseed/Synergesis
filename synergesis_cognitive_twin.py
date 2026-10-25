@@ -170,8 +170,8 @@ def main(argv=None) -> int:
         parser.error("--model required with --provider ollama")
     if args.provider == "demo" and args.model:
         parser.error("--model only valid with --provider ollama")
-    if type(args.max_turns) is not int or not 1 <= args.max_turns <= 20:
-        parser.error("max-turns must be between 1 and 20")
+    if type(args.max_turns) is not int or not 1 <= args.max_turns <= 19:
+        parser.error("max-turns must be between 1 and 19; the adapter reserves two context messages")
     if args.output.exists() or args.output.is_symlink():
         parser.error("session output must be new")
     if args.profile.resolve() == args.output.resolve():
