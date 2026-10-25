@@ -187,6 +187,50 @@ def test_cannot_overwrite_session(tmp_path):
               "--message", "Un message."])
 
 
+def test_real_ollama_transport_contract_is_compatible_without_http():
+    """Exercise the real serialized /api/chat request with a fake socket."""
+    from synergesis_ollama_backend import OllamaBackend
+    import io
+
+    class FakeHTTP:
+        def __init__(self):
+            self.payload = None
+
+        def open(self, request, timeout):
+            self.payload = json.loads(request.data)
+            return io.BytesIO(json.dumps({
+                "done": True,
+                "message": {"role": "assistant", "content": "Intention. Objection. Épreuve. Suite."},
+                "prompt_eval_count": 123, "eval_count": 20,
+            }).encode())
+
+    transport = OllamaBackend("syn-mistral-import:latest",
+                              conversation=False, response_format=None, timeout=60)
+    fake_http = FakeHTTP()
+    transport._opener = fake_http
+    ledger = TwinLedger(Path(tempfile.mkdtemp()) / "twin.jsonl")
+    ledger.add("intention", "Éprouver les intentions, pas les flatter.")
+    result = CognitiveTwinBackend(transport, ledger).reply([
+        {"role": "user", "content": "Oppose-moi une objection sérieuse."}
+    ])
+    assert result.startswith("Intention.")
+    assert fake_http.payload["messages"][0]["role"] == "system"
+    assert len(fake_http.payload["messages"]) == 3
+    assert fake_http.payload["messages"][-1]["content"].startswith("Oppose-moi")
+    assert "format" not in fake_http.payload
+    assert fake_http.payload["model"] == "syn-mistral-import:latest"
+    assert transport.usage["prompt_eval_count"] == 123
+
+
+def test_original_ollama_conversation_mode_would_reject_custom_system():
+    from synergesis_ollama_backend import OllamaBackend
+    backend = OllamaBackend("mistral:latest",
+                            conversation=True, response_format=None)
+    with pytest.raises(ValueError, match="trusted system"):
+        backend.reply([{"role": "system", "content": "Already supplied."},
+                       {"role": "user", "content": "A question."}])
+
+
 def test_only_one_provider_turn_no_auto_tools(tmp_path):
     sink = CaptureBackend()
     ledger = TwinLedger(tmp_path / "twin.jsonl")
