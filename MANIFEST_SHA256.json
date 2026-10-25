@@ -13,7 +13,7 @@
   "MANIFEST_UPSTREAM_SHA256.json": "2e07a3d9b4d18224936abd08ca8646def8909fbc4f86f33d97e1c80db0a617e8",
   "PORTABILITY.patch": "19a8d4d933a813038a7190a15254c7f5fc88333c8495dc251d3376d53c93cf09",
   "PREMIERE_CONVERSATION.md": "23ddfdd79cb50aed08ff9e3b6268ce2cb55277afa0a5c6cad8a035443c09eed7",
-  "pyproject.toml": "2f1a76423c7dcb15c800fbfb7e9e0efc137d875a6c2798d6f92150e21c38394c",
+  "pyproject.toml": "1627997f2eaf4d6528dff81bc33a6f7a90ffa1dfb1753b6115376bda2f4ac334",
   "PYTEST_RESULT.txt": "650e4d2a11b2a4a95e0bde9118f3172db68c5e8f135b08a544dc7485a9a7b242",
   "QuantumEnergyCalculator_RETIRED.py": "7520ef86164bc356b22a2dca4c3dce5f600d4c310848508d18f3b88eb7c9a1af",
   "README.md": "2a2ead65721387005e13691dafe9f404a06d2e8e3ec4389bac23e553672a85c5",
@@ -257,5 +257,9 @@
   "test_synergesis_transport_wait.py": "9a178cc68a861718c30a8e42c3dac508e8e62010240423ebfadf0a2757ccb20c",
   "test_synergesis_world_belief_view.py": "d6d218b3131549192759edea620d752c5b50ad48d8cb67e80cdb1c2f1ca6cdd3",
   "test_synergesis_world_revision.py": "fba55ce7e0c75571689f1af8c1ed2c6e0e4936c654665482f077a7110a21849b",
-  "test_SynergesisCore_Production.py": "97ff7a0e652ab01c25ab2bd1baaa286a4bcba46707c47f40af59bed2e9958301"
+  "test_SynergesisCore_Production.py": "97ff7a0e652ab01c25ab2bd1baaa286a4bcba46707c47f40af59bed2e9958301",
+  "synergesis_curiosity_observatory.py": "454df89bd75be907998be83a503cfc1051aba16376a1d4ccd98455801702d1b4",
+  "test_synergesis_curiosity_observatory.py": "13bb025e0f55a0088404f3a844a0147c5fd193f4306d035b6b49e207777e0b46",
+  "docs/SYN_CURIOSITY_OBSERVATORY_V0.md": "47a3b87a643e53ee0f9d99508a6251b9388c909a118ebc4fa3e5cd256836678c",
+  "curiosity-journal/README.md": "f0fcabb21b728e844081d568ec894858f3c9b24e75853ab2e74db22f72738e11"
 }
