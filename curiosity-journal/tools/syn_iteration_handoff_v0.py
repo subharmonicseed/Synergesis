@@ -85,6 +85,7 @@ def _public_record(raw: dict) -> dict:
             "gap_kind": raw["gap_kind"], "record_sha256": digest(raw),
             "next_action": action,
             "priority_heuristic": round(min(1.0, score + boost), 6),
+            "times_surfaced": 0,
             "requires_independent_review": True}
 
 
@@ -121,7 +122,15 @@ def advance(previous: dict | None, new_reports: list[dict],
     require(type(capacity) is int and 1 <= capacity <= 20,
             "invalid queue capacity")
     require(isinstance(new_reports, list), "reports must be a list")
-    ledger = list(old["ledger"]) if old is not None else []
+    ledger = [dict(r) for r in old["ledger"]] if old is not None else []
+    # Surfacing is NOT completion: reduce scheduling monopoly but preserve the gap.
+    surfaced = {q["entry_id"] for q in old["queue"]} if old else set()
+    for row in ledger:
+        require(type(row.get("times_surfaced")) is int and
+                0 <= row["times_surfaced"] < 100000,
+                "invalid previous surfacing count")
+        if row["entry_id"] in surfaced:
+            row["times_surfaced"] += 1
     known = {r["entry_id"] for r in ledger}
     require(len(new_reports) + len(ledger) <= MAX_RECORDS,
             "iteration record limit exceeded")
@@ -133,11 +142,14 @@ def advance(previous: dict | None, new_reports: list[dict],
         ledger.append(candidate)
     require(ledger, "cannot create an empty handoff")
     ledger.sort(key=lambda e: e["entry_id"])
-    ranking = sorted(ledger, key=lambda r: (
-        -r["priority_heuristic"], r["entry_id"]))
+    # This fairness penalty is a scheduling heuristic; no task is marked done.
+    def effective(row):
+        return round(row["priority_heuristic"] /
+                     (1 + 0.25 * row["times_surfaced"]), 6)
+    ranking = sorted(ledger, key=lambda r: (-effective(r), r["entry_id"]))
     queue = [{"entry_id": r["entry_id"], "domain": r["domain"],
               "proposed_action": r["next_action"],
-              "priority_heuristic": r["priority_heuristic"],
+              "priority_heuristic": effective(r),
               "state": "queued_not_executed"}
              for r in ranking[:capacity]]
     body = {"schema": SCHEMA, "iteration": old["iteration"] + 1 if old else 1,
