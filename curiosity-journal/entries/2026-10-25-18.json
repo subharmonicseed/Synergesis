@@ -1,0 +1,28 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-25:18",
+  "observed_at": "2026-10-25T12:44:17.055+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "human-ai-code-auditing-skill",
+  "question": "Un développeur utilisant une IA pour écrire du code maîtrise-t-il ensuite suffisamment les concepts pour déboguer et auditer cette production ?",
+  "reason": "Le travail sur SYN utilise du code produit avec l'aide de modèles; le taux de tests réussis du logiciel ne prouve pas une compétence de supervision humaine. Confronter essais randomisés sur acquisition de nouveaux concepts et usages divers d'IA. Scores non calibrés.",
+  "hypothesis": "L'automatisation de la rédaction de code peut réduire la maîtrise des concepts et du débogage, même lorsque l'exécution assistée paraît plus rapide.",
+  "need_id": null,
+  "research_mode": "directed",
+  "gap_kind": "missing_domain",
+  "metrics": {
+    "uncertainty": 0.81,
+    "expected_impact": 0.96,
+    "staleness": 0.46,
+    "novelty_gap": 0.89,
+    "selection_score": 0.816
+  },
+  "evidence_refs": [
+    "https://www.anthropic.com/research/AI-assistance-coding-skills",
+    "https://arxiv.org/abs/2601.20245"
+  ],
+  "outcome": "supported",
+  "uncertainty_after": 0.6,
+  "learning": "Anthropic, expérience randomisée publiée 29 janvier 2026, 52 développeurs (principalement juniors) apprenant Trio en Python : notes de quiz sur concepts/lecture/débogage ~50% avec assistant contre ~67% sans, différence statistiquement significative; gain de temps moyen d'environ 2 min non significatif. Six profils d'interaction observés : délégation et débogage par IA associés à notes faibles, questions conceptuelles/explications à notes élevées, mais comparaison qualitative non randomisée. Applicabilité à SYNERGESIS : distinguer tests de code réussis, compréhension des mécanismes et capacité indépendante à diagnostiquer des bugs. Résultats sur petite étude, pas une loi pour tous ingénieurs."
+}
