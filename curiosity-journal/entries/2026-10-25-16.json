@@ -1,0 +1,25 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-25:16",
+  "observed_at": "2026-10-25T12:39:39.295+01:00",
+  "producer": "chatgpt",
+  "stage": "proposed",
+  "domain": "syn-civic-agency-experiment",
+  "question": "Une procédure qui préserve le jugement préalable, rend la contestation peu coûteuse et reconnaît explicitement le droit à l'abstention améliore-t-elle la qualité d'une délibération collective avec IA, sans effacer les minorités ?",
+  "reason": "Question générée des entrées 07, 11 et 12 à 15. Les expériences portent sur pédagogie, vérification des données, questions pièges, ou préférences et non sur la combinaison dans des délibérations locales réelles. Construire un protocole randomisé et vérifier des résultats objectifs et procéduraux, avec sécurité et consentement. Scores heuristiques non calibrés.",
+  "hypothesis": "Une interface IA qui recueille un avis privé initial, sépare faits et valeurs, autorise refus de juger et contestation simple pourrait diminuer les erreurs et la capture des décisions, mais son effet sur participation et représentation reste inconnu.",
+  "need_id": null,
+  "research_mode": "emergent",
+  "gap_kind": "unverified",
+  "metrics": {
+    "uncertainty": 0.96,
+    "expected_impact": 0.99,
+    "staleness": 0.52,
+    "novelty_gap": 0.98,
+    "selection_score": 0.888
+  },
+  "evidence_refs": [],
+  "outcome": "not_tested",
+  "uncertainty_after": null,
+  "learning": null
+}
