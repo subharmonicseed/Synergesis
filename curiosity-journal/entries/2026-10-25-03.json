@@ -1,0 +1,27 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-25:03",
+  "observed_at": "2026-10-25T12:19:00+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "ai-democratic-governance",
+  "question": "Les outils d'IA pour la participation citoyenne améliorent-ils durablement la représentation et la qualité des décisions démocratiques ?",
+  "reason": "L'existence de plateformes ou d'expériences ne suffit pas à établir leur efficacité démocratique, et la sélection des publics est un angle mort potentiel. Heuristiques non calibrées.",
+  "hypothesis": "L'IA peut faciliter certains processus de participation, mais son effet net sur la représentation, l'inclusion et la confiance politique demeure insuffisamment identifié.",
+  "need_id": null,
+  "research_mode": "adversarial",
+  "gap_kind": "unverified",
+  "metrics": {
+    "uncertainty": 0.84,
+    "expected_impact": 0.94,
+    "staleness": 0.48,
+    "novelty_gap": 0.9,
+    "selection_score": 0.82
+  },
+  "evidence_refs": [
+    "https://www.oecd.org/en/publications/artificial-intelligence-and-the-future-of-citizen-participation_a1ee2e0a-en.html"
+  ],
+  "outcome": "inconclusive",
+  "uncertainty_after": 0.8,
+  "learning": "Rapport OCDE 30 juin 2026 : 50 cas d'usage dans 22 pays, typologie, opportunités et risques. Ce recensement n'est pas une démonstration causale d'un gain démocratique durable. Priorité : comparer des expérimentations avec groupes témoins, mesurer inclusion, influence réelle des citoyens et effets de sélection."
+}
