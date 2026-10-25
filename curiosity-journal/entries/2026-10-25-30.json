@@ -1,0 +1,29 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-25:30",
+  "observed_at": "2026-10-25T13:07:03.698+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "agi-agentic-architecture",
+  "question": "Un modèle de langage à poids fixes, entouré d'un curriculum autonome, d'une mémoire de compétences et d'évaluateurs externes, peut-il améliorer ses capacités mesurées sans réentraîner le modèle ?",
+  "reason": "Hypothèse architecturale née de la veille sur les prédictions vérifiables : comparer la progression d'un système complet à celle de son modèle de base. Voyager, Darwin Gödel Machine et AlphaEvolve donnent des résultats empiriques mais sur des domaines circonscrits. Scores heuristiques non calibrés.",
+  "hypothesis": "Oui dans des domaines bornés : exploration, compilation de compétences, essais et sélection par résultats augmentent certaines performances observables sans mises à jour des poids; cela ne démontre pas une AGI.",
+  "need_id": null,
+  "research_mode": "emergent",
+  "gap_kind": "missing_domain",
+  "metrics": {
+    "uncertainty": 0.88,
+    "expected_impact": 0.99,
+    "staleness": 0.69,
+    "novelty_gap": 0.94,
+    "selection_score": 0.898
+  },
+  "evidence_refs": [
+    "https://arxiv.org/abs/2305.16291",
+    "https://arxiv.org/abs/2505.22954",
+    "https://deepmind.google/blog/alphaevolve-a-gemini-powered-coding-agent-for-designing-advanced-algorithms/"
+  ],
+  "outcome": "supported",
+  "uncertainty_after": 0.69,
+  "learning": "Voyager (TMLR 2024) associe curriculum auto-généré, bibliothèque de programmes réutilisables et vérification environnementale avec GPT-4 en boîte noire : progrès dans Minecraft et transfert à de nouveaux mondes. Darwin Gödel Machine (2025) produit des descendants de son propre agent et les sélectionne sur tests : SWE-bench 20,0%→50,0% et Polyglot 14,2%→30,7% dans son protocole, avec isolation et supervision. AlphaEvolve (DeepMind mai 2025) associe génération de programmes et évaluateurs automatiques pour optimiser des algorithmes. Preuve de progrès circonscrits de système, PAS de généralité ouverte ou d'AGI. Lacune : amélioration fiable entre domaines, horizons et modèles, à coût constant."
+}
