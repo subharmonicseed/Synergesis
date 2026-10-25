@@ -1,5 +1,9 @@
 # Synergesis
 
+## Colonne vertébrale glyphique et continuité
+
+Le [raccordement du contexte de scène au Glyph Protocol](docs/SYN_GLYPH_SCENE_BRIDGE_V1.md) réutilise le `GlyphLedger` / `GlyphAuditGraph` existant pour relier les décisions et hypothèses documentées dans Git. Les glyphes portent les relations de provenance et les révisions ; Git versionne les sources. Rappel local explicite, journal privé hors dépôt, pas de mémoire automatiquement injectée dans le chat. Les tests ont été écrits mais ne sont pas revendiqués comme exécutés dans cette livraison.
+
 ## Reprise du travail agentique
 
 Lire le [référentiel de continuité SYN](docs/SYN_AGENT_CONTINUITY.md) pour retrouver
