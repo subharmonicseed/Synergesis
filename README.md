@@ -1,5 +1,12 @@
 # Synergesis
 
+## Reprise du travail agentique
+
+Lire le [référentiel de continuité SYN](docs/SYN_AGENT_CONTINUITY.md) pour retrouver
+les décisions, résultats, objections et questions ouvertes avant une nouvelle
+itération. [AGENTS.md](AGENTS.md) demande sa lecture et la conservation des apports
+significatifs ; le registre ne remplace pas les journaux scientifiques du runtime.
+
 ## État consolidé
 
 Voir [SYN_AUDIT_STATUS.md](SYN_AUDIT_STATUS.md) pour le bilan des 29 points,

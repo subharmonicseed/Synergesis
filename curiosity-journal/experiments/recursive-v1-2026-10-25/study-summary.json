@@ -1,0 +1,418 @@
+{
+  "schema": "syn-recursive-two-study-summary-v1",
+  "studies": [
+    {
+      "study": "syn-recursive-real-001",
+      "results": {
+        "digest": "6b712a4c83603cfaa1bdfc002bd484e01007f6d23a654e2245669f9967c51d98",
+        "generation_digests": [
+          "bef6b890937f98092d99897dd0eae75937ac299f2ddf43e50eb168a8fe3f363f",
+          "89e0c43344004829d993a97ff71cc094b0cd645ce9404088fc210f002950d173",
+          "c63fe6e37f4125406cb6fd9ac5dcb72e1628170f0b7e7a55022dafbdcd673980"
+        ],
+        "generation_policies": [
+          {
+            "arithmetic": "llm",
+            "calendar": "llm",
+            "graph": "llm"
+          },
+          {
+            "arithmetic": "exact",
+            "calendar": "exact",
+            "graph": "llm"
+          },
+          {
+            "arithmetic": "exact",
+            "calendar": "exact",
+            "graph": "exact"
+          }
+        ],
+        "glyph_events": 1450,
+        "interpretation": "Executed synthetic task benchmark with real local Mistral and fixed exact tools. Learned routing only; no model-weight update, new skill code, AGI claim or general scientific transfer. Single model/seed; intervals are descriptive; exploratory p-value is unadjusted.",
+        "mcnemar_exact_two_sided_exploratory": 0.0078125,
+        "model": {
+          "details": {
+            "context_length": 32768,
+            "embedding_length": 4096,
+            "families": [
+              "llama"
+            ],
+            "family": "llama",
+            "format": "gguf",
+            "parameter_size": "7.2B",
+            "parent_model": "Mistral-7B-Instruct-v0.3.Q4_K_M.gguf",
+            "quantization_level": "Q4_K_M"
+          },
+          "digest": "6fb2c6e2bdc5ce5719719586b099710eb63942060cbb0be64a190f4c633b9d0c",
+          "name": "syn-mistral-import:latest",
+          "size": 4372812661
+        },
+        "paired_gain": 0.6666666666666666,
+        "physical_executions": 54,
+        "physical_model_calls": 33,
+        "physical_tokens": 8225,
+        "preregistration_digest": "a912973c047acc653bda484a059e0e4a930cbfc34c4a8ca8907dcbca2377af1f",
+        "regressed": [],
+        "repaired": [
+          "heldout-arithmetic-000",
+          "heldout-arithmetic-001",
+          "heldout-arithmetic-002",
+          "heldout-arithmetic-003",
+          "heldout-calendar-000",
+          "heldout-calendar-001",
+          "heldout-calendar-002",
+          "heldout-calendar-003"
+        ],
+        "results": {
+          "journal": {
+            "by_domain": {
+              "arithmetic": {
+                "passed": 0,
+                "total": 4
+              },
+              "calendar": {
+                "passed": 0,
+                "total": 4
+              },
+              "graph": {
+                "passed": 4,
+                "total": 4
+              }
+            },
+            "pass_rate": 0.3333333333333333,
+            "passed": 4,
+            "tokens_if_run_alone": 4369,
+            "total": 12,
+            "wilson_95": [
+              0.13812009109121315,
+              0.6093779111272004
+            ]
+          },
+          "reset": {
+            "by_domain": {
+              "arithmetic": {
+                "passed": 0,
+                "total": 4
+              },
+              "calendar": {
+                "passed": 0,
+                "total": 4
+              },
+              "graph": {
+                "passed": 4,
+                "total": 4
+              }
+            },
+            "pass_rate": 0.3333333333333333,
+            "passed": 4,
+            "tokens_if_run_alone": 2235,
+            "total": 12,
+            "wilson_95": [
+              0.13812009109121315,
+              0.6093779111272004
+            ]
+          },
+          "syn1": {
+            "by_domain": {
+              "arithmetic": {
+                "passed": 4,
+                "total": 4
+              },
+              "calendar": {
+                "passed": 4,
+                "total": 4
+              },
+              "graph": {
+                "passed": 4,
+                "total": 4
+              }
+            },
+            "pass_rate": 1.0,
+            "passed": 12,
+            "tokens_if_run_alone": 856,
+            "total": 12,
+            "wilson_95": [
+              0.7575059933447592,
+              1
+            ]
+          },
+          "syn2": {
+            "by_domain": {
+              "arithmetic": {
+                "passed": 4,
+                "total": 4
+              },
+              "calendar": {
+                "passed": 4,
+                "total": 4
+              },
+              "graph": {
+                "passed": 4,
+                "total": 4
+              }
+            },
+            "pass_rate": 1.0,
+            "passed": 12,
+            "tokens_if_run_alone": 0,
+            "total": 12,
+            "wilson_95": [
+              0.7575059933447592,
+              1
+            ]
+          }
+        },
+        "risk_state": {
+          "active_reservations": 0,
+          "available": 202.0,
+          "budget_limit": 256,
+          "consumed": 54.0,
+          "epoch_id": "recursive-isolated-study",
+          "reserved": 0.0
+        },
+        "schema": "syn-recursive-results-v1",
+        "shared_execution": "Identical task/strategy/model/prompt requests share one physical execution; every arm references its receipt."
+      },
+      "verification": {
+        "digest": "00fcbd01d9bccbaf518a0496a57172e545cf9c9d4f15d693f3fb2bfa2470ba81",
+        "ledgers": {
+          "glyph_events": 1450,
+          "prediction_settlements": 54,
+          "risk_events": 108
+        },
+        "n_heldout": 12,
+        "n_training": 9,
+        "physical_model_calls": 33,
+        "physical_tokens": 8225,
+        "posthoc_integer_format_sensitivity_passed": {
+          "journal": 4,
+          "reset": 4,
+          "syn1": 12,
+          "syn2": 12
+        },
+        "schema": "syn-recursive-offline-verification-v1",
+        "source_digest": "2ff8bcfa21db83334c6722063d290f8b46cc719b4309943a5b2efce9b003d6c6",
+        "strict_passed": {
+          "journal": 4,
+          "reset": 4,
+          "syn1": 12,
+          "syn2": 12
+        },
+        "study_results_digest": "6b712a4c83603cfaa1bdfc002bd484e01007f6d23a654e2245669f9967c51d98",
+        "training_tokens": 1621,
+        "verified": true,
+        "warning": "Offline verification checks artifact consistency and recomputes scores; it is not independent attestation of transport, timestamps or operator blindness. Integer-format sensitivity was added after the first study and does not replace its registered score."
+      }
+    },
+    {
+      "study": "syn-recursive-real-002",
+      "results": {
+        "digest": "543b12ce877b2f13008efb10a6aac2dd19562f429052355ad4948c88f78257ff",
+        "generation_digests": [
+          "bef6b890937f98092d99897dd0eae75937ac299f2ddf43e50eb168a8fe3f363f",
+          "a1aa875175635d793c7ff0e46d8c95efcc0858fcbf68aeaba2657e092e272315",
+          "5f8686bc809cd07d7e0ebd3f969b237c742166cd98ed1a1eac54be63f6223d27"
+        ],
+        "generation_policies": [
+          {
+            "arithmetic": "llm",
+            "calendar": "llm",
+            "graph": "llm"
+          },
+          {
+            "arithmetic": "exact",
+            "calendar": "exact",
+            "graph": "llm"
+          },
+          {
+            "arithmetic": "exact",
+            "calendar": "exact",
+            "graph": "exact"
+          }
+        ],
+        "glyph_events": 2447,
+        "interpretation": "Executed synthetic task benchmark with real local Mistral and fixed exact tools. Learned routing only; no model-weight update, new skill code, AGI claim or general scientific transfer. Single model/seed; intervals are descriptive; exploratory p-value is unadjusted.",
+        "mcnemar_exact_two_sided_exploratory": 1.52587890625e-05,
+        "model": {
+          "details": {
+            "context_length": 32768,
+            "embedding_length": 4096,
+            "families": [
+              "llama"
+            ],
+            "family": "llama",
+            "format": "gguf",
+            "parameter_size": "7.2B",
+            "parent_model": "Mistral-7B-Instruct-v0.3.Q4_K_M.gguf",
+            "quantization_level": "Q4_K_M"
+          },
+          "digest": "6fb2c6e2bdc5ce5719719586b099710eb63942060cbb0be64a190f4c633b9d0c",
+          "name": "syn-mistral-import:latest",
+          "size": 4372812661
+        },
+        "paired_gain": 0.7083333333333334,
+        "physical_executions": 90,
+        "physical_model_calls": 57,
+        "physical_tokens": 14617,
+        "preregistration_digest": "a6c9d76678b5ff320df66ec5ec4dbbdf240e932c295aa37658b02c2f305d2959",
+        "regressed": [],
+        "repaired": [
+          "heldout-arithmetic-000",
+          "heldout-arithmetic-001",
+          "heldout-arithmetic-002",
+          "heldout-arithmetic-003",
+          "heldout-arithmetic-004",
+          "heldout-arithmetic-005",
+          "heldout-arithmetic-006",
+          "heldout-arithmetic-007",
+          "heldout-calendar-000",
+          "heldout-calendar-001",
+          "heldout-calendar-002",
+          "heldout-calendar-003",
+          "heldout-calendar-004",
+          "heldout-calendar-006",
+          "heldout-calendar-007",
+          "heldout-graph-002",
+          "heldout-graph-003"
+        ],
+        "results": {
+          "journal": {
+            "by_domain": {
+              "arithmetic": {
+                "passed": 0,
+                "total": 8
+              },
+              "calendar": {
+                "passed": 0,
+                "total": 8
+              },
+              "graph": {
+                "passed": 5,
+                "total": 8
+              }
+            },
+            "pass_rate": 0.20833333333333334,
+            "passed": 5,
+            "tokens_if_run_alone": 8627,
+            "total": 24,
+            "wilson_95": [
+              0.09244825352851857,
+              0.40470453253188665
+            ]
+          },
+          "reset": {
+            "by_domain": {
+              "arithmetic": {
+                "passed": 0,
+                "total": 8
+              },
+              "calendar": {
+                "passed": 1,
+                "total": 8
+              },
+              "graph": {
+                "passed": 6,
+                "total": 8
+              }
+            },
+            "pass_rate": 0.2916666666666667,
+            "passed": 7,
+            "tokens_if_run_alone": 4357,
+            "total": 24,
+            "wilson_95": [
+              0.14914648196960875,
+              0.49167693664496637
+            ]
+          },
+          "syn1": {
+            "by_domain": {
+              "arithmetic": {
+                "passed": 8,
+                "total": 8
+              },
+              "calendar": {
+                "passed": 8,
+                "total": 8
+              },
+              "graph": {
+                "passed": 6,
+                "total": 8
+              }
+            },
+            "pass_rate": 0.9166666666666666,
+            "passed": 22,
+            "tokens_if_run_alone": 1589,
+            "total": 24,
+            "wilson_95": [
+              0.741511978067893,
+              0.9768411847029567
+            ]
+          },
+          "syn2": {
+            "by_domain": {
+              "arithmetic": {
+                "passed": 8,
+                "total": 8
+              },
+              "calendar": {
+                "passed": 8,
+                "total": 8
+              },
+              "graph": {
+                "passed": 8,
+                "total": 8
+              }
+            },
+            "pass_rate": 1.0,
+            "passed": 24,
+            "tokens_if_run_alone": 0,
+            "total": 24,
+            "wilson_95": [
+              0.8620237953250198,
+              1
+            ]
+          }
+        },
+        "risk_state": {
+          "active_reservations": 0,
+          "available": 166.0,
+          "budget_limit": 256,
+          "consumed": 90.0,
+          "epoch_id": "recursive-isolated-study",
+          "reserved": 0.0
+        },
+        "schema": "syn-recursive-results-v1",
+        "shared_execution": "Identical task/strategy/model/prompt requests share one physical execution; every arm references its receipt."
+      },
+      "verification": {
+        "digest": "620fe681613be0188496971b0ba3220b436fe6ebd9dda03953c3827ffd4bb70b",
+        "ledgers": {
+          "glyph_events": 2447,
+          "prediction_settlements": 90,
+          "risk_events": 180
+        },
+        "n_heldout": 24,
+        "n_training": 9,
+        "physical_model_calls": 57,
+        "physical_tokens": 14617,
+        "posthoc_integer_format_sensitivity_passed": {
+          "journal": 5,
+          "reset": 7,
+          "syn1": 22,
+          "syn2": 24
+        },
+        "schema": "syn-recursive-offline-verification-v1",
+        "source_digest": "2ff8bcfa21db83334c6722063d290f8b46cc719b4309943a5b2efce9b003d6c6",
+        "strict_passed": {
+          "journal": 5,
+          "reset": 7,
+          "syn1": 22,
+          "syn2": 24
+        },
+        "study_results_digest": "543b12ce877b2f13008efb10a6aac2dd19562f429052355ad4948c88f78257ff",
+        "training_tokens": 1633,
+        "verified": true,
+        "warning": "Offline verification checks artifact consistency and recomputes scores; it is not independent attestation of transport, timestamps or operator blindness. Integer-format sensitivity was added after the first study and does not replace its registered score."
+      }
+    }
+  ]
+}

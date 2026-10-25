@@ -31,6 +31,10 @@ packages = ["synergesis_ui_assets"]
 # explicit so retired prototypes and one-off scripts are never installed as the
 # advertised API by an import glob.
 py-modules = [
+    "synergesis_recursive",
+    "synergesis_recursive_audit",
+    "synergesis_recursive_tasks",
+    "synergesis_recursive_trial",
     "synergesis_curiosity_observatory",
     "synergesis_supervisor",
     "synergesis_ui",
