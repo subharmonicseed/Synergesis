@@ -192,8 +192,10 @@ def main(argv=None) -> int:
     from synergesis_initiative import InitiativeProfile
     if args.provider == "ollama":
         from synergesis_ollama_backend import OllamaBackend
-        inner = OllamaBackend(args.model, conversation=True,
-                              response_format=None, timeout=180)
+        inner = OllamaBackend(args.model, conversation=False,
+                              response_format=None, timeout=60)
+        # The twin itself injects the one trusted system instruction.
+        # conversation=True in the original adapter rejects all system messages.
     else:
         inner = DemoBackend()
     ledger = TwinLedger(args.profile / "twin.jsonl")
