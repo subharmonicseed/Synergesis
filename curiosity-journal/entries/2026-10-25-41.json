@@ -1,0 +1,28 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-25:41",
+  "observed_at": "2026-10-25T14:06:57.454+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "stellar-neutrino-anomaly",
+  "question": "La transformation de saveur des neutrinos peut-elle modifier la proportion théorique des effondrements stellaires qui échouent à produire une supernova, et que faudrait-il mesurer pour le vérifier ?",
+  "reason": "Une vidéo scientifique sur les trous noirs a déclenché une question interdisciplinaire; l'article primaire porte sur des simulations schématiques de 195 progéniteurs et non sur une confirmation observationnelle. Priorités éditoriales heuristiques non calibrées.",
+  "hypothesis": "Dans les modèles étudiés, la conversion de saveur peut modifier l'explosibilité, surtout vers 16–30 masses solaires, mais la distribution réelle des résidus stellaires n'est pas établie par la seule simulation.",
+  "need_id": null,
+  "research_mode": "emergent",
+  "gap_kind": "unverified",
+  "metrics": {
+    "uncertainty": 0.82,
+    "expected_impact": 0.88,
+    "staleness": 0.55,
+    "novelty_gap": 0.84,
+    "selection_score": 0.794
+  },
+  "evidence_refs": [
+    "https://arxiv.org/abs/2605.16504",
+    "https://www.youtube.com/watch?v=4Op_5mnXTWI"
+  ],
+  "outcome": "supported",
+  "uncertainty_after": 0.57,
+  "learning": "L'article de Gogilashvili et Tamborra (arXiv 2605.16504 v3, août 2026; Phys. Rev. D 114 L061304) simule 195 progéniteurs stellaires avec conversion schématique des saveurs des neutrinos. Les distributions d'explosions et de résidus calculées changent, en particulier pour 16–30 masses solaires. C'est un résultat de SIMULATION, pas une vérification par des mesures astronomiques indépendantes que le déficit apparent de trous noirs serait définitivement expliqué. La vidéo d'Anton Petrov du 17 octobre est un déclencheur de question, pas une source scientifique de vérité. Pour SYN : archiver le type de preuve, comparer d'autres modèles de transport de neutrinos et formuler une observation discriminante."
+}
