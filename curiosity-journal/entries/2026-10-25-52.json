@@ -1,0 +1,29 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-25:52",
+  "observed_at": "2026-10-25T20:23:51+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "ai-grid-market-regulatory-incentives",
+  "question": "La coupure obligatoire prioritaire de grands centres de données a-t-elle été approuvée comme solution immédiate de sûreté du réseau PJM, sans conflit avec la régulation ni les signaux de capacité ?",
+  "reason": "Approfondit l'entrée 48, limitée aux procédures FERC de juin : distinguer une proposition de gestion du risque électrique de son autorisation réelle. Chaîne causale : priorité de délestage imposée -> exclusion possible de la demande des enchères de capacité -> signaux d'investissement et coûts déplacés. Pouvoir discriminant : ordre officiel du 9 octobre 2026, proposition PJM d'août et avis motivé d'un commissaire. Gain attendu : distinguer registre de charges accepté et mécanisme IRAS refusé. Scores heuristiques non calibrés.",
+  "hypothesis": "La FERC a approuvé le mécanisme PJM de coupure obligatoire prioritaire IRAS et ses règles associées comme solution immédiatement applicable aux nouvelles grandes charges.",
+  "need_id": null,
+  "research_mode": "adversarial",
+  "gap_kind": "staleness",
+  "metrics": {
+    "uncertainty": 0.76,
+    "expected_impact": 0.91,
+    "staleness": 0.83,
+    "novelty_gap": 0.85,
+    "selection_score": 0.852
+  },
+  "evidence_refs": [
+    "https://elibrary.ferc.gov/eLibrary/docinfo?accession_Number=20261009-3055",
+    "https://www.ferc.gov/news-events/news/commissioner-rosners-concurrence-pjm-interconnection-llc-er26-3515-000",
+    "https://insidelines.pjm.com/pjm-proposes-framework-to-connect-data-centers-without-compromising-reliability-affordability/"
+  ],
+  "outcome": "refuted",
+  "uncertainty_after": 0.4,
+  "learning": "Fait réglementaire daté : l'ordonnance FERC ER26-3515-000 du 9 octobre 2026 accepte une partie des révisions tarifaires PJM mais en rejette une autre; le commissaire Rosner confirme le rejet de l'essentiel de la proposition, notamment la coupure obligatoire IRAS avant réponse volontaire à la demande. Le registre de grandes charges est distingué du mécanisme IRAS rejeté. Rosner avertit qu'une exclusion de cette demande de la courbe de capacité pourrait affaiblir les signaux d'investissement. Contre-argument : la protection des ménages, écoles et hôpitaux en situation d'urgence reste légitime; une proposition révisée pourrait être déposée et la hiérarchie de délestage relève aussi des autorités étatiques. Il ne s'agit ni d'une preuve de panne ni d'une mesure empirique de prix. Prochaine lacune : vérifier un éventuel nouveau dépôt PJM, l'ordre final applicable et les conséquences mesurées sur la facture et la fiabilité."
+}
