@@ -13,33 +13,51 @@ Le programme `curiosity-journal/tools/syn_iteration_handoff_v0.py` consomme uniq
 - Les refutations prioritaires dirigent vers `investigate_refutation`; les hypothèses non testées vers `run_preregistered_test`; les résultats inconclusifs vers `seek_discriminating_evidence`; les conclusions étayées vers `independent_replication`.
 - **Aucune action exécutée, aucun modèle appelé, aucune auto-modification, aucune écriture dans le journal local de SYN.** Les décisions émises sont des propositions pour revue humaine et ne contournent aucun budget, AEGIS, RISK ou REALITY.
 
-## Expérience reproductible sur les entrées GitHub existantes
+## Expérience reproductible sur les vraies entrées GitHub 044 → 046
 
-Dans un clone de la branche `feat/syn-curiosity-observatory-v0`, depuis la racine du dépôt :
+Dans le clone de la branche `feat/syn-curiosity-observatory-v0`, depuis la racine :
 
 ```bash
 mkdir -p syn-private/iteration-states
 
-# Version N : une question encore non testée, déjà présente dans le journal
 python curiosity-journal/tools/syn_iteration_handoff_v0.py \
-  --entry curiosity-journal/entries/2026-10-25-46.json \
+  --capacity 1 \
+  --entry curiosity-journal/entries/2026-10-25-44.json \
   --out syn-private/iteration-states/001.json
 
-# Version N+1 : la même mémoire + nouveau constat contradictoire déjà enregistré.
-# C'est une démonstration de recalcul, et NON un replay chronologique fidèle
-# (l'entrée 44 précède effectivement la 46 dans le journal public).
 python curiosity-journal/tools/syn_iteration_handoff_v0.py \
+  --capacity 1 \
   --previous syn-private/iteration-states/001.json \
-  --entry curiosity-journal/entries/2026-10-25-44.json \
+  --entry curiosity-journal/entries/2026-10-25-45.json \
   --out syn-private/iteration-states/002.json
 
-# Vérifier que le registre a maintenant deux items, que previous_digest
-# relie l'itération 002 à la 001, et que la file d'actions a changé.
+python curiosity-journal/tools/syn_iteration_handoff_v0.py \
+  --capacity 1 \
+  --previous syn-private/iteration-states/002.json \
+  --entry curiosity-journal/entries/2026-10-25-46.json \
+  --out syn-private/iteration-states/003.json
+
 python -m unittest discover -s curiosity-journal/tools \
   -p 'test_syn_iteration_handoff_v0.py' -v
 ```
 
-Ces fichiers `syn-private/...` sont des exemples de destination locale, **pas** des secrets à déposer sur un dépôt public. Pour les expériences réelles, préserver la provenance des entrées et utiliser un registre indépendant si la protection contre une réécriture malveillante est nécessaire.
+Les résultats proposés par le programme, en respectant l'ordre chronologique des
+trois observations déjà publiées, sont : itération 001 → **examiner la réfutation 044** ;
+002 → **répliquer le résultat 045** ; 003 → **pré-enregistrer le test 046**.
+C'est un **changement vérifiable de file de recherche**, et non une action exécutée
+par SYN. Un test d'intégration reprend directement les trois JSON du dépôt, sans
+modifier l'historique, ni reclasser le résultat scientifique.
+
+**Équité de sélection :** après qu'un sujet a été *présenté* dans la file,
+sa priorité décroît selon `priority/(1+0,25 × nombre_de_présentations)`.
+Cela évite qu'une réfutation à haute priorité bloque indéfiniment les autres questions,
+mais **présenter une question ne signifie ni l'avoir résolue, ni l'avoir vérifiée**.
+La question reste dans le registre, sa trace demeure intacte et elle peut revenir.
+L'atténuation est une hypothèse de planification, non une stratégie d'exploration validée.
+
+Ces fichiers `syn-private/...` sont des sorties locales recommandées, pas une
+synchronisation automatique du moteur SYN. Un répertoire GitHub public ne remplace
+pas le profil local privé du superviseur.
 
 ## Limites explicites
 
