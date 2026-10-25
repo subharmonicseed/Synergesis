@@ -16,7 +16,7 @@
   "pyproject.toml": "474a00a88a4eb416f3b7cacf36fd72150155323c7a893bbea7172058abe77192",
   "PYTEST_RESULT.txt": "650e4d2a11b2a4a95e0bde9118f3172db68c5e8f135b08a544dc7485a9a7b242",
   "QuantumEnergyCalculator_RETIRED.py": "7520ef86164bc356b22a2dca4c3dce5f600d4c310848508d18f3b88eb7c9a1af",
-  "README.md": "2a2ead65721387005e13691dafe9f404a06d2e8e3ec4389bac23e553672a85c5",
+  "README.md": "a46850a5070bbf7df98c15692dad67ac2f1fd79de907ebd723c81bc28cdf5613",
   "run_syn_discovery.py": "9576214de235540bfadd8e634e15862ff5faff3d545e5fa2160e35d61cda82c1",
   "run_syn_live_source_smoke.py": "7c1fea41db61f6d901b25a78d329bed4d98e4a023c11f15d52e51a73dd8ebbb9",
   "run_syn_prediction_calibration_stress.py": "15a95bcc302ce330e1b19084469e25a79675f6364857c38a295b47243583b209",
@@ -272,5 +272,8 @@
   "docs/SYN_RECURSIVE_RESULTS_2026-10-25.md": "a497fa6e0f819237ab4250ac3d0b22f5e58002e79b6df8e1dd29d6cad5333750",
   "curiosity-journal/tools/syn_four_arm_recorded_v1.py": "a51465c49bddde602fc9482bf18cdd5289393edda0e3be336cb389b8123b4705",
   "curiosity-journal/tools/test_syn_four_arm_recorded_v1.py": "13d9a45605f165ca795773adfad178a4d6b26663db0b65b6bffa510257c82cd5",
-  "docs/SYN_FOUR_ARM_PC_TRIAL_2026-10-25.md": "f585d59cc7782c6b336526cd43d43198abe54ed6600948b7cc94948b928c581f"
+  "docs/SYN_FOUR_ARM_PC_TRIAL_2026-10-25.md": "f585d59cc7782c6b336526cd43d43198abe54ed6600948b7cc94948b928c581f",
+  "AGENTS.md": "9fc6f78ba7023d97ec1b015c7715097ec44675865b33b5aeefff8a77bdcf1ad8",
+  "docs/SYN_AGENT_CONTINUITY.md": "f836578f851c3af969ab9baf4ddf624fa99c653389bf27a2a3c4bf93bf0662cb",
+  "docs/continuity/2026-10-25-001.md": "ef1762bf889975b1a8b8b1db9b1e640cf4f383ed1cee83f3dad8fbcce453ca40"
 }
