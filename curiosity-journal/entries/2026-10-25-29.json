@@ -1,0 +1,30 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-25:29",
+  "observed_at": "2026-10-25T13:01:05.784+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "prospective-evaluation-preregistration",
+  "question": "Quels engagements minimum rendent une évaluation de la curiosité de SYN falsifiable au lieu de seulement rétrospective ?",
+  "reason": "Les cycles antérieurs auto-notent incertitude et intérêt; un véritable test doit fixer avant les événements la liste des questions, les probabilités, la baseline, le critère d'échec, et la date de résolution. Contrôler la méthode de scoring et le gel des plans. Scores heuristiques non calibrés.",
+  "hypothesis": "Un protocole fixé avant la résolution, des probabilités déposées avant les événements et des résultats USGS externes permettent de mesurer une erreur de prévision objective, sans constituer par eux-mêmes une preuve que la curiosité apporte un avantage.",
+  "need_id": null,
+  "research_mode": "emergent",
+  "gap_kind": "missing_domain",
+  "metrics": {
+    "uncertainty": 0.81,
+    "expected_impact": 0.98,
+    "staleness": 0.72,
+    "novelty_gap": 0.89,
+    "selection_score": 0.876
+  },
+  "evidence_refs": [
+    "https://earthquake.usgs.gov/fdsnws/event/1/",
+    "https://www.annualreviews.org/content/journals/10.1146/annurev-statistics-042424-050626",
+    "https://help.osf.io/article/330-welcome-to-registrations",
+    "https://www.forecastbench.org/about/"
+  ],
+  "outcome": "supported",
+  "uncertainty_after": 0.62,
+  "learning": "L'USGS spécifie un service officiel de recherche/count des événements sismiques filtrés par date et magnitude; un résultat futur indépendant peut être arbitré 14 jours après chaque fenêtre hebdomadaire. Le Brier (p-y)^2 est une règle de score propre pour questions binaires, mais 16 événements corrélés ne suffiront pas à valider statistiquement la calibration ou une supériorité. OSF Registries propose une préinscription publique figée; un commit GitHub seul n'est pas un registre immuable, et aucune préinscription OSF n'a été réalisée. Protocole créé le 25 octobre 2026 : curiosity-journal/protocols/2026-10-25-prospective-forecast-pilot-v0.md. AUCUNE probabilité réelle déposée, AUCUN bras de comparaison exécuté. La réussite immédiate visée est la traçabilité, pas un gain cognitif."
+}
