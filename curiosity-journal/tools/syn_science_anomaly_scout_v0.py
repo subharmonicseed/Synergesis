@@ -103,7 +103,9 @@ def assess(rows: list[dict], *, capacity: int = 3, domains_max: int = 1) -> dict
                                   evidence_status == "curator_checked_primary" else None),
             "unverified_primary_candidate_url": (
                 row["primary_url"] if evidence_status == "needs_primary_check" else None),
+            "publication_date": row["publication_date"],
             "evidence_kind": row["evidence_kind"], "primary_check": evidence_status,
+            "baseline_expectation": row["baseline_expectation"],
             "finding": row["finding"],
             "competing_explanation": row["competing_explanation"],
             "falsifier": row["falsifier"],
