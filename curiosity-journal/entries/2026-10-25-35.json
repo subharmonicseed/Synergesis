@@ -1,0 +1,25 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-25:35",
+  "observed_at": "2026-10-25T13:16:45.153+01:00",
+  "producer": "chatgpt",
+  "stage": "proposed",
+  "domain": "syn-held-out-evaluation",
+  "question": "Après génération et promotion de compétences par SYN, un évaluateur indépendant peut-il montrer un gain apparié hors échantillon supérieur à mémoire-journal seule, sans régression cachée ?",
+  "reason": "Suite de l'hypothèse H-AGI-01 : un évaluateur déterministe de quatre bras a été ajouté à curiosity-journal/tools/ avec 11 tests logiciels synthétiques réussis. Les résultats réels et un jeu d'oracles cachés ne sont pas encore produits. Prochaine expérience : agents indépendants, gel des tâches, même modèle/budget, oracle externe. Scores heuristiques non calibrés.",
+  "hypothesis": "La configuration avec compétences réutilisables validées donnera un meilleur taux de réussite sur des tâches inédites que la configuration journal-seul, sans hausse des régressions; rien n'est encore prouvé.",
+  "need_id": null,
+  "research_mode": "emergent",
+  "gap_kind": "unverified",
+  "metrics": {
+    "uncertainty": 0.96,
+    "expected_impact": 0.99,
+    "staleness": 0.53,
+    "novelty_gap": 0.98,
+    "selection_score": 0.89
+  },
+  "evidence_refs": [],
+  "outcome": "not_tested",
+  "uncertainty_after": null,
+  "learning": null
+}
