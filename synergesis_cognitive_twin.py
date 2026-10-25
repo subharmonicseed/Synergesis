@@ -124,7 +124,7 @@ class TwinLedger:
         picked = []
         for kind, maximum in (("intention", 1), ("objection", 2), ("decision", 1)):
             newest = [r for r in items if r["kind"] == kind][-maximum:]
-            picked += [{"kind": kind, "text": r["text"],
+            picked += [{"kind": kind, "text": r["text"][:500],
                         "reference": r["sha256"][:16]} for r in newest]
         packet = {"schema": SCHEMA, "source": "explicit_user_annotations_unverified",
                   "active_records": picked, "record_count": len(items),
@@ -225,7 +225,7 @@ def main(argv=None) -> int:
                     continue
             cmd, _, payload = user.partition(" ")
             if cmd in ("/intention", "/objection", "/decision"):
-                kind = {"\/intention": "intention", "/objection": "objection",
+                kind = {"/intention": "intention", "/objection": "objection",
                         "/decision": "decision"}[cmd]
                 record = ledger.add(kind, payload)
                 print("Annotation explicite enregistrée : " + record["sha256"][:12])
