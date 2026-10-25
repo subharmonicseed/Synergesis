@@ -79,6 +79,12 @@ class ScoutTests(unittest.TestCase):
         self.assertIn("never calibrated", scout.assess([example(1, "astro")])
                       ["scoring_policy"])
 
+    def test_expected_model_survives_triage(self):
+        row = example(1, "astro")
+        result = scout.assess([row])["selected"][0]
+        self.assertEqual(result["baseline_expectation"], row["baseline_expectation"])
+        self.assertEqual(result["publication_date"], row["publication_date"])
+
     def test_empty_input(self):
         self.assertEqual(scout.assess([])["selected"], [])
 
