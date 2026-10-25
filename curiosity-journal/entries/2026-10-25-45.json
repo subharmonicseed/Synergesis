@@ -1,0 +1,30 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-25:45",
+  "observed_at": "2026-10-25T13:21:45.885+00:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "syn-preregistered-real-world-forecasts",
+  "question": "Peut-on au moins figer publiquement des probabilités prospectives de SYN avant les événements et les rendre exploitables par un contrôle indépendant ultérieur ?",
+  "reason": "Passer d'un journal de découvertes rétrospectives à un instrument qui risque publiquement une erreur. USGS publie des taux annuels de magnitudes 6+ et 7+; les fréquences de base forment un contrôle simplifié pré-enregistrable. Aucun résultat du futur n'est encore accessible.",
+  "hypothesis": "Deux probabilités de base relatives à la semaine UTC du 2 au 9 novembre 2026 sont gelées avant l'événement et archivées à une URL par commit SHA immuable, avec un protocole de vérification indépendant ultérieur.",
+  "need_id": null,
+  "research_mode": "directed",
+  "gap_kind": "unverified",
+  "metrics": {
+    "uncertainty": 0.85,
+    "expected_impact": 0.99,
+    "staleness": 0.73,
+    "novelty_gap": 0.88,
+    "selection_score": 0.888
+  },
+  "evidence_refs": [
+    "https://www.usgs.gov/programs/earthquake-hazards/science/earthquake-sequence-product",
+    "https://earthquake.usgs.gov/fdsnws/event/1/",
+    "https://github.com/subharmonicseed/Synergesis/blob/b409e84520013b6c2717f911a7e208b26b1788e1/curiosity-journal/forecast-pilot/2026-11-02-usgs-prospective-v0.json",
+    "https://github.com/subharmonicseed/Synergesis/blob/feat/syn-curiosity-observatory-v0/curiosity-journal/forecast-pilot/2026-11-02-usgs-forecast-input-v0.jsonl"
+  ],
+  "outcome": "supported",
+  "uncertainty_after": 0.61,
+  "learning": "Deux prévisions prospectives publiques ont été enregistrées le 25 octobre 2026 à 13:19:00Z avant les observations : p=0,232 pour au moins un M>=7.0 mondial, p=0,425 pour au moins trois M>=6.0 mondiaux sur la semaine UTC 2–9 novembre. Elles résultent exclusivement d'une fréquence de Poisson approximative basée sur les moyennes USGS 2015–25 de 13 M7–7,9, 0,7 M8+ et 110 M6–6,9 par an, ignorent les séquences sismiques et ne prédisent aucun séisme particulier. GitHub préinscription SHA b409e845... et références de données datées. Ne mesure AUCUN progrès de SYN; outcomes inconnus avant la fin de la fenêtre et arbitrage prévu 14 jours après. Les deux événements sont corrélés."
+}
