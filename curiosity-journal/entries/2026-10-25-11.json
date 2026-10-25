@@ -1,0 +1,25 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-25:11",
+  "observed_at": "2026-10-25T12:35:54.584+01:00",
+  "producer": "chatgpt",
+  "stage": "proposed",
+  "domain": "syn-experimental-design-civic-trust",
+  "question": "Une interface de médiation IA montrant preuves, incertitude réellement calibrée et possibilité de contester améliore-t-elle à la fois la vérification indépendante, la participation réelle et la protection des opinions minoritaires ?",
+  "reason": "Question générée du croisement des observations 08-10 : les scores calibrés peuvent aider individuellement, les jauges combinées peuvent dégrader les comportements, la médiation préférée peut orienter les décisions sans meilleure équité. Aucun test commun de ces objectifs n'a été établi. Heuristiques non calibrées.",
+  "hypothesis": "Des preuves vérifiables et des procédures de contestation pourraient réduire l'adhésion non critique, mais pourraient aussi ralentir les échanges ou accroître la méfiance. Comparaison randomisée à mener, sans présumer du résultat.",
+  "need_id": null,
+  "research_mode": "emergent",
+  "gap_kind": "unverified",
+  "metrics": {
+    "uncertainty": 0.95,
+    "expected_impact": 0.98,
+    "staleness": 0.35,
+    "novelty_gap": 0.98,
+    "selection_score": 0.848
+  },
+  "evidence_refs": [],
+  "outcome": "not_tested",
+  "uncertainty_after": null,
+  "learning": null
+}
