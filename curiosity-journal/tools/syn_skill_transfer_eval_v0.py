@@ -109,7 +109,7 @@ def evaluate(manifest: dict[str, Any], truth: list[dict[str, Any]], attempts: li
         tokens = _nonneg_int(row["tokens_used"], "tokens_used")
         skills = row["skill_ids"]
         _require(isinstance(skills, list) and all(isinstance(x, str) and x.strip() for x in skills) and len(set(skills)) == len(skills), "bad skill IDs")
-        _require(arm == "skills" or len(skills) == 0, "skills declared outside skills arm")
+        _require(arm in ("research", "skills") or len(skills) == 0, "skills declared outside skill-enabled arm")
         key = tid, arm
         _require(key not in results, "duplicate result for task and arm")
         results[key] = answer == truth_map[tid]
