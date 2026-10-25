@@ -4,6 +4,7 @@
 Point d'entrée : [AGENTS.md](../AGENTS.md). Historique :
 [2026-10-25-001 — transmission des décisions et incertitudes](continuity/2026-10-25-001.md).
 [2026-10-25-002 — SYN au-delà du logiciel, frontière du possible](continuity/2026-10-25-002.md).
+[2026-10-25-003 — retour à la colonne vertébrale glyphique](continuity/2026-10-25-003.md).
 
 ## Décisions actives
 
@@ -18,6 +19,7 @@ Point d'entrée : [AGENTS.md](../AGENTS.md). Historique :
 | D005 | Exigence épistémique | Préserver intention, altérité et réalité sans confondre beauté, nouveauté et preuve. |
 | D006 | Protection de la vie privée | Ne pas publier dans GitHub de profils, conversations ni informations personnelles non autorisées. |
 | H002 | Hypothèse non testée | La curiosité transformationnelle pourrait identifier des actions rendues nouvellement possibles. Pré-enregistrement dans [frontière du possible](SYN_FRONTIERE_DU_POSSIBLE_V1.md). Aucun gain encore démontré. |
+| D007 | Correction d'architecture | La mémoire de transformation repose sur les **glyphes déjà existants** ; Git conserve les sources versionnées. Voir [raccord de scène](SYN_GLYPH_SCENE_BRIDGE_V1.md). Code présent, tests non exécutés ici. |
 
 ## État expérimental à conserver
 
@@ -49,6 +51,12 @@ au même héritage accompagné d'une objection non résolue, avec budget commun 
 critère annoncé avant exécution : changement justifié de l'expérience choisie,
 puis utilité constatée. C'est une piste à préciser, pas un essai exécuté ni une
 mission permanente ou un nouveau budget autorisé.
+
+## Rappel glyphique de scène (premier raccord)
+
+Un adaptateur borné réutilise le `GlyphLedger`/`GlyphAuditGraph` existant : `synergesis_scene_glyph_bridge.py`. Lire [la procédure](SYN_GLYPH_SCENE_BRIDGE_V1.md) avant toute proposition de « nouvelle mémoire ». Les ancêtres du glyphe `frontier` ramènent à `scaphandre`, puis `scope`; les révisions conservent leurs liens `supersedes`.
+
+**Ce raccord n'est pas un index sémantique exhaustif, n'injecte pas automatiquement la mémoire dans le chat et n'est pas revendiqué comme testé sur le runtime local.** Le ledger privé reste hors dépôt.
 
 ## Réouverture conceptuelle prioritaire
 
