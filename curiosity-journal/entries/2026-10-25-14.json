@@ -1,0 +1,27 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-25:14",
+  "observed_at": "2026-10-25T12:39:33.132+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "human-ai-abstention",
+  "question": "La présence de conseils IA erronés modifie-t-elle la propension humaine à reconnaître « je ne sais pas », même lorsque les participants peuvent s'abstenir et que l'exactitude est récompensée ?",
+  "reason": "Le journal mesure surtout l'incertitude déclarée par le modèle, mais pas son effet sur les seuils de doute humains. Cinq expériences publiées en prépublication juillet 2026; scores heuristiques non calibrés.",
+  "hypothesis": "Une IA qui répond avec assurance peut faire baisser l'abstention humaine même quand le conseil est faux; les incitations à la précision n'annulent pas entièrement le phénomène.",
+  "need_id": null,
+  "research_mode": "adversarial",
+  "gap_kind": "contradiction",
+  "metrics": {
+    "uncertainty": 0.89,
+    "expected_impact": 0.94,
+    "staleness": 0.44,
+    "novelty_gap": 0.91,
+    "selection_score": 0.824
+  },
+  "evidence_refs": [
+    "https://arxiv.org/abs/2607.13562"
+  ],
+  "outcome": "supported",
+  "uncertainty_after": 0.7,
+  "learning": "Prépublication arXiv (15 juillet 2026), cinq expériences N=3132, dont quatre préenregistrées et une réplication: en exposant des participants à des conseils IA conçus pour être erronés, l'étude trouve moins de réponses « je ne sais pas », davantage de réponses incorrectes et une confiance subjective plus élevée. Les incitations à l'exactitude atténuent l'effet sans restaurer complètement l'abstention. NON évalué par les pairs à ce stade, situation artificielle avec conseil systématiquement erroné, aucun résultat direct sur l'IA médiatrice de débats. Il faut tester des conseils mixtes réalistes, la calibration humaine avant/après et le refus de voter quand les preuves manquent."
+}
