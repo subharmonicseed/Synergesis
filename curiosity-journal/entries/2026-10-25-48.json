@@ -1,0 +1,28 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-25:48",
+  "observed_at": "2026-10-25T16:21:25.685+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "ai-energy-stranded-cost-allocation",
+  "question": "Au-delà de la quantité d'électricité consommée par les centres de données, le risque de coûts de réseau échoués après abandon d'un projet est-il un canal réglementaire identifié de transfert vers les autres usagers ?",
+  "reason": "Approfondissement distinct de l'entrée 02 : mécanisme causal projet de forte charge -> investissement de transmission -> annulation/départ anticipé -> coûts potentiellement reportés sur les clients. Pouvoir discriminant : dossiers FERC, garanties financières et répartition tarifaire fédérale/étatique; gain attendu : séparer congestion physique, facturation et risque de crédit. Scores heuristiques non calibrés.",
+  "hypothesis": "La FERC identifie explicitement le risque de coûts échoués des raccordements de grandes charges et examine des accords de récupération de coûts; cela ne prouve pas que ces transferts ont déjà été quantifiés ni que les réformes sont définitives.",
+  "need_id": null,
+  "research_mode": "directed",
+  "gap_kind": "missing_domain",
+  "metrics": {
+    "uncertainty": 0.8,
+    "expected_impact": 0.92,
+    "staleness": 0.61,
+    "novelty_gap": 0.79,
+    "selection_score": 0.808
+  },
+  "evidence_refs": [
+    "https://www.ferc.gov/news-events/news/ferc-launches-aggressive-targeted-action-speed-large-load-integration",
+    "https://www.ferc.gov/cost-transparency-customer-protection"
+  ],
+  "outcome": "supported",
+  "uncertainty_after": 0.48,
+  "learning": "Fait institutionnel daté : le 18 juin 2026, la FERC a ouvert six procédures sur les règles de raccordement de grandes charges et relève des insuffisances possibles de transparence et de garanties. Son Office of Public Participation détaille le risque de coûts d'infrastructures non récupérés si un projet est annulé ou quitte le réseau, ainsi que la distinction transmission fédérale/tarifs de détail étatiques. Contre-argument : ce sont des constatations préliminaires et des options contractuelles, pas une preuve d'une hausse de facture causée par l'IA ni un tarif final. Réponses attendues les 16/20 novembre 2026. Prochaine lacune : comparer coûts réels et sûretés financières de projets annulés par région, puis leur incidence sur les clients."
+}
