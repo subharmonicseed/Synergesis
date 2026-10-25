@@ -1,5 +1,11 @@
 # SYN-CURIOSITY — banc d'essai du transfert de compétences (v0)
 
+**Extension exécutable v1 :** voir [la boucle d'héritage vérifié](../../docs/SYN_RECURSIVE_INHERITANCE_V1.md)
+et `python -m synergesis_recursive_trial`. Elle exécute les stratégies, vérifie
+leurs résultats puis transmet une politique à un nouveau processus. Les limites
+et la distinction entre mémoire, sélection d'outils et apprentissage du modèle
+sont décrites séparément. Les évaluateurs v0 ci-dessous restent inchangés.
+
 **État réel (25 octobre 2026) : évaluateur implémenté et testé sur données entièrement SYNTHÉTIQUES. Aucun bras de SYN n'a encore été exécuté. Aucune AGI démontrée.**
 
 Ce répertoire contient un évaluateur hors ligne, sans appel au réseau, LLM ni exécution de code de compétence. Il mesure sur les **mêmes tâches** l'effet descriptif de quatre configurations : `baseline`, `journal`, `research`, `skills`. L'évaluateur vérifie les identifiants de tâche et modèle, l'absence de chevauchement explicite entraînement/test, la présence de chaque bras, les doublons, les budgets de jetons déclarés et les régressions. Il compare par égalité stricte les réponses produites à un oracle distinct.
