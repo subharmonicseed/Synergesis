@@ -61,6 +61,10 @@ Une « mémoire de SYN » utile conserve, pour les épisodes importants :
 
 Le stockage et l'accès à ces informations demandent autorisation et contrôle ; les conversations personnelles, médicales ou intimes ne sont **pas destinées à être publiées dans GitHub**. Le dépôt contient seulement des abstractions non identifiantes et des expériences fictives ou consenties.
 
+### Colonne vertébrale existante : le Glyph Protocol
+
+Dans l'instrument Synergesis, la mémoire des transformations **doit réutiliser les glyphes déjà typés et reliés** : `synergesis_glyph_protocol.py` (`GlyphLedger`, `GlyphAuditGraph`). Les documents GitHub sont des sources versionnées ; les glyphes portent l'identité, la provenance, les contradictions documentées et les révisions. Voir [raccord de contexte de scène](SYN_GLYPH_SCENE_BRIDGE_V1.md), encore expérimental. Il ne crée pas de mémoire sémantique automatique dans ChatGPT.
+
 ## 6. Principe nouveau : la frontière du possible
 
 La curiosité ordinaire peut chercher une information manquante. La curiosité expérimentale peut chercher une observation discriminante. La **curiosité transformationnelle** cherche les hypothèses sur les limites du possible qui méritent d'être reconsidérées.
