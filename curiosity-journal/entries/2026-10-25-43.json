@@ -1,0 +1,25 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-25:43",
+  "observed_at": "2026-10-25T14:07:02.953+01:00",
+  "producer": "chatgpt",
+  "stage": "proposed",
+  "domain": "syn-scientific-curiosity-source-diversity",
+  "question": "À modèle et budget constants, un observatoire qui détecte des anomalies scientifiques dans des disciplines éloignées, puis contrôle les publications primaires, produit-il davantage d'hypothèses réellement nouvelles et réfutables qu'un agenda concentré sur un seul domaine ?",
+  "reason": "Observation architecturale inspirée par une vulgarisation scientifique multidisciplinaire : la diversité des thèmes n'est pas un gain d'intelligence et les vidéos ne sont que des sources secondaires. Un filtre hors ligne de preuves, de domaines et de questions falsifiables a été implémenté, sans accès automatique aux sources et sans promotion en mémoire. Scores heuristiques non calibrés.",
+  "hypothesis": "Un flux interdisciplinaire avec vérification des sources originales augmente la nouveauté utile et la transférabilité des hypothèses, MAIS peut aussi augmenter les analogies trompeuses et la charge de vérification; seule une comparaison aveugle permet de trancher.",
+  "need_id": null,
+  "research_mode": "emergent",
+  "gap_kind": "unverified",
+  "metrics": {
+    "uncertainty": 0.97,
+    "expected_impact": 0.98,
+    "staleness": 0.44,
+    "novelty_gap": 0.98,
+    "selection_score": 0.87
+  },
+  "evidence_refs": [],
+  "outcome": "not_tested",
+  "uncertainty_after": null,
+  "learning": null
+}
