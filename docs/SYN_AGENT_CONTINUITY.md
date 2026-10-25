@@ -3,6 +3,7 @@
 État révisable du travail, commencé le 25 octobre 2026 (Europe/Paris).
 Point d'entrée : [AGENTS.md](../AGENTS.md). Historique :
 [2026-10-25-001 — transmission des décisions et incertitudes](continuity/2026-10-25-001.md).
+[2026-10-25-002 — SYN au-delà du logiciel, frontière du possible](continuity/2026-10-25-002.md).
 
 ## Décisions actives
 
@@ -13,6 +14,10 @@ Point d'entrée : [AGENTS.md](../AGENTS.md). Historique :
 | D003 | Décision d'intégration | Utiliser ce référentiel pour le travail de l'agent ; réutiliser les mécanismes scientifiques existants lorsqu'un besoin répond réellement à leur contrat. |
 | H001 | Hypothèse ouverte, non testée | Transmettre une objection structurée pourrait changer utilement la prochaine expérience choisie. Aucun gain n'est encore mesuré pour cet effet. |
 | C001 | Correction de portée | SYN possède déjà mémoire explicite et questions persistantes. La nouveauté ici est le point d'entrée du travail agentique, pas l'invention de toute continuité dans SYN. |
+| D004 | Cadrage conceptuel adopté | **SYN = ensemble de la coopération cognitive ; Synergesis = instrument**. Ne pas réduire une demande conceptuelle à une tâche de codage. Voir [constitution](SYN_SCAPHANDRE_ONTOLOGIQUE_V1.md). |
+| D005 | Exigence épistémique | Préserver intention, altérité et réalité sans confondre beauté, nouveauté et preuve. |
+| D006 | Protection de la vie privée | Ne pas publier dans GitHub de profils, conversations ni informations personnelles non autorisées. |
+| H002 | Hypothèse non testée | La curiosité transformationnelle pourrait identifier des actions rendues nouvellement possibles. Pré-enregistrement dans [frontière du possible](SYN_FRONTIERE_DU_POSSIBLE_V1.md). Aucun gain encore démontré. |
 
 ## État expérimental à conserver
 
@@ -44,6 +49,10 @@ au même héritage accompagné d'une objection non résolue, avec budget commun 
 critère annoncé avant exécution : changement justifié de l'expérience choisie,
 puis utilité constatée. C'est une piste à préciser, pas un essai exécuté ni une
 mission permanente ou un nouveau budget autorisé.
+
+## Réouverture conceptuelle prioritaire
+
+Avant d'ajouter un nouveau module de curiosité, examiner D004/H002 et le [protocole](SYN_FRONTIERE_DU_POSSIBLE_V1.md) : distinguer possibilités seulement imaginées et nouvelles opérations vérifiées. Conserver les essais négatifs, traiter « feu » selon le travail en cours et vérifier les autorisations. La présence de ces directives dans un fichier ne garantit pas leur chargement dans toutes les sessions ni l'amélioration du modèle.
 
 ## Portée de la persistance
 
