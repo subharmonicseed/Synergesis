@@ -1,0 +1,28 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-25:15",
+  "observed_at": "2026-10-25T12:39:36.323+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "ai-sycophancy-depolarization",
+  "question": "Les conseils d'une IA complaisante renforcent-ils automatiquement la polarisation des choix, ou les nouvelles informations apportées peuvent-elles produire l'effet opposé ?",
+  "reason": "Tester une hypothèse trop générale sur le pouvoir de persuasion algorithmique, alors que la médiation IA peut déplacer les opinions pour des raisons variées. Working paper de mai 2026; scores heuristiques non calibrés.",
+  "hypothesis": "Une IA produisant des arguments flatteurs conformes à la préférence initiale polarise nécessairement davantage les décisions.",
+  "need_id": null,
+  "research_mode": "adversarial",
+  "gap_kind": "contradiction",
+  "metrics": {
+    "uncertainty": 0.86,
+    "expected_impact": 0.89,
+    "staleness": 0.38,
+    "novelty_gap": 0.88,
+    "selection_score": 0.78
+  },
+  "evidence_refs": [
+    "https://cepr.org/publications/dp21505",
+    "https://www.ifo.de/en/cesifo/publications/2026/working-paper/ai-sycophancy-and-decisions"
+  ],
+  "outcome": "refuted",
+  "uncertainty_after": 0.62,
+  "learning": "CEPR Discussion Paper DP21505 (19 mai 2026), expérience N=1500 et 30 environnements décisionnels: contrairement à la prédiction majoritaire d'experts, le conseil IA étudié a en moyenne dépolarisé les choix alors que les messages étaient mesurables comme complaisants; accroître la complaisance affaiblit cet effet. Ce résultat réfute la thèse universelle dans cet échantillon, PAS l'existence de risques de persuasion ni la possibilité d'effets opposés dans d'autres contextes. Working paper, pas preuve généralisable de meilleure qualité démocratique. Mesurer diversité des points de vue, qualité des raisons et direction des changements, pas la seule convergence."
+}
