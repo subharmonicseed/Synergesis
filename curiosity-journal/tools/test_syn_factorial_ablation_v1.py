@@ -111,5 +111,35 @@ class FactorialTests(unittest.TestCase):
             f.build(m, tr, ts, c, seed=True)
 
 
+    def test_end_to_end_with_real_pack_and_scorer(self):
+        """Full existing modules, synthetic responses: no external model used."""
+        import json
+        import tempfile
+        gen = f._module("syn_holdout_pack_v0")
+        old = f._module("syn_four_arm_trial_v0")
+        score = f._module("syn_skill_transfer_eval_v0")
+        with tempfile.TemporaryDirectory() as t:
+            pack = Path(t) / "pack"
+            gen.build(pack, model_id="frozen-mock-v1", seed=771)
+            manifest = old._read_json(pack / "release/manifest.json")
+            train = old._read_jsonl(pack / "release/train_examples.jsonl")
+            test = old._read_jsonl(pack / "holdout/test_prompts.jsonl")
+            cards = {"schema": "syn-factorial-skill-cards-v1", "cards": [
+                {"domain": dom, "skill_id": "human-" + dom,
+                 "procedure": "Read carefully, check each step, then answer.",
+                 "origin": "human_authored", "training_evidence_ids": []}
+                for dom in ("arithmetic", "calendar", "graph")]}
+            req = f.build(manifest, train, test, cards, seed=33)
+            self.assertEqual(len(req), 96)
+            attempts = [{"task_id": q["task_id"], "arm": q["arm"],
+                         "model_id": q["model_id"], "answer": "synthetic-no-answer",
+                         "tokens_used": 1, "skill_ids": q["skill_ids"]} for q in req]
+            truth = score._read_jsonl(pack / "sealed/oracle.jsonl")
+            outcome = score.evaluate(manifest, truth, attempts)
+            self.assertEqual(outcome["n_tasks"], 24)
+            self.assertEqual(outcome["results_by_arm"]["research"]["total"], 24)
+            self.assertEqual(set(f.summarize(outcome)["accuracy"]), set(f.ARMS))
+
+
 if __name__ == "__main__":
     unittest.main()
