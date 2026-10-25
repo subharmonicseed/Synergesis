@@ -1,0 +1,27 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-25:33",
+  "observed_at": "2026-10-25T13:16:39.860+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "generalization-of-agent-skills",
+  "question": "Les gains acquis par des compétences auto-améliorées sur les tâches d'entraînement se transfèrent-ils intégralement aux tâches tenues à l'écart ?",
+  "reason": "L'hypothèse H-AGI-01 exige le transfert au-delà des situations mémorisées. Étude directe de méthodes d'évolution de compétences avec modèle, agent et découpages train/test tenus constants. Scores de priorité heuristiques, non calibrés.",
+  "hypothesis": "La plupart des compétences qui progressent sur les exemples de pratique conservent l'intégralité de leurs gains sur des tâches inconnues.",
+  "need_id": null,
+  "research_mode": "adversarial",
+  "gap_kind": "contradiction",
+  "metrics": {
+    "uncertainty": 0.91,
+    "expected_impact": 0.99,
+    "staleness": 0.64,
+    "novelty_gap": 0.93,
+    "selection_score": 0.892
+  },
+  "evidence_refs": [
+    "https://arxiv.org/abs/2609.39148"
+  ],
+  "outcome": "refuted",
+  "uncertainty_after": 0.54,
+  "learning": "Piao, Wang, Chen, prépublication révisée le 7 octobre 2026; 5 méthodes évolutives, variante en une passe, 6 benchmarks avec contrôle modèle/agent/découpage : sur 21 compétences qui progressent en entraînement, 5 conservent tous leurs gains en test, 13 une partie, 3 aucun. Les compétences trop attachées à des chemins, colonnes ou réparations spécifiques transfèrent mal. Leur GSO (guide de compétences rédigées par tâche) arrive en tête sur les six benchmarks évalués. L'étude ne mesure pas une AGI ni un taux populationnel général. Exigence pour SYN : séparer gain train, maintien sur tâches inconnues et régressions en test."
+}
