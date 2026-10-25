@@ -6,6 +6,12 @@ leurs résultats puis transmet une politique à un nouveau processus. Les limite
 et la distinction entre mémoire, sélection d'outils et apprentissage du modèle
 sont décrites séparément. Les évaluateurs v0 ci-dessous restent inchangés.
 
+**Essai PC des quatre variations de prompts :** [résultats exécutés et lanceur
+avec reçus](../../docs/SYN_FOUR_ARM_PC_TRIAL_2026-10-25.md). Le modèle local a
+réellement répondu à 24 requêtes : chacun des quatre bras obtient 2/6 sur ces
+exercices synthétiques, sans gain observé. Le texte v0 ci-dessous décrit l'état
+historique de l'évaluateur ; il ne remplace pas ce reçu d'exécution plus récent.
+
 **État réel (25 octobre 2026) : évaluateur implémenté et testé sur données entièrement SYNTHÉTIQUES. Aucun bras de SYN n'a encore été exécuté. Aucune AGI démontrée.**
 
 Ce répertoire contient un évaluateur hors ligne, sans appel au réseau, LLM ni exécution de code de compétence. Il mesure sur les **mêmes tâches** l'effet descriptif de quatre configurations : `baseline`, `journal`, `research`, `skills`. L'évaluateur vérifie les identifiants de tâche et modèle, l'absence de chevauchement explicite entraînement/test, la présence de chaque bras, les doublons, les budgets de jetons déclarés et les régressions. Il compare par égalité stricte les réponses produites à un oracle distinct.

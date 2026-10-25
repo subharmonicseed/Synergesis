@@ -267,7 +267,10 @@
   "synergesis_recursive_trial.py": "9605c0f885ae0fa10bb6b5a4702d99fc2323b68cd8631758f8c5064c858f47ad",
   "test_synergesis_recursive.py": "f9cd9c2d68fa6291d5999f2bded25ce5fe856112eda2e36bf06875d555635624",
   "docs/SYN_RECURSIVE_INHERITANCE_V1.md": "b3e75acafdcf38ee66bb721b0a54bdab9a6d4e97026f6ffb8b88208da698f9da",
-  "curiosity-journal/tools/README.md": "5e49dfb6406bbe08cc7a89ffa669b8e313fcd70172c5eb140c3499444dfa0720",
+  "curiosity-journal/tools/README.md": "064b5a1a1f7e5f91d725e8193f14882614d18441764dca27684ed1d87c7d755f",
   "synergesis_recursive_audit.py": "da3ed77311eeba281cd464d58c5a111e241ad6c1719d7c26dab83ec0b5fcfa89",
-  "docs/SYN_RECURSIVE_RESULTS_2026-10-25.md": "a497fa6e0f819237ab4250ac3d0b22f5e58002e79b6df8e1dd29d6cad5333750"
+  "docs/SYN_RECURSIVE_RESULTS_2026-10-25.md": "a497fa6e0f819237ab4250ac3d0b22f5e58002e79b6df8e1dd29d6cad5333750",
+  "curiosity-journal/tools/syn_four_arm_recorded_v1.py": "a51465c49bddde602fc9482bf18cdd5289393edda0e3be336cb389b8123b4705",
+  "curiosity-journal/tools/test_syn_four_arm_recorded_v1.py": "13d9a45605f165ca795773adfad178a4d6b26663db0b65b6bffa510257c82cd5",
+  "docs/SYN_FOUR_ARM_PC_TRIAL_2026-10-25.md": "f585d59cc7782c6b336526cd43d43198abe54ed6600948b7cc94948b928c581f"
 }

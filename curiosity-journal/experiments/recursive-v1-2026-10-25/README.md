@@ -14,6 +14,10 @@ entre études ; les données et graines de tâches sont nouvelles.
 Lire [le rapport et ses limites](../../../docs/SYN_RECURSIVE_RESULTS_2026-10-25.md)
 et [l'architecture](../../../docs/SYN_RECURSIVE_INHERITANCE_V1.md).
 
+Un [pilote historique de quatre variations de prompts](../../../docs/SYN_FOUR_ARM_PC_TRIAL_2026-10-25.md)
+est conservé séparément dans `historical-four-arm-summary.json` : 24 appels réels,
+six problèmes synthétiques, 2/6 pour chaque condition, sans gain observé.
+
 - `study-summary.json` contient les résultats complets et les reçus de vérification.
 - Les preuves détaillées ont été remises localement au fondateur : 439 fichiers
   de données synthétiques, graines, requêtes/réponses, états, décisions, registres,

@@ -1,0 +1,102 @@
+{
+  "schema": "syn-historical-four-arm-executed-v1",
+  "evaluation": {
+    "claims": "DESCRIPTIVE_ONLY: exact-match scoring of supplied answers; not proof of independent oracle, skill causality, AGI or statistical significance",
+    "model_id": "syn-mistral-import:latest",
+    "n_domains": 3,
+    "n_tasks": 6,
+    "paired_gain_skills_minus_baseline": 0.0,
+    "paired_gain_skills_minus_journal": 0.0,
+    "pass_rates_by_domain": {
+      "arithmetic": {
+        "baseline": 0.0,
+        "journal": 0.0,
+        "research": 0.0,
+        "skills": 0.0
+      },
+      "calendar": {
+        "baseline": 0.5,
+        "journal": 0.5,
+        "research": 0.5,
+        "skills": 0.5
+      },
+      "graph": {
+        "baseline": 0.5,
+        "journal": 0.5,
+        "research": 0.5,
+        "skills": 0.5
+      }
+    },
+    "regressed_tasks": [],
+    "repaired_tasks": [],
+    "results_by_arm": {
+      "baseline": {
+        "pass_rate": 0.3333333333333333,
+        "passed": 2,
+        "tokens_used": 1211,
+        "total": 6
+      },
+      "journal": {
+        "pass_rate": 0.3333333333333333,
+        "passed": 2,
+        "tokens_used": 1845,
+        "total": 6
+      },
+      "research": {
+        "pass_rate": 0.3333333333333333,
+        "passed": 2,
+        "tokens_used": 2149,
+        "total": 6
+      },
+      "skills": {
+        "pass_rate": 0.3333333333333333,
+        "passed": 2,
+        "tokens_used": 2346,
+        "total": 6
+      }
+    },
+    "schema": "syn-skill-transfer-eval-v0",
+    "skill_id_domains_observed": {
+      "human-procedure-arithmetic-v0": [
+        "arithmetic"
+      ],
+      "human-procedure-calendar-v0": [
+        "calendar"
+      ],
+      "human-procedure-graph-v0": [
+        "graph"
+      ]
+    },
+    "study_id": "toy-holdout-pilot-NOT-A-REAL-AGENT-TRIAL",
+    "warnings": [
+      "Oracle independence, pre-registration, budgets and task provenance cannot be established from these files alone.",
+      "Skill IDs indicate reported usage, not demonstrated causal effectiveness or cross-domain transfer.",
+      "No formal statistical claim or confidence interval is computed; multiple repetitions and hidden tests are needed."
+    ]
+  },
+  "verification": {
+    "schema": "syn-four-arm-real-verification-v1",
+    "verified": true,
+    "n_tasks": 6,
+    "physical_calls": 24,
+    "physical_tokens": 7551,
+    "tokens_by_arm": {
+      "baseline": 1211,
+      "journal": 1845,
+      "research": 2149,
+      "skills": 2346
+    },
+    "input_commitments_verified": true,
+    "raw_response_hashes_verified": 24,
+    "independent_oracle_checks": 6,
+    "oracle_was_not_a_runner_input": true,
+    "model_digest": "6fb2c6e2bdc5ce5719719586b099710eb63942060cbb0be64a190f4c633b9d0c",
+    "source_sha256": {
+      "syn_four_arm_trial_v0.py": "11cb273516f9e5748438912953db25d05f7713e8e365105e0bbe0f37d5678212",
+      "syn_holdout_pack_v0.py": "053450bd31a78e754da028e16137a8435b01f8d44ecc875719663e96ff784719",
+      "syn_skill_transfer_eval_v0.py": "e007f9d24c4ea4fbb00d30ce9ab2fb1ed978d3b69ce496c34458b667754c255f",
+      "syn_four_arm_recorded_v1.py": "a51465c49bddde602fc9482bf18cdd5289393edda0e3be336cb389b8123b4705"
+    },
+    "warning": "Real local model executions on generated toy problems; prompt conditions are not full SYN deployments. No operator blinding or independent timestamp attestation."
+  }
+}
