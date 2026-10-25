@@ -1,0 +1,25 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-25:22",
+  "observed_at": "2026-10-25T12:44:24.102+01:00",
+  "producer": "chatgpt",
+  "stage": "proposed",
+  "domain": "syn-curiosity-causal-trial",
+  "question": "Un SYN-CURIOSITY avec boucle de veille obtient-il après plusieurs cycles une meilleure précision hors échantillon et une meilleure calibration qu'un SYN sans veille, à ressources égales ?",
+  "reason": "Question issue des observations 17-21 : savoir si la curiosité enregistrée produit un vrai gain prédictif, plutôt que de jolies chaînes de questions ou de scores auto-déclarés. Proposer comparaison contrôlée avec jeux de questions tenus secrets, sources datées et coûts identiques.",
+  "hypothesis": "Un agent à veille avec mémoire auditée, sélection contradictoire et vérification des prédictions devrait être plus précis et mieux calibré hors échantillon qu'un témoin sans veille; l'effet reste à mesurer.",
+  "need_id": null,
+  "research_mode": "emergent",
+  "gap_kind": "unverified",
+  "metrics": {
+    "uncertainty": 0.96,
+    "expected_impact": 0.99,
+    "staleness": 0.69,
+    "novelty_gap": 0.95,
+    "selection_score": 0.916
+  },
+  "evidence_refs": [],
+  "outcome": "not_tested",
+  "uncertainty_after": null,
+  "learning": null
+}
