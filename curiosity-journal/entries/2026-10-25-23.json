@@ -1,0 +1,30 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-25:23",
+  "observed_at": "2026-10-25T12:50:20.260+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "prospective-forecasting-evaluation",
+  "question": "La capacité des systèmes IA à prévoir le futur reste-t-elle inférieure à celle des meilleurs prévisionnistes humains d'après les observations à jour en octobre 2026 ?",
+  "reason": "L'hypothèse 22 doit choisir des données de test et des références humaines. Les comparaisons ICLR 2025 risquent d'être dépassées par les résultats du ForecastBench mis à jour en 2026. Scores de priorité et d'incertitude estimatifs non calibrés.",
+  "hypothesis": "Il existe en 2026 des systèmes de prévision IA dont le score ForecastBench est statistiquement indiscernable de celui des superforecasters de référence, sans preuve d'une supériorité durable.",
+  "need_id": null,
+  "research_mode": "directed",
+  "gap_kind": "staleness",
+  "metrics": {
+    "uncertainty": 0.83,
+    "expected_impact": 0.97,
+    "staleness": 0.9,
+    "novelty_gap": 0.87,
+    "selection_score": 0.908
+  },
+  "evidence_refs": [
+    "https://proceedings.iclr.cc/paper_files/paper/2025/hash/ea74e45a229dac70b5b63b28d8934db6-Abstract-Conference.html",
+    "https://forecastingresearch.substack.com/p/ai-models-have-likely-reached-parity",
+    "https://www.forecastbench.org/about/",
+    "https://www.forecastbench.org/tournament/"
+  ],
+  "outcome": "supported",
+  "uncertainty_after": 0.57,
+  "learning": "ICLR 2025 : dans les questions examinées, les superforecasters étaient meilleurs que le meilleur modèle testé (p<0,001). Forecasting Research Institute, 16 juillet 2026 : plusieurs systèmes instrumentés sont statistiquement indiscernables de la référence humaine sur ForecastBench; un système était au-dessus de la médiane humaine sur sous-ensemble des questions de marché. LIMITES : référence humaine relevée en 2024 et extrapolée en 2026, intervalles de confiance chevauchants; absence de preuve d'équivalence stricte ou supériorité durable. Benchmark prospectif dynamique, nouveaux ensembles toutes les deux semaines, scores Brier ajustés et comparateurs humains/base-rate. Pour SYN : pré-enregistrer des prévisions sur des événements futurs non résolus, comparer à références simples et humaines, verrouiller les horodatages, coûts et ensembles."
+}
