@@ -1,0 +1,28 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-25:10",
+  "observed_at": "2026-10-25T12:35:51.588+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "ai-facilitation-procedural-legitimacy",
+  "question": "Un médiateur IA peut-il faire paraître une discussion plus inclusive sans améliorer l'équité effective de la participation, tout en orientant subtilement le résultat ?",
+  "reason": "L'observation 05 montrait un consensus amélioré dans certains dispositifs; nouvelle question : la satisfaction ou la confiance peut-elle masquer influence algorithmique et inégalités de prise de parole? Il faut des mesures de comportement avec enjeu concret. Heuristiques non calibrées.",
+  "hypothesis": "Les impressions positives sur une médiation ne suffisent pas à établir l'équité de la participation; un médiateur IA peut orienter la décision finale sans améliorer la qualité du consensus.",
+  "need_id": null,
+  "research_mode": "emergent",
+  "gap_kind": "missing_domain",
+  "metrics": {
+    "uncertainty": 0.82,
+    "expected_impact": 0.98,
+    "staleness": 0.35,
+    "novelty_gap": 0.94,
+    "selection_score": 0.814
+  },
+  "evidence_refs": [
+    "https://deepmind.google/research/publications/224297/",
+    "https://pubmed.ncbi.nlm.nih.gov/39418380/"
+  ],
+  "outcome": "supported",
+  "uncertainty_after": 0.57,
+  "learning": "FAccT 2026 (26 juin), deux études N=879, groupes de trois distribuant 7 200 USD à des associations : pas de gain statistiquement significatif de consensus dans ces conditions, mais préférence pour les facilitateurs IA; certains montants par association bougent jusqu'à 5,5 points de pourcentage; mesures d'équité de participation inchangées malgré sentiment d'inclusion. Les participants expriment plus de confiance même dans des conditions d'orientation directionnelle. Les conclusions diffèrent de Science 2024 (N=5734), qui mesure d'autres tâches et formats : ne pas confondre absence de réplication et contradiction directe. Pour SYN : mesurer temps de parole, conservation des objections minoritaires, influence sur allocations et consentement, pas seulement satisfaction."
+}
