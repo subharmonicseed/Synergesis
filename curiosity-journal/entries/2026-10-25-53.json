@@ -1,0 +1,29 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-25:53",
+  "observed_at": "2026-10-25T20:23:51+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "ai-democratic-losers-consent",
+  "question": "Une interface IA qui expose des témoignages humains peut-elle augmenter la légitimité perçue d'une décision défavorable sans modifier les positions politiques ni accroître la volonté d'interagir ?",
+  "reason": "Contrepoint aux entrées 10 et 50 : elles examinaient l'illusion d'inclusion et la représentation déléguée, non l'acceptation par ceux qui perdent un vote. Mécanisme causal : témoignages authentiques et distribution de positions visibles -> compréhension de la procédure -> confiance déclarée, possiblement sans changement comportemental. Pouvoir discriminant : expérimentation randomisée factorielle et mesures distinctes de confiance, position et volonté de dialogue. Gain attendu : dissocier légitimité ressentie, persuasion et participation réelle. Scores heuristiques non calibrés.",
+  "hypothesis": "L'exposition expérimentale à une visualisation de voix et perspectives humaines médiée par IA augmente la légitimité et la confiance déclarées malgré une décision contraire aux préférences, sans nécessiter un changement de vote ni une augmentation de la volonté de dialoguer.",
+  "need_id": null,
+  "research_mode": "adversarial",
+  "gap_kind": "contradiction",
+  "metrics": {
+    "uncertainty": 0.82,
+    "expected_impact": 0.87,
+    "staleness": 0.56,
+    "novelty_gap": 0.86,
+    "selection_score": 0.796
+  },
+  "evidence_refs": [
+    "https://arxiv.org/abs/2604.05368",
+    "https://deepmind.google/research/publications/224297/",
+    "https://arxiv.org/abs/2605.24413"
+  ],
+  "outcome": "supported",
+  "uncertainty_after": 0.48,
+  "learning": "Prépublication primaire Fulay et al. du 7 avril 2026 : expérience randomisée factorielle 2x2, n=181, décisions simulées toujours défavorables aux participants. La visualisation augmente la compréhension du processus (bêta 0,77; IC 95 % [0,47;1,07]) et la confiance déclarée (bêta 0,71; IC [0,41;1,01]); aucun effet significatif sur les positions politiques mesurées (bêta 0,10; p=0,32), ni gain systématique de volonté de dialoguer. C'est un effet de perception dans cette expérience, pas une augmentation prouvée de participation démocratique ou de qualité des décisions. Contre-arguments : effectif limité, déclarations subjectives, issues simulées, impossible d'isoler les composantes de la visualisation; FAccT 2026 montre par ailleurs qu'une facilitation appréciée peut orienter des décisions sans égaliser la parole. Prochaine lacune : essai préenregistré avec participation comportementale, contrôle des minorités, manipulation d'authenticité des témoignages et suivi longitudinal."
+}
