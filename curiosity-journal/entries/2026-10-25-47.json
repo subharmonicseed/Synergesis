@@ -1,0 +1,25 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-25:47",
+  "observed_at": "2026-10-25T13:32:11.332+00:00",
+  "producer": "chatgpt",
+  "stage": "proposed",
+  "domain": "syn-recursive-iteration-causal-test",
+  "question": "Le passage d'un état décisionnel héritant des réfutations et tests de SYN_n modifie-t-il utilement le comportement de SYN_(n+1), au-delà de l'effet d'un simple historique de texte, à modèle et budget identiques ?",
+  "reason": "Le journal de curiosité stockait des entrées validées, mais ne transformait pas formellement leurs contradictions en décisions de la prochaine itération. Un passage d'état SHA-256 et une file déterministe ont été implémentés en expérimentation : ce sont des propositions, non une boucle du superviseur déjà intégrée. Priorités heuristiques non calibrées.",
+  "hypothesis": "Un mécanisme explicitement conditionné par les résultats passés conduira à davantage de nouveaux tests utiles et de progrès prédictifs hors échantillon qu'une simple conservation narrative des mêmes entrées; un essai contrôlé doit encore le démontrer.",
+  "need_id": null,
+  "research_mode": "emergent",
+  "gap_kind": "unverified",
+  "metrics": {
+    "uncertainty": 0.93,
+    "expected_impact": 0.99,
+    "staleness": 0.37,
+    "novelty_gap": 0.92,
+    "selection_score": 0.84
+  },
+  "evidence_refs": [],
+  "outcome": "not_tested",
+  "uncertainty_after": null,
+  "learning": null
+}
