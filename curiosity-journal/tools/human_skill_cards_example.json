@@ -1,0 +1,26 @@
+{
+  "schema": "syn-factorial-skill-cards-v1",
+  "cards": [
+    {
+      "domain": "arithmetic",
+      "skill_id": "human-arithmetic-20261025",
+      "procedure": "Respect precedence and signs: compute the multiplications first, then subtract 2 times the second integer. Check the sign of negative numbers.",
+      "origin": "human_authored",
+      "training_evidence_ids": []
+    },
+    {
+      "domain": "calendar",
+      "skill_id": "human-calendar-20261025",
+      "procedure": "Use the Gregorian calendar, including leap-year and month-length rules; add the exact specified number of days and give YYYY-MM-DD.",
+      "origin": "human_authored",
+      "training_evidence_ids": []
+    },
+    {
+      "domain": "graph",
+      "skill_id": "human-graph-20261025",
+      "procedure": "Treat edges as directed; begin at the source and explore only outgoing reachable neighbors. Return YES only when the destination is reached.",
+      "origin": "human_authored",
+      "training_evidence_ids": []
+    }
+  ]
+}
