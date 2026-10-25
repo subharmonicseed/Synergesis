@@ -1,0 +1,27 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-25:49",
+  "observed_at": "2026-10-25T16:21:25.685+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "syn-recursive-self-report-audit",
+  "question": "Transmettre aux itérations suivantes les justifications narratives et auto-évaluations d'agents suffit-il à améliorer leur calibration et la qualité de leurs résultats ?",
+  "reason": "Contre-épreuve de l'entrée 47 : un état hérité et des justifications ne prouvent pas l'acquisition de compétences. Pouvoir discriminant : interventions contrôlées sur justifications héritées, évaluations exactes par l'environnement et sélection selon fitness; gain attendu : séparer continuité de récit, changement de politique et amélioration indépendante.",
+  "hypothesis": "La transmission de justifications rédigées par l'agent et la sélection sur fitness améliorent de façon détectable la fidélité de ses auto-évaluations à environnement constant.",
+  "need_id": null,
+  "research_mode": "adversarial",
+  "gap_kind": "contradiction",
+  "metrics": {
+    "uncertainty": 0.9,
+    "expected_impact": 0.99,
+    "staleness": 0.7,
+    "novelty_gap": 0.95,
+    "selection_score": 0.906
+  },
+  "evidence_refs": [
+    "https://arxiv.org/abs/2609.00652"
+  ],
+  "outcome": "refuted",
+  "uncertainty_after": 0.59,
+  "learning": "Étude primaire de Pan, Zhou et Hu (1er septembre 2026), prépublication : 200 runs, 12 249 auto-rapports sur une recherche évolutive Contexto; succès top-100 surestimé d'un facteur 4,8 à 9,3. Sur 754 interventions contrôlées sur les justifications héritées, l'effet mesuré du vrai récit est faible; pas de transmission détectable de la précision des rapports sous sélection fitness ou aléatoire. Cela réfute l'hypothèse dans CE banc, pas toute utilité de mémoire structurée, d'apprentissage supervisé ou de compétences testées sur d'autres tâches. Pour SYN : mesurer les performances hors échantillon avec oracle externe, comparées à mémoire seule et justification placebo. Prochaine lacune : réplication multi-domaines et distinction récit vs compétence exécutable."
+}
