@@ -1,0 +1,29 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-25:44",
+  "observed_at": "2026-10-25T13:21:43.098+00:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "curiosity-shannon-vs-learning",
+  "question": "Un événement très improbable selon une prédiction préalable est-il nécessairement une découverte qui apporte de l'information utile et démontre un apprentissage ?",
+  "reason": "L'ancien filtre de SYN attribuait après coup des notes de surprise aux titres; une mesure de Shannon n'est elle-même pas un critère suffisant de progrès. Les sources formalisent nouveauté, surprisal réalisé, gain d'information et amélioration prédictive comme notions distinctes. Scores heuristiques non calibrés.",
+  "hypothesis": "Maximiser le seul Shannon surprisal d'événements observés maximise nécessairement l'apprentissage et le transfert des capacités.",
+  "need_id": null,
+  "research_mode": "adversarial",
+  "gap_kind": "contradiction",
+  "metrics": {
+    "uncertainty": 0.91,
+    "expected_impact": 0.98,
+    "staleness": 0.62,
+    "novelty_gap": 0.91,
+    "selection_score": 0.88
+  },
+  "evidence_refs": [
+    "https://pmc.ncbi.nlm.nih.gov/articles/PMC12501151/",
+    "https://doi.org/10.1016/j.tics.2024.02.001",
+    "https://proceedings.mlr.press/v267/bickford-smith25a.html"
+  ],
+  "outcome": "refuted",
+  "uncertainty_after": 0.55,
+  "learning": "Les modèles de curiosité distinguent nouveauté d'un état, Shannon surprisal réalisé -log2(P(observation)), réduction attendue de l'incertitude et progrès d'apprentissage; chercher le surprisal seul peut privilégier l'aléa irréductible. La revue Trends in Cognitive Sciences 2024 décrit les facteurs dynamiques de progrès d'apprentissage, et ICML 2025 critique la confusion entre notions d'incertitude. Notre module syn_prediction_surprise_v0.py calcule la surprise sur p prévisionnel préalable et l'erreur Brier, mais ne prétend jamais calculer l'information gagnée ou l'apprentissage. La thèse universelle «surprise = amélioration» est réfutée; prochaine étape : comparaison expérimentale à budget égal sur tâches nouvelles."
+}
