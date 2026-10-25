@@ -1,0 +1,28 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-25:42",
+  "observed_at": "2026-10-25T14:07:00.126+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "marine-hybrid-materials-anomaly",
+  "question": "Les composants plastiques fusionnés à des fragments coralliens morts constituent-ils une forme observable de matériau hybride, et que reste-t-il à démontrer sur leur formation et leurs effets ?",
+  "reason": "Source vidéo de vulgarisation couvrant un domaine éloigné de l'astronomie : occasion de tester l'émergence de questions sans présumer que les matériaux observés sont des minéraux nouveaux ou une transformation des coraux vivants. Scores heuristiques non calibrés.",
+  "hypothesis": "Des fragments de squelette corallien mort contiennent des plastiques fondues détectables; leur origine locale précise et les impacts toxicologiques ne sont pas prouvés par cette observation seule.",
+  "need_id": null,
+  "research_mode": "directed",
+  "gap_kind": "missing_domain",
+  "metrics": {
+    "uncertainty": 0.74,
+    "expected_impact": 0.88,
+    "staleness": 0.61,
+    "novelty_gap": 0.94,
+    "selection_score": 0.81
+  },
+  "evidence_refs": [
+    "https://doi.org/10.1016/j.marpolbul.2026.120310",
+    "https://www.oist.jp/news-center/news/2026/9/18/new-form-plastic-pollution-discovered-shores-vulnerable-coral-reefs"
+  ],
+  "outcome": "supported",
+  "uncertainty_after": 0.38,
+  "learning": "Ilechukwu et al., Marine Pollution Bulletin (4 septembre 2026), décrivent des morceaux de rubble corallien MORT provenant de plages d'Okinawa, combinés à des polymères de plastiques domestiques; microscopie et spectroscopie étayent la présence de matériaux agglutinés. La formation par feu de plage est plausible mais l'origine précise et la toxicité spécifique des plasticorals ne sont pas établies. L'analogie avec matériaux ou minéralogie est une piste pour mesurer la pollution, PAS une nouvelle espèce minérale prouvée ni la preuve d'une transformation de coraux vivants. Pour SYN : séparer observations directes, hypothèses causales, effets non démontrés et propositions d'essais."
+}
