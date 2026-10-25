@@ -1,0 +1,29 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-25:08",
+  "observed_at": "2026-10-25T12:35:46.412+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "human-ai-confidence-calibration",
+  "question": "Des scores d'incertitude correctement calibrés améliorent-ils les décisions humaines davantage que des scores mal calibrés, et que changent les formulations verbales de doute ?",
+  "reason": "Suite de l'hypothèse 07 : distinguer le niveau de confiance exprimé et l'usage correct de cette confiance par des personnes réelles. Travaux expérimentaux sur tâches logiques et réponses médicales, mais aucune extrapolation directe à la démocratie. Scores heuristiques non calibrés.",
+  "hypothesis": "Des signaux de confiance bien calibrés peuvent favoriser une reliance appropriée dans certaines tâches; afficher des scores mal calibrés ou des formulations arbitraires peut aggraver les erreurs.",
+  "need_id": null,
+  "research_mode": "directed",
+  "gap_kind": "unverified",
+  "metrics": {
+    "uncertainty": 0.86,
+    "expected_impact": 0.95,
+    "staleness": 0.3,
+    "novelty_gap": 0.86,
+    "selection_score": 0.784
+  },
+  "evidence_refs": [
+    "https://ojs.aaai.org/index.php/AAAI/article/view/38798",
+    "https://www.microsoft.com/en-us/research/publication/im-not-sure-but-examining-the-impact-of-large-language-models-uncertainty-expression-on-user-reliance-and-trust/",
+    "https://proceedings.mlr.press/v235/marusich24a.html"
+  ],
+  "outcome": "supported",
+  "uncertainty_after": 0.59,
+  "learning": "AAAI (14 mars 2026) : étude intra-sujets N=184 sur énigmes logiques; scores calibrés associés à gain de précision de 20% contre 2% pour signaux mal calibrés dans les conditions expérimentales; des scores incorrectement confiants créent des biais de confiance ou un rejet excessif. FAccT 2024 (N=404, questions médicales fictives) : «I'm not sure» réduit accord et augmente précision, davantage que une formulation générale de doute. ICML 2024 trouve des bénéfices de quantification d'incertitude dans deux expériences en ligne. Ces résultats ne mesurent ni légitimité civique, ni participation démocratique réelle. Prochaine question : comment vérifier la calibration sur les questions ouvertes de délibération ?"
+}
