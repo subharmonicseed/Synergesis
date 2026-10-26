@@ -1,0 +1,30 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-26:09",
+  "observed_at": "2026-10-26T08:30:12+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "ai-electricity-backstop-financial-cost-allocation",
+  "question": "Le risque financier de nouvelles capacités électriques destinées aux grandes charges est-il déjà traité par une procédure réglementaire distincte du délestage, et les coûts sont-ils effectivement imputés aux responsables de la demande ?",
+  "reason": "Approfondit les entrées 2026-10-25-48 et -52 sans répéter le risque général de coûts échoués ni le rejet du dispositif IRAS. Pertinence causale : un achat de capacité de secours de longue durée crée des engagements financiers dont la répartition peut déplacer le risque vers les clients existants. Pouvoir discriminant : distinguer l'ordonnance FERC du 29 septembre sur le Reliability Backstop Procurement de celle du 9 octobre sur les grandes charges; vérifier suspension, procédure 206, attribution des coûts et garanties. Gain espéré : identifier un mécanisme réglementaire précis et un événement futur vérifiable (nouveau dépôt et décision sur les coûts). Scores heuristiques non calibrés.",
+  "hypothesis": "Le mécanisme de capacité de secours proposé par PJM pour répondre à la croissance des grandes charges a fait l'objet d'une procédure réglementaire sur l'allocation des coûts plutôt que d'une approbation définitive garantissant que seuls les nouveaux demandeurs paient.",
+  "need_id": null,
+  "research_mode": "directed",
+  "gap_kind": "staleness",
+  "metrics": {
+    "uncertainty": 0.79,
+    "expected_impact": 0.9,
+    "staleness": 0.64,
+    "novelty_gap": 0.89,
+    "selection_score": 0.824
+  },
+  "evidence_refs": [
+    "https://www.federalregister.gov/documents/2026/10/06/2026-20421/pjm-interconnection-llc-notice-of-institution-of-section-206-proceeding-and-refund-effective-date",
+    "https://www.ferc.gov/news-events/news/commissioner-rosners-concurrence-pjms-reliability-backstop-procurement-er26-3380",
+    "https://www.ferc.gov/news-events/news/commissioner-sees-concurrence-pjms-reliability-backstop-procurement-er26-3380-000",
+    "https://insidelines.pjm.com/ferc-accepts-pjm-reliability-backstop-proposal/"
+  ],
+  "outcome": "supported",
+  "uncertainty_after": 0.47,
+  "learning": "Faits observés : le 29 septembre 2026, la FERC a accepté pour dépôt mais suspendu cinq mois le Reliability Backstop Procurement de PJM, avec effet prévu au 28 février 2027 sous réserve des procédures; le Federal Register du 6 octobre confirme l'ouverture d'une enquête au titre de la section 206 (EL26-108-000). Les commissaires Rosner et See soulignent la causalité des coûts et la nécessité de protéger les clients existants. PJM confirme que l'appel d'offres prévu le 30 septembre n'a pas démarré. Cette procédure de financement de capacité est distincte de la décision IRAS du 9 octobre. Contre-arguments : le risque de pénurie de capacité est lui aussi documenté; retarder les achats peut nuire à la fiabilité, et les tarifs de détail relèvent également des États. Aucune hausse effective de facture, allocation finale ni achat réalisé ne sont démontrés. Hypothèse procédurale soutenue, incidence économique encore inconnue. Prochaine lacune : vérifier tout nouveau dépôt PJM après le 29 octobre, la décision définitive sur les garanties et l'allocation, puis confronter prévisions, contrats signés et charges effectivement payées."
+}
