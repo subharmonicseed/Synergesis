@@ -1,0 +1,27 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-26:05",
+  "observed_at": "2026-10-26T04:27:51+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "governed-agent-memory-dedup-contradiction-order",
+  "question": "Un filtre de quasi-doublons exécuté avant la détection de contradictions peut-il empêcher l'enregistrement de corrections pourtant nécessaires dans une mémoire multi-agents ?",
+  "reason": "Angle mort distinct des entrées 049, 054 et 055 : la perte peut se produire à l'écriture, avant tout rappel ou contrôle. Pertinence causale : une assertion contraire ressemble lexicalement à l'ancienne et risque d'être rejetée comme doublon avant la résolution temporelle. Pouvoir discriminant : comparer admission des deux écritures, supersession conditionnelle et rejets pré-commit; gain espéré : isoler la sûreté du pipeline d'ingestion de celle du détecteur. Scores heuristiques non calibrés.",
+  "hypothesis": "Une déduplication synchrone placée avant un détecteur de contradictions asynchrone peut empêcher des corrections de parvenir au mécanisme de supersession.",
+  "need_id": null,
+  "research_mode": "adversarial",
+  "gap_kind": "contradiction",
+  "metrics": {
+    "uncertainty": 0.83,
+    "expected_impact": 0.97,
+    "staleness": 0.48,
+    "novelty_gap": 0.93,
+    "selection_score": 0.836
+  },
+  "evidence_refs": [
+    "https://arxiv.org/abs/2606.24535"
+  ],
+  "outcome": "supported",
+  "uncertainty_after": 0.42,
+  "learning": "Fait observé : Margalit et al., prépublication du 23 juin 2026, ont testé le service de mémoire MemClaw avec ArgusFleet. Dans l'expérience de contradiction, 206/400 écritures ont reçu un rejet HTTP 409 au filtre de quasi-doublons; la résolution de contradiction a réussi 90/90 fois lorsque les deux écritures avaient été admises, tandis que le taux global de détection rapporté est 98/200. Mécanisme documenté : filtre synchrone avant commit, détecteur structurel asynchrone après commit; une correction proche peut être écartée en amont. Contre-arguments et limites : une partie des rejets vient de véritables doublons et de la faible diversité du générateur, sans séparation quantitative propre des causes; le détecteur fonctionne pour les écritures admises, et une déduplication bien ordonnée reste utile. Ce résultat ne prouve pas que SYN présente ce défaut. Prochaine lacune : vérifier en lecture seule l'ordre réel de validation, déduplication et supersession du GlyphLedger, puis tester des paires contradictoires avec et sans identifiants de source."
+}
