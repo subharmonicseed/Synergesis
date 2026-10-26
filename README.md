@@ -1,5 +1,14 @@
 # Synergesis
 
+## Reprise SYN avec ChatGPT
+
+Le contexte de coopération, les décisions et le raccord aux glyphes sont publiés
+sur une autre branche. Avant une reprise, lire [SYN_START_HERE.md](https://github.com/subharmonicseed/Synergesis/blob/feat/syn-glyph-scene-bridge-v1/SYN_START_HERE.md)
+et l'état court qu'il référence. Cette branche reste la source des observations.
+Une question ou correction de l'utilisateur appelle d'abord une réponse ; elle
+ne déclenche pas automatiquement une nouvelle veille. ChatGPT peut être le moteur
+sans lancer le modèle local. Ce lien ne modifie pas la configuration d'une tâche planifiée.
+
 ## État consolidé
 
 Voir [SYN_AUDIT_STATUS.md](SYN_AUDIT_STATUS.md) pour le bilan des 29 points,
@@ -140,3 +149,4 @@ python -m pytest -q
 
 The CI workflow is configured for Python 3.11 and 3.12. Its remote result must
 be checked on the pull request; local validation is not a CI receipt.
+

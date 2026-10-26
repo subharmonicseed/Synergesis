@@ -1,5 +1,14 @@
 # SYN-CURIOSITY — journal public commun
 
+## Reprise SYN avec ChatGPT
+
+Le contexte de coopération, les décisions et le raccord aux glyphes sont publiés
+sur une autre branche. Avant une reprise, lire [SYN_START_HERE.md](https://github.com/subharmonicseed/Synergesis/blob/feat/syn-glyph-scene-bridge-v1/SYN_START_HERE.md)
+et l'état court qu'il référence. Cette branche reste la source des observations.
+Une question ou correction de l'utilisateur appelle d'abord une réponse ; elle
+ne déclenche pas automatiquement une nouvelle veille. ChatGPT peut être le moteur
+sans lancer le modèle local. Ce lien ne modifie pas la configuration d'une tâche planifiée.
+
 Ce répertoire accueille uniquement des comptes rendus de veille anonymisés au format
 `syn-curiosity-v1`. Les entrées sont destinées à l'inspection humaine et à
 l'import local explicite dans `CuriosityJournal`. Elles ne deviennent jamais
@@ -23,3 +32,4 @@ automatiquement des connaissances approuvées par SYN.
   pas en réécrivant une preuve existante.
 
 Voir `docs/SYN_CURIOSITY_OBSERVATORY_V0.md` pour le contrat.
+

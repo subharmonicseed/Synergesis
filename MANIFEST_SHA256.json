@@ -16,7 +16,7 @@
   "pyproject.toml": "1627997f2eaf4d6528dff81bc33a6f7a90ffa1dfb1753b6115376bda2f4ac334",
   "PYTEST_RESULT.txt": "650e4d2a11b2a4a95e0bde9118f3172db68c5e8f135b08a544dc7485a9a7b242",
   "QuantumEnergyCalculator_RETIRED.py": "7520ef86164bc356b22a2dca4c3dce5f600d4c310848508d18f3b88eb7c9a1af",
-  "README.md": "2a2ead65721387005e13691dafe9f404a06d2e8e3ec4389bac23e553672a85c5",
+  "README.md": "2cf886cbda66ba4c782c79ac335501f65f9a22ab6318e722f9b71fc5f4a954ed",
   "run_syn_discovery.py": "9576214de235540bfadd8e634e15862ff5faff3d545e5fa2160e35d61cda82c1",
   "run_syn_live_source_smoke.py": "7c1fea41db61f6d901b25a78d329bed4d98e4a023c11f15d52e51a73dd8ebbb9",
   "run_syn_prediction_calibration_stress.py": "15a95bcc302ce330e1b19084469e25a79675f6364857c38a295b47243583b209",
@@ -261,5 +261,6 @@
   "synergesis_curiosity_observatory.py": "454df89bd75be907998be83a503cfc1051aba16376a1d4ccd98455801702d1b4",
   "test_synergesis_curiosity_observatory.py": "13bb025e0f55a0088404f3a844a0147c5fd193f4306d035b6b49e207777e0b46",
   "docs/SYN_CURIOSITY_OBSERVATORY_V0.md": "47a3b87a643e53ee0f9d99508a6251b9388c909a118ebc4fa3e5cd256836678c",
-  "curiosity-journal/README.md": "f0fcabb21b728e844081d568ec894858f3c9b24e75853ab2e74db22f72738e11"
+  "curiosity-journal/README.md": "106991f7650864edd18e6c2d7d7cf49c727d16c32a6b8211991347ca004c2b7d",
+  "SYN_START_HERE.md": "4e57857ec29a8e051e08d5d580a9ff4011168de86690b427f372b4c220636108"
 }
