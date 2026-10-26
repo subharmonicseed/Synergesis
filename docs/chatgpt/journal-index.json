@@ -1,0 +1,136 @@
+{
+  "schema": "syn-chatgpt-journal-index-v1",
+  "source_repository": "subharmonicseed/Synergesis",
+  "source_branch": "feat/syn-curiosity-observatory-v0",
+  "source_commit": "47f1313758f82e0151d1a0be444885b20f434a71",
+  "count": 65,
+  "source_url": "https://github.com/subharmonicseed/Synergesis/tree/47f1313758f82e0151d1a0be444885b20f434a71/curiosity-journal/entries",
+  "validation_scope": "entry schema, uniqueness and local source bytes only; cited studies not reverified",
+  "pages": [
+    {
+      "count": 12,
+      "first_entry": "chatgpt:2026-10-25:01",
+      "last_entry": "chatgpt:2026-10-25:12",
+      "domains": [
+        "ai-civic-metacognition",
+        "ai-democratic-deliberation",
+        "ai-democratic-governance",
+        "ai-facilitation-procedural-legitimacy",
+        "ai-metacognition",
+        "ai-uncertainty-interface-risk",
+        "energy-ai-governance",
+        "human-ai-confidence-calibration",
+        "human-ai-independent-judgment",
+        "syn-experimental-design-civic-trust",
+        "systemic-financial-amplification",
+        "systemic-financial-risk"
+      ],
+      "path": "docs/chatgpt/journal-pages/01.json",
+      "sha256": "f9436f6cda8e8d0cbc3455ef519481f401cc5b768fb7a0a42e4801319945aabd",
+      "git_blob_sha": "657b9fc9ba5e70ef7263bb3d7e6d4daea74f4908"
+    },
+    {
+      "count": 12,
+      "first_entry": "chatgpt:2026-10-25:13",
+      "last_entry": "chatgpt:2026-10-25:27",
+      "domains": [
+        "ai-sycophancy-depolarization",
+        "forecasting-calibration-baselines",
+        "forecasting-official-benchmark-eligibility",
+        "human-ai-abstention",
+        "human-ai-code-auditing-skill",
+        "human-ai-contestation-friction",
+        "human-ai-learning-transfer",
+        "prospective-forecasting-evaluation",
+        "scientific-agent-evidence-integrity",
+        "syn-civic-agency-experiment",
+        "syn-curiosity-causal-trial",
+        "syn-curiosity-prospective-causal-validation"
+      ],
+      "path": "docs/chatgpt/journal-pages/02.json",
+      "sha256": "3abdb7102b788d1580e0bb947a434a62b62cf2c3850ccffa8d278f17aff2a43f",
+      "git_blob_sha": "6624539d7e46e7de54fa5cd3800530c5b86c8d0c"
+    },
+    {
+      "count": 12,
+      "first_entry": "chatgpt:2026-10-25:28",
+      "last_entry": "chatgpt:2026-10-25:39",
+      "domains": [
+        "agent-skills-negative-transfer",
+        "agentic-harness-context-continuity",
+        "agi-agentic-architecture",
+        "cross-domain-skill-transfer",
+        "forecast-data-permissions",
+        "general-agent-architectures",
+        "generalization-of-agent-skills",
+        "prospective-evaluation-preregistration",
+        "self-modification-evaluation-integrity",
+        "syn-ablation-negative-control",
+        "syn-held-out-evaluation",
+        "syn-heldout-harness-ablation"
+      ],
+      "path": "docs/chatgpt/journal-pages/03.json",
+      "sha256": "72ecac8092a748ff0707907d24e32ee01ff6e6172e8ef392011fae99d39e6960",
+      "git_blob_sha": "d0767f9b8816f8073ca41b72a5e1f27575e4060c"
+    },
+    {
+      "count": 12,
+      "first_entry": "chatgpt:2026-10-25:40",
+      "last_entry": "chatgpt:2026-10-25:51",
+      "domains": [
+        "agentic-financial-composition-integrity",
+        "ai-delegated-civic-representation",
+        "ai-energy-stranded-cost-allocation",
+        "curiosity-shannon-vs-learning",
+        "marine-hybrid-materials-anomaly",
+        "stellar-neutrino-anomaly",
+        "syn-active-curiosity-comparative-test",
+        "syn-factorial-memory-skill-audit",
+        "syn-preregistered-real-world-forecasts",
+        "syn-recursive-iteration-causal-test",
+        "syn-recursive-self-report-audit",
+        "syn-scientific-curiosity-source-diversity"
+      ],
+      "path": "docs/chatgpt/journal-pages/04.json",
+      "sha256": "b9429573bc1caad9e5893d7efef70ce7591c882ed1cc17ba60832a6e52f963dc",
+      "git_blob_sha": "58ec78aaa682b2b0012fce74fec36b8a9cb0f4f2"
+    },
+    {
+      "count": 12,
+      "first_entry": "chatgpt:2026-10-25:52",
+      "last_entry": "chatgpt:2026-10-26:10",
+      "domains": [
+        "agent-memory-conflict-observability",
+        "agent-memory-post-retrieval-action-compatibility",
+        "agent-memory-retrieval-workflow-collision",
+        "agentic-abstention-irreversible-action-timing",
+        "agentic-governance-monitoring-integrity",
+        "ai-democratic-losers-consent",
+        "ai-electricity-backstop-financial-cost-allocation",
+        "ai-grid-market-regulatory-incentives",
+        "democratic-ai-governance-voting-rules",
+        "democratic-preference-inference-collective-distortion",
+        "governed-agent-memory-dedup-contradiction-order",
+        "multiagent-contract-verifier-false-alarms"
+      ],
+      "path": "docs/chatgpt/journal-pages/05.json",
+      "sha256": "addefc3935c7492be9f93c056aa3245c2fa6e5a74b92e9a03369f63cae1daea6",
+      "git_blob_sha": "933bcf03f7500ac72c3f04ca3d2d29e78c5f0cb8"
+    },
+    {
+      "count": 5,
+      "first_entry": "chatgpt:2026-10-26:11",
+      "last_entry": "chatgpt:2026-10-26:15",
+      "domains": [
+        "agent-memory-origin-laundering-independent-corroboration",
+        "agent-memory-provenance-weighting-utility-tradeoff",
+        "bank-liquidity-regulation-private-credit-displacement",
+        "condensed-matter-coherent-phonon-temporal-control",
+        "iberian-blackout-voltage-reactive-power-multicausality"
+      ],
+      "path": "docs/chatgpt/journal-pages/06.json",
+      "sha256": "c46933dd1bdbca54039b4d7912175d5c341e179cdc191021780b873088bf4872",
+      "git_blob_sha": "b74498b404d39c8d5858ba815b64972feb309bfb"
+    }
+  ]
+}

@@ -2,11 +2,17 @@
 
 État révisable du travail, commencé le 25 octobre 2026 (Europe/Paris).
 Point d'entrée : [AGENTS.md](../AGENTS.md). Historique :
+[2026-10-26-004 — ChatGPT moteur et reprise entre branches](continuity/2026-10-26-004.md).
 [2026-10-25-001 — transmission des décisions et incertitudes](continuity/2026-10-25-001.md).
 [2026-10-25-002 — SYN au-delà du logiciel, frontière du possible](continuity/2026-10-25-002.md).
 [2026-10-25-003 — retour à la colonne vertébrale glyphique](continuity/2026-10-25-003.md).
 
 ## Décisions actives
+
+**D008 — mode ChatGPT adopté pour le prochain test** : utiliser directement le
+modèle choisi dans la conversation, charger [l'état court](chatgpt/STATE.md) et
+suivre [le point d'entrée](../SYN_START_HERE.md). Le mode ordinaire est le dialogue.
+La veille est un déclenchement distinct. Ne pas imposer un modèle local pour ce mode.
 
 | ID | Statut | Conséquence pour le travail |
 | --- | --- | --- |

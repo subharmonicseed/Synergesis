@@ -2,6 +2,12 @@
 
 **25 octobre 2026 — Adaptateur expérimental v1 ; tests écrits, pas encore exécutés dans cette session.**
 
+**Mise à jour du 26 octobre :** les cinq tests existants passent sous Linux/Python
+3.12.3. Pour utiliser ChatGPT comme moteur, lire [SYN_START_HERE.md](../SYN_START_HERE.md) :
+une projection des glyphes natifs et des sources publiques est disponible sans
+lancement de modèle local. Les remarques « tests non exécutés » ci-dessous décrivent
+la livraison initiale, pas cette vérification ultérieure.
+
 ## La correction architecturale
 
 **Ce document corrige notre erreur de cadrage :** nous avions décrit GitHub comme une nouvelle mémoire de transformations et envisagé encore un mécanisme de récupération, alors que SYN disposait déjà du **Glyph Protocol v1**. Les glyphes ne sont pas des pictogrammes à interpréter ni une fin symbolique. Ce sont des **unités de connaissance/événements typées, sourcées, reliées et révisables**.
@@ -41,14 +47,15 @@ Chaque entrée conserve seulement chemin relatif, empreinte SHA-256 et bref rés
 
 ## Utilisation locale : importer puis rappeler
 
-Depuis la racine du dépôt, dans PowerShell :
+Depuis la racine du dépôt, dans Linux, macOS ou un terminal Ubuntu/WSL sous Windows.
+PowerShell/Python Windows natif n'est pas pris en charge par les verrous du journal :
 
-```powershell
-$ledger = Join-Path $env:USERPROFILE "syn-private\scene-glyph-ledger.jsonl"
-python -m synergesis_scene_glyph_bridge ingest --repo-root . --ledger $ledger
-python -m synergesis_scene_glyph_bridge recall --repo-root . --ledger $ledger --focus frontier
-python -m synergesis_scene_glyph_bridge recall --repo-root . --ledger $ledger --focus glyph
-python -m synergesis_scene_glyph_bridge recall --repo-root . --ledger $ledger --focus feu
+```bash
+ledger="/chemin/prive/hors-depot/scene-glyph-ledger.jsonl"
+python3 -m synergesis_scene_glyph_bridge ingest --repo-root . --ledger "$ledger"
+python3 -m synergesis_scene_glyph_bridge recall --repo-root . --ledger "$ledger" --focus frontier
+python3 -m synergesis_scene_glyph_bridge recall --repo-root . --ledger "$ledger" --focus glyph
+python3 -m synergesis_scene_glyph_bridge recall --repo-root . --ledger "$ledger" --focus feu
 ```
 
 L'import exige la présence des cinq fichiers dans le checkout. Une source modifiée après import provoque un échec explicite au rappel, jusqu'au prochain `ingest`. Le rappel renvoie les sources pertinentes (extraits bornés), leurs empreintes et les relations du graphe, **pas une réponse LLM automatiquement exécutée**.

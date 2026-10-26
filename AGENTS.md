@@ -1,5 +1,11 @@
 # SYN — continuité du travail agentique
 
+Pour utiliser **ChatGPT directement comme moteur de SYN**, commencer par
+`SYN_START_HERE.md` et `docs/chatgpt/STATE.md`. Le dialogue est le mode par défaut ;
+une question d'évaluation ne déclenche pas automatiquement la veille. Les sources
+de continuité et les observations sont actuellement sur deux branches publiées :
+suivre les références explicites du point d'entrée, sans supposer que `main` les contient.
+
 Au début d'une session sur ce dépôt, lire `docs/SYN_AGENT_CONTINUITY.md`, puis
 les entrées datées qu'il désigne. Vérifier la branche et le commit avant d'agir.
 Si un référentiel manque, signaler la limite ; ne pas inventer son contenu.

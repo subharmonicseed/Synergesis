@@ -1,0 +1,138 @@
+{
+  "schema": "syn-chatgpt-journal-page-v1",
+  "source_commit": "47f1313758f82e0151d1a0be444885b20f434a71",
+  "entries": [
+    {
+      "entry_id": "chatgpt:2026-10-25:13",
+      "observed_at": "2026-10-25T12:39:30.278+01:00",
+      "domain": "human-ai-contestation-friction",
+      "question_excerpt": "Quel est l'effet causal du coût d'une contestation sur la capacité des humains à corriger des suggestions erronées de l'IA ?",
+      "question_truncated": false,
+      "outcome_reported": "supported",
+      "path": "curiosity-journal/entries/2026-10-25-13.json",
+      "sha256": "de35f3199bf28cf6e6f2879632e145f515065beb90cc1f1c17cb8b31f9ae61fb",
+      "git_blob_sha": "1a5a9833ebb5bd3e151a5b3189c3adb6f099d9f9"
+    },
+    {
+      "entry_id": "chatgpt:2026-10-25:14",
+      "observed_at": "2026-10-25T12:39:33.132+01:00",
+      "domain": "human-ai-abstention",
+      "question_excerpt": "La présence de conseils IA erronés modifie-t-elle la propension humaine à reconnaître « je ne sais pas », même lorsque les participants peuvent s'abstenir et que l'exactitude est r",
+      "question_truncated": true,
+      "outcome_reported": "supported",
+      "path": "curiosity-journal/entries/2026-10-25-14.json",
+      "sha256": "6ae23e2a756e2920c6e27c8559db180160ba58756bcfc386fb5a4b37103f6f20",
+      "git_blob_sha": "4d669ada7579937d2f710cec64392f17818a17ac"
+    },
+    {
+      "entry_id": "chatgpt:2026-10-25:15",
+      "observed_at": "2026-10-25T12:39:36.323+01:00",
+      "domain": "ai-sycophancy-depolarization",
+      "question_excerpt": "Les conseils d'une IA complaisante renforcent-ils automatiquement la polarisation des choix, ou les nouvelles informations apportées peuvent-elles produire l'effet opposé ?",
+      "question_truncated": false,
+      "outcome_reported": "refuted",
+      "path": "curiosity-journal/entries/2026-10-25-15.json",
+      "sha256": "88682d7f5be2b9e7f5466e4d5030424105f5cf4f7d4e5b60d62c74283364a6ce",
+      "git_blob_sha": "d79d90a0930044f8f40a70359f8c77b0b34e7555"
+    },
+    {
+      "entry_id": "chatgpt:2026-10-25:16",
+      "observed_at": "2026-10-25T12:39:39.295+01:00",
+      "domain": "syn-civic-agency-experiment",
+      "question_excerpt": "Une procédure qui préserve le jugement préalable, rend la contestation peu coûteuse et reconnaît explicitement le droit à l'abstention améliore-t-elle la qualité d'une délibération",
+      "question_truncated": true,
+      "outcome_reported": "not_tested",
+      "path": "curiosity-journal/entries/2026-10-25-16.json",
+      "sha256": "ffb909dc54c04287ba0f1328575d627d281a7e39ed8aa314f8b7e3cc3ec11b67",
+      "git_blob_sha": "d3fb5fac05fc806683abc245c5a5feb6997abee2"
+    },
+    {
+      "entry_id": "chatgpt:2026-10-25:17",
+      "observed_at": "2026-10-25T12:44:13.601+01:00",
+      "domain": "human-ai-learning-transfer",
+      "question_excerpt": "L'assistance générative par IA nuit-elle systématiquement à la compétence après retrait de l'outil, ou certains usages améliorent-ils le transfert autonome ?",
+      "question_truncated": false,
+      "outcome_reported": "refuted",
+      "path": "curiosity-journal/entries/2026-10-25-17.json",
+      "sha256": "233e8d1e3f09568c4fc61e169af1b9958d064994128d078f930709ae056e78a8",
+      "git_blob_sha": "1a61eb349b56808a345eaac057fdd353a4591599"
+    },
+    {
+      "entry_id": "chatgpt:2026-10-25:18",
+      "observed_at": "2026-10-25T12:44:17.055+01:00",
+      "domain": "human-ai-code-auditing-skill",
+      "question_excerpt": "Un développeur utilisant une IA pour écrire du code maîtrise-t-il ensuite suffisamment les concepts pour déboguer et auditer cette production ?",
+      "question_truncated": false,
+      "outcome_reported": "supported",
+      "path": "curiosity-journal/entries/2026-10-25-18.json",
+      "sha256": "72e65a3ce0543951f2fa5ca65bd833a1a204d3c772438caa44fb9f5a33dd0421",
+      "git_blob_sha": "242dad1c3d627fab46bef4d0ce211eff0ae896f5"
+    },
+    {
+      "entry_id": "chatgpt:2026-10-25:22",
+      "observed_at": "2026-10-25T12:44:24.102+01:00",
+      "domain": "syn-curiosity-causal-trial",
+      "question_excerpt": "Un SYN-CURIOSITY avec boucle de veille obtient-il après plusieurs cycles une meilleure précision hors échantillon et une meilleure calibration qu'un SYN sans veille, à ressources é",
+      "question_truncated": true,
+      "outcome_reported": "not_tested",
+      "path": "curiosity-journal/entries/2026-10-25-22.json",
+      "sha256": "06c829c58f1715760d33791f0a7201ea03be34b81058bb18b29540ee6fb6595f",
+      "git_blob_sha": "acb312449cdeb663ec28b2e90afa8433912cfa99"
+    },
+    {
+      "entry_id": "chatgpt:2026-10-25:23",
+      "observed_at": "2026-10-25T12:50:20.260+01:00",
+      "domain": "prospective-forecasting-evaluation",
+      "question_excerpt": "La capacité des systèmes IA à prévoir le futur reste-t-elle inférieure à celle des meilleurs prévisionnistes humains d'après les observations à jour en octobre 2026 ?",
+      "question_truncated": false,
+      "outcome_reported": "supported",
+      "path": "curiosity-journal/entries/2026-10-25-23.json",
+      "sha256": "5f2b033a3bce8921c60c87e263e609c68b83cf8484a8e2a466f90d8fb334de0d",
+      "git_blob_sha": "7d49099a3c0060f4c6689c066521045765132bf9"
+    },
+    {
+      "entry_id": "chatgpt:2026-10-25:24",
+      "observed_at": "2026-10-25T12:50:22.802+01:00",
+      "domain": "scientific-agent-evidence-integrity",
+      "question_excerpt": "Une chaîne d'agents IA capable d'écrire un article de recherche fournit-elle généralement des preuves scientifiques correctement reliées à des expériences réellement exécutées ?",
+      "question_truncated": false,
+      "outcome_reported": "supported",
+      "path": "curiosity-journal/entries/2026-10-25-24.json",
+      "sha256": "1fc51b32ccda87b1f2e4621725bd40233e432e9c56a0b39b7641a349cdbdb35f",
+      "git_blob_sha": "3ade237e70f93d19059aa26aceb494c6caa6c7c8"
+    },
+    {
+      "entry_id": "chatgpt:2026-10-25:25",
+      "observed_at": "2026-10-25T12:50:25.905+01:00",
+      "domain": "forecasting-calibration-baselines",
+      "question_excerpt": "Les nouvelles versions ou tailles de modèles donnent-elles automatiquement de meilleures probabilités prédictives lorsqu'on tient constantes les questions, les dates et les conditi",
+      "question_truncated": true,
+      "outcome_reported": "inconclusive",
+      "path": "curiosity-journal/entries/2026-10-25-25.json",
+      "sha256": "aa51ad38befcd7add11b55b5b36f212316b44f4a301278d274856ddbd1adb5fc",
+      "git_blob_sha": "b135f11d4cacec81b0c5e8c732f7b28d1d4d5d27"
+    },
+    {
+      "entry_id": "chatgpt:2026-10-25:26",
+      "observed_at": "2026-10-25T12:50:28.722+01:00",
+      "domain": "syn-curiosity-prospective-causal-validation",
+      "question_excerpt": "À modèle, budget et questions identiques, SYN-CURIOSITY améliore-t-elle des prévisions futures verrouillées et la redécouverte scientifique vérifiable plutôt qu'uniquement la riche",
+      "question_truncated": true,
+      "outcome_reported": "not_tested",
+      "path": "curiosity-journal/entries/2026-10-25-26.json",
+      "sha256": "59a398959901d528d51fbce2f2debb2de191907baa29cc65efe49c5cfb42c9f3",
+      "git_blob_sha": "12b6d222f238549dc42d8094fc4d489db9fa8358"
+    },
+    {
+      "entry_id": "chatgpt:2026-10-25:27",
+      "observed_at": "2026-10-25T13:01:00.293+01:00",
+      "domain": "forecasting-official-benchmark-eligibility",
+      "question_excerpt": "Une veille ChatGPT de quelques questions par cycle peut-elle être considérée comme une participation officielle à ForecastBench, ou faut-il une soumission structurée et suffisammen",
+      "question_truncated": true,
+      "outcome_reported": "supported",
+      "path": "curiosity-journal/entries/2026-10-25-27.json",
+      "sha256": "d68647792a8222cbea1b0a51695cc098db8632dbf8167fa1f0da3686e1df3c72",
+      "git_blob_sha": "e2735d934e2255d1c90d6f84c67ec5173ded7a13"
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "schema": "syn-chatgpt-journal-page-v1",
+  "source_commit": "47f1313758f82e0151d1a0be444885b20f434a71",
+  "entries": [
+    {
+      "entry_id": "chatgpt:2026-10-26:11",
+      "observed_at": "2026-10-26T12:21:56+01:00",
+      "domain": "agent-memory-provenance-weighting-utility-tradeoff",
+      "question_excerpt": "Pénaliser par un simple coefficient les souvenirs issus de sources non fiables protège-t-il des fausses assertions sans faire disparaître des preuves externes pourtant indispensabl",
+      "question_truncated": true,
+      "outcome_reported": "refuted",
+      "path": "curiosity-journal/entries/2026-10-26-11.json",
+      "sha256": "b462525d2fbd681a8eb074e3fdaf92d24f2578833073d206f474ae58232afaf6",
+      "git_blob_sha": "837dd79017f9d11a6cc8baab7bb9f01c6c627e4f"
+    },
+    {
+      "entry_id": "chatgpt:2026-10-26:12",
+      "observed_at": "2026-10-26T12:21:56+01:00",
+      "domain": "agent-memory-origin-laundering-independent-corroboration",
+      "question_excerpt": "Une provenance conservée seulement dans le texte ou les liens de dérivation empêche-t-elle qu'une information externe gagne artificiellement autorité après résumé, écho d'outil ou ",
+      "question_truncated": true,
+      "outcome_reported": "supported",
+      "path": "curiosity-journal/entries/2026-10-26-12.json",
+      "sha256": "706c4e440186b02f864f728d56f6dd7b39f19905d43a3fc709329b1b5e4510b6",
+      "git_blob_sha": "4936557ff83199e5a2b2a442295ceb3184b5ced8"
+    },
+    {
+      "entry_id": "chatgpt:2026-10-26:13",
+      "observed_at": "2026-10-26T16:28:59+01:00",
+      "domain": "condensed-matter-coherent-phonon-temporal-control",
+      "question_excerpt": "À énergie optique totale identique, deux impulsions laser correctement espacées peuvent-elles dépasser la saturation d'amplitude d'un phonon cohérent dans un ferroélectrique, plutô",
+      "question_truncated": true,
+      "outcome_reported": "supported",
+      "path": "curiosity-journal/entries/2026-10-26-13.json",
+      "sha256": "889cf051c3b643bc495f5e1a8084c03f715d843a2973e9f3c5c47f248c950de9",
+      "git_blob_sha": "814e55a5d2580e781a41530adfbe522bd76b7682"
+    },
+    {
+      "entry_id": "chatgpt:2026-10-26:14",
+      "observed_at": "2026-10-26T16:28:59+01:00",
+      "domain": "bank-liquidity-regulation-private-credit-displacement",
+      "question_excerpt": "Les exigences de liquidité imposées aux grandes banques peuvent-elles déplacer le crédit vers des fonds privés non bancaires, même lorsque la règle améliore la liquidité des banque",
+      "question_truncated": true,
+      "outcome_reported": "supported",
+      "path": "curiosity-journal/entries/2026-10-26-14.json",
+      "sha256": "78b2c789e351f0ad8c448c322fb10dfda9e8816584a7454952d7909edad9404d",
+      "git_blob_sha": "2090fef0012eb4ad8df003648fe3d6427aa20d51"
+    },
+    {
+      "entry_id": "chatgpt:2026-10-26:15",
+      "observed_at": "2026-10-26T16:28:59+01:00",
+      "domain": "iberian-blackout-voltage-reactive-power-multicausality",
+      "question_excerpt": "La panne générale ibérique du 28 avril 2025 peut-elle être attribuée à une cause unique, telle que la seule part des renouvelables, ou l'enquête finale établit-elle une cascade mul",
+      "question_truncated": true,
+      "outcome_reported": "refuted",
+      "path": "curiosity-journal/entries/2026-10-26-15.json",
+      "sha256": "fdbcd32bd368ea67b843289895f8893e9c967f6e9669bd3565b9d200c123853f",
+      "git_blob_sha": "bed952b5371ad3a72a2e98d1b943f1ecc251d577"
+    }
+  ]
+}
