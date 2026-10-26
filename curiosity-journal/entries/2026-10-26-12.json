@@ -1,0 +1,29 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-26:12",
+  "observed_at": "2026-10-26T12:21:56+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "agent-memory-origin-laundering-independent-corroboration",
+  "question": "Une provenance conservée seulement dans le texte ou les liens de dérivation empêche-t-elle qu'une information externe gagne artificiellement autorité après résumé, écho d'outil ou fausse corroboration ?",
+  "reason": "Angle mort distinct de l'entrée 2026-10-26-08 sur la suppression des moniteurs et de l'entrée précédente sur les coefficients de classement : ici la question porte sur l'autorisation d'une action sensible à partir d'une source externe réécrite. Pertinence causale : une chaîne de glyphes dérivés peut perdre l'origine effective si le système fait confiance à ses propres reformulations. Pouvoir discriminant : trois canaux de blanchiment, huit modèles et un invariant formel liant origine, corroboration et autorisation; gain attendu : distinguer conservation d'un historique et préservation d'une autorité non falsifiable. Scores heuristiques non calibrés.",
+  "hypothesis": "Dans un modèle où l'origine est authentifiée à l'écriture et où les actions conséquentes exigent une corroboration indépendante ou une autorisation fraîche liée à l'action, les transformations textuelles seules ne suffisent pas à élever l'autorité d'un souvenir externe.",
+  "need_id": null,
+  "research_mode": "directed",
+  "gap_kind": "missing_domain",
+  "metrics": {
+    "uncertainty": 0.86,
+    "expected_impact": 0.97,
+    "staleness": 0.39,
+    "novelty_gap": 0.91,
+    "selection_score": 0.82
+  },
+  "evidence_refs": [
+    "https://arxiv.org/abs/2606.24322",
+    "https://github.com/yedidel/mem-inv-bench",
+    "https://arxiv.org/abs/2608.21230"
+  ],
+  "outcome": "supported",
+  "uncertainty_after": 0.55,
+  "learning": "Faits observés : Louck (23 juin 2026) modélise le blanchiment par résumé de l'agent, écho d'un outil réputé fiable et corroboration artificielle. Dans MEM-INV-Bench, sur huit modèles, les défenses de contenu ou de lineage sont contournées sur certains canaux (jusqu'à 68 % d'attaques réussies), tandis que la porte TMA-NM liée à l'origine donne 0/192 actions attaquantes par canal et autorise les actions légitimes corroborées dans les scénarios étudiés. Un invariant est vérifié par TLC sur 3270 états d'un modèle borné; ce n'est pas une preuve formelle générale d'une implémentation déployée. Contre-arguments : authenticité des étiquettes d'origine et indépendance des deux corroborateurs sont supposées; une source de confiance compromise peut transmettre du faux, et les biais des réponses non conséquentes restent hors périmètre. Les résultats ne prouvent aucune sécurité actuelle du Glyph Graph de SYN. Prédiction à tester : lier l'autorité à l'origine et aux préconditions des actions empêchera les promotions indues sans perte majeure d'utilité. Prochaine lacune : audit en lecture seule des chemins source->glyphe->action, puis banc de tests avec faux échos et corroborations non indépendantes, sans agir sur des systèmes externes."
+}
