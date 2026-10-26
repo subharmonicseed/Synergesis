@@ -1,0 +1,27 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-26:07",
+  "observed_at": "2026-10-26T08:30:10+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "agent-memory-post-retrieval-action-compatibility",
+  "question": "Une trajectoire de mémoire auparavant réussie peut-elle dégrader une tâche nouvelle à cause de commandes incompatibles, et une normalisation déterministe après récupération restaure-t-elle la performance sans entraîner le modèle ?",
+  "reason": "Approfondit les lacunes 2026-10-26-02, -04 et -05. Pertinence causale : une expérience historiquement valide peut contenir des actions invalides pour l'interface actuelle; la récupération pertinente ne suffit pas. Pouvoir discriminant : mêmes 134 tâches et récupération gelée, comparaison sans mémoire, trajectoires brutes, trajectoires normalisées, adaptation MATE et ablations de normalisation. Gain espéré : distinguer incompatibilité des commandes, longueur de contexte et information relationnelle utile. Scores heuristiques non calibrés.",
+  "hypothesis": "Dans le protocole ALFWorld évalué, une transformation déterministe des actions historiques incompatibles après récupération restaure davantage de réussite que la réutilisation brute des trajectoires.",
+  "need_id": null,
+  "research_mode": "directed",
+  "gap_kind": "contradiction",
+  "metrics": {
+    "uncertainty": 0.82,
+    "expected_impact": 0.96,
+    "staleness": 0.55,
+    "novelty_gap": 0.94,
+    "selection_score": 0.846
+  },
+  "evidence_refs": [
+    "https://arxiv.org/abs/2609.35808"
+  ],
+  "outcome": "supported",
+  "uncertainty_after": 0.43,
+  "learning": "Faits observés : Li et al., prépublication datée du 20 septembre 2026, utilisent 134 tâches ALFWorld. Avec Qwen2.5-14B, la réussite est de 72,4 % sans mémoire, 20,1 % avec trajectoires brutes et 81,3 % avec MATE; avec Qwen2.5-72B, 87,3 %, 69,4 % et 93,3 %. L'ablation de normalisation fait passer MATE de 81,3 % à 51,5 % à 14B; l'adaptation emploie environ un dixième des tokens des trajectoires brutes. Contre-arguments : le gain face à aucune mémoire n'est pas significatif après correction à 14B (p ajusté 0,065); MATE n'est pas significativement supérieur à la séquence d'actions correspondante, et des trajectoires complètes restent meilleures dans certains tests frais ou de planification. Hypothèse soutenue pour l'incompatibilité des actions dans ce protocole, non pour toute mémoire ni pour SYN. Prochaine lacune : comparer sur tâches tenues à l'écart rappel brut, rappel typé avec préconditions et transformation vérifiée, et abstention, en comptant les actions interdites et les coûts."
+}
