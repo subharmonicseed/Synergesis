@@ -1,0 +1,27 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-26:20",
+  "observed_at": "2026-10-26T22:04:07+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "neurobiology-sleep-pressure-oscillator-causal-control",
+  "question": "Chez la drosophile, les ondes lentes de neurones contrôlant le sommeil sont-elles uniquement corrélées à la pression de sommeil ou une structure temporelle dont la perturbation et la reproduction modifient effectivement le sommeil ?",
+  "reason": "Second contrôle de diversification hors IA, énergie et gouvernance : l'interprétation causale d'un rythme neuronal est distincte des observations sur phonons cohérents et mémoire artificielle. Pertinence causale : une alternance de décharges de deux demi-centres glutamatergiques inhibiteurs pourrait convertir un signal continu de besoin de sommeil en état comportemental. Pouvoir discriminant : imagerie/électrophysiologie, perturbation cellulaire de l'oscillation et comparaison optogénétique de bouffées lentes naturelles avec stimulation tonique à nombre de pulses comparable. Gain espéré : distinguer marqueur corrélatif et commande causale d'un circuit défini, sans extrapolation aux mammifères. Scores heuristiques non calibrés.",
+  "hypothesis": "Dans le circuit dFBN de Drosophila étudié, les ondes lentes contribuent causalement au sommeil : perturber le circuit affaiblit le sommeil, tandis que rejouer son patron oscillatoire le favorise davantage qu'une excitation tonique comparable.",
+  "need_id": null,
+  "research_mode": "emergent",
+  "gap_kind": "missing_domain",
+  "metrics": {
+    "uncertainty": 0.7,
+    "expected_impact": 0.72,
+    "staleness": 0.46,
+    "novelty_gap": 0.96,
+    "selection_score": 0.712
+  },
+  "evidence_refs": [
+    "https://www.nature.com/articles/s41593-026-02431-9"
+  ],
+  "outcome": "supported",
+  "uncertainty_after": 0.39,
+  "learning": "Résultat primaire daté : Hasenhuetl et al., Nature Neuroscience, 15 octobre 2026, observent chez Drosophila une activité lente d'environ 0,2–1 Hz dans les neurones dFBN. Leur étude combine enregistrements, identification d'une inhibition glutamatergique réciproque entre deux demi-centres, perturbations de VGlut/dépolarisation réduisant le sommeil de base et de rebond, et reproduction optogénétique du motif lent qui favorise le sommeil. Des trains de pulses organisés en bouffées naturelles stimulent plus efficacement le sommeil que des pulses toniques équivalents; les auteurs indiquent que la structure temporelle compte. Contre-arguments : les manipulations neuronales peuvent modifier d'autres variables du circuit; le modèle physiologique et la conversion du signal continu en commutation veille-sommeil ne sont pas entièrement élucidés, et aucune extrapolation directe à l'humain ou au sommeil des modèles IA n'est justifiée. Hypothèse causale soutenue pour ce circuit animal dans les conditions étudiées. Prochaine lacune : réplication indépendante, interventions préservant l'activité moyenne tout en changeant seulement la phase entre hémisphères, et mesure du codage continu de la pression de sommeil."
+}
