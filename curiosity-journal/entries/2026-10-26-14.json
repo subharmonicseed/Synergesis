@@ -1,0 +1,28 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-26:14",
+  "observed_at": "2026-10-26T16:28:59+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "bank-liquidity-regulation-private-credit-displacement",
+  "question": "Les exigences de liquidité imposées aux grandes banques peuvent-elles déplacer le crédit vers des fonds privés non bancaires, même lorsque la règle améliore la liquidité des banques réglementées ?",
+  "reason": "Angle mort distinct des précédents cycles sur la contagion dette souveraine et les agents financiers : effet de substitution induit par une règle prudentielle. Pertinence causale : le coût de financement et de détention d'actifs illiquides change selon le statut réglementaire, pouvant déplacer l'offre de crédit sans réduire proportionnellement la demande. Pouvoir discriminant : comparer les comtés américains selon leur exposition initiale aux banques soumises au LCR et leurs déficits de liquidité initiaux. Gain attendu : distinguer réduction du risque bancaire et déplacement du financement vers d'autres intermédiaires; scores heuristiques non calibrés.",
+  "hypothesis": "Après introduction du LCR américain, les territoires plus exposés ex ante aux banques concernées connaissent une expansion relative plus forte du crédit privé non bancaire.",
+  "need_id": null,
+  "research_mode": "adversarial",
+  "gap_kind": "contradiction",
+  "metrics": {
+    "uncertainty": 0.82,
+    "expected_impact": 0.9,
+    "staleness": 0.42,
+    "novelty_gap": 0.95,
+    "selection_score": 0.798
+  },
+  "evidence_refs": [
+    "https://www.bis.org/publications/bank-liquidity-regulation-and-growth-private-credit",
+    "https://www.bis.org/publications/paper-164-liquidity-coverage-ratio-decade-on-stocktake-literature"
+  ],
+  "outcome": "supported",
+  "uncertainty_after": 0.53,
+  "learning": "Fait empirique daté : Doerr, Gelos et Pursiainen, BIS Working Paper 1388, 20 octobre 2026, trouvent qu'une empreinte initiale des banques soumises au Liquidity Coverage Ratio (LCR) supérieure d'un écart-type est associée à près de 50 % de volumes de crédit privé supplémentaires après l'introduction du LCR dans les comtés américains. L'effet est plus fort dans les secteurs dépendants du crédit, cohérent avec une substitution d'offre. Contre-arguments : identification économétrique observationnelle et facteurs concomitants possibles; les auteurs ne mesurent pas l'effet total sur le risque systémique. La revue BIS du 13 janvier 2026 souligne que le LCR accroît les actifs liquides de haute qualité et peut réduire les risques de financement court terme, malgré des effets secondaires sur le crédit. Hypothèse d'un déplacement relatif soutenue; prédiction de hausse nette du risque systémique non établie. Prochaine lacune : relier expositions banque-fonds, levier, retraits et pertes en stress pour mesurer la stabilité consolidée plutôt que le seul déplacement de volumes."
+}
