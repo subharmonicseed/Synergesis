@@ -1,0 +1,28 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-26:15",
+  "observed_at": "2026-10-26T16:28:59+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "iberian-blackout-voltage-reactive-power-multicausality",
+  "question": "La panne générale ibérique du 28 avril 2025 peut-elle être attribuée à une cause unique, telle que la seule part des renouvelables, ou l'enquête finale établit-elle une cascade multi-factorielle de contrôle de tension ?",
+  "reason": "Angle mort énergétique distinct des précédentes observations sur la demande électrique de l'IA et l'allocation des coûts de raccordement. Pertinence causale : comprendre comment oscillations, puissance réactive, régulation de tension et protections se combinent en cascade. Pouvoir discriminant : confronter les explications monocausales au rapport d'enquête indépendant de 49 experts et aux positions divergentes de l'exploitant national. Gain attendu : identifier des mécanismes physiques vérifiables et des mesures de prévention sans attribuer à tort la panne à une seule technologie; scores heuristiques non calibrés.",
+  "hypothesis": "Une cause unique, notamment la seule proportion d'électricité renouvelable, suffit à expliquer le blackout ibérique du 28 avril 2025.",
+  "need_id": null,
+  "research_mode": "adversarial",
+  "gap_kind": "contradiction",
+  "metrics": {
+    "uncertainty": 0.76,
+    "expected_impact": 0.91,
+    "staleness": 0.66,
+    "novelty_gap": 0.96,
+    "selection_score": 0.84
+  },
+  "evidence_refs": [
+    "https://www.entsoe.eu/publications/blackout/28-april-2025-iberian-blackout/",
+    "https://www.ree.es/es/sala-de-prensa/actualidad/nota-de-prensa/2026/03/red-electrica-no-fallo-el-informe-del-expert-panel-europeo-confirma-las-causas-del-incidente-identificadas-por-el-os"
+  ],
+  "outcome": "refuted",
+  "uncertainty_after": 0.38,
+  "learning": "Fait institutionnel daté : le panel ENTSO-E (49 membres, rapport final du 20 mars 2026) identifie une combinaison d'oscillations, de lacunes de contrôle de tension et de puissance réactive, de différences de pratiques de régulation, de baisses rapides de production et de déconnexions de générateurs; ces facteurs ont provoqué des surtensions puis une cascade. Le blackout a touché l'Espagne et le Portugal continentaux le 28 avril 2025. Hypothèse monocausale réfutée par cette reconstruction, sans établir que le mix de production est sans influence sur les besoins de contrôle. Contre-argument et divergence institutionnelle : Red Eléctrica affirme que l'enquête ne lui attribue pas de manquement causal; le panel ne fournit pas pour autant un test expérimental isolant chaque facteur ni une attribution exclusive de responsabilité. Prédiction à vérifier : une meilleure régulation dynamique de tension et coordination réduit la probabilité de cascades comparables. Prochaine lacune : confronter les recommandations à leur mise en oeuvre mesurée, à des simulations de stabilité répliquées et à de futurs incidents documentés."
+}
