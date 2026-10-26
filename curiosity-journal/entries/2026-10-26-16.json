@@ -1,0 +1,28 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-26:16",
+  "observed_at": "2026-10-26T20:24:32+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "scientific-experiment-selection-random-baseline",
+  "question": "Dans un modèle collectif de construction de théories, les stratégies de sélection d'expériences motivées par la réfutation ou le désaccord produisent-elles nécessairement une meilleure représentation du monde qu'un échantillonnage aléatoire ?",
+  "reason": "H001 présume qu'hériter d'une objection peut améliorer le choix de l'expérience. Pertinence causale : une objection peut concentrer l'échantillonnage dans les régions déjà représentées et créer une réussite apparente. Pouvoir discriminant : comparer sur la distribution vraie, non sur les seules observations sélectionnées, les politiques réfutation/désaccord/confirmation/aléatoire. Gain attendu : imposer un témoin aléatoire et une évaluation hors sélection dans les futurs essais de SYN. Staleness mesure ici la lacune héritée, pas l'âge de l'article; scores heuristiques non calibrés.",
+  "hypothesis": "Dans le modèle multi-agent de Dubova et al., les choix d'expériences orientés par réfutation ou désaccord surpassent l'échantillonnage aléatoire sur la reconstruction prédictive de la distribution vraie.",
+  "need_id": null,
+  "research_mode": "adversarial",
+  "gap_kind": "contradiction",
+  "metrics": {
+    "uncertainty": 0.76,
+    "expected_impact": 0.9,
+    "staleness": 0.38,
+    "novelty_gap": 0.93,
+    "selection_score": 0.774
+  },
+  "evidence_refs": [
+    "https://journals.sagepub.com/doi/full/10.1177/26339137261421577",
+    "https://arxiv.org/abs/2610.07627"
+  ],
+  "outcome": "refuted",
+  "uncertainty_after": 0.39,
+  "learning": "Fait primaire daté : Dubova, Moskvichev et Zollman, Collective Intelligence, 16 février 2026, simulent des collectifs qui apprennent des représentations du monde. Dans les conditions testées, le tirage aléatoire fournit des théories plus fidèles à la distribution vraie que les stratégies de confirmation, réfutation et désaccord; celles-ci paraissent pourtant meilleures sur leurs données sélectionnées. La supériorité aléatoire est rapportée sur plusieurs budgets et structures simulées. Hypothèse réfutée uniquement dans ce cadre; cela ne teste pas H001 ni les glyphes de SYN. Contre-arguments : modèles abstraits, objectifs de représentation choisis, coûts pratiques et spécialisation hors champ; des politiques actives peuvent gagner dans d'autres régimes, comme l'étude de révision structurale du 6 octobre 2026. Prédiction à tester : un témoin aléatoire avec évaluation indépendante révèlera des biais de sélection masqués par le score interne. Prochaine lacune : expérience prospective H001 à budget égal, avec témoin aléatoire, objection pertinente et objection placebo, sur des tâches inédites."
+}
