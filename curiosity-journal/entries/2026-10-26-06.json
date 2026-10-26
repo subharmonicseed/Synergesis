@@ -1,0 +1,27 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-26:06",
+  "observed_at": "2026-10-26T04:27:52+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "democratic-preference-inference-collective-distortion",
+  "question": "Une forte exactitude de prédiction des votes individuels garantit-elle que l'inférence de préférences conserve les consensus, désaccords et groupes minoritaires d'une consultation démocratique ?",
+  "reason": "Approfondissement non redondant des entrées 050, 053 et 2026-10-26-03 : ces cycles étudiaient délégation, interface et règle de vote, non la distorsion collective introduite par l'imputation de votes manquants. Pertinence causale : des erreurs concentrées sur une minorité peuvent modifier l'image agrégée d'un débat sans fortement dégrader l'exactitude moyenne. Pouvoir discriminant : comparer balanced accuracy à stabilité des communautés, taux d'approbation et distorsion du consensus sur plusieurs consultations. Gain espéré : distinguer performance prédictive individuelle et fidélité collective. Scores heuristiques non calibrés.",
+  "hypothesis": "Un modèle de préférences ayant une forte exactitude équilibrée préserve nécessairement les structures de consensus et de désaccord des groupes d'une consultation.",
+  "need_id": null,
+  "research_mode": "adversarial",
+  "gap_kind": "missing_domain",
+  "metrics": {
+    "uncertainty": 0.79,
+    "expected_impact": 0.88,
+    "staleness": 0.58,
+    "novelty_gap": 0.94,
+    "selection_score": 0.814
+  },
+  "evidence_refs": [
+    "https://arxiv.org/abs/2609.02990"
+  ],
+  "outcome": "refuted",
+  "uncertainty_after": 0.44,
+  "learning": "Fait observé : Lequeu et al., prépublication du 2 septembre 2026, évaluent des modèles d'inférence de votes sur plusieurs consultations, dont quatre nouveaux corpus réunissant environ 90 000 participants, plus d'un million de votes et jusqu'à 22 langues. Le modèle le mieux classé en balanced accuracy (SBGCL) n'arrive que cinquième pour la plausibilité des taux d'approbation et la stabilité des communautés, et sixième pour la distorsion du consensus. Les auteurs rapportent des R² de 0,05 (approbation), 0,14 (stabilité) et 0,13 (distorsion sur l'attribut politique) entre exactitude et métriques collectives. Hypothèse de suffisance de l'exactitude individuelle réfutée dans ce banc. Contre-argument : certaines méthodes offrent de meilleurs compromis; l'étude mesure des reconstructions hors échantillon, non un effet causal sur des décisions publiques réelles, et ses métriques reflètent une conception normative particulière de la représentation. Prochaine lacune : vérifier sur un essai prospectif si des contraintes de préservation des minorités améliorent la fidélité collective sans dégrader excessivement la qualité des prédictions ni attribuer abusivement des votes non exprimés."
+}
