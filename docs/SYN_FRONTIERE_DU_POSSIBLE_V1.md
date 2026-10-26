@@ -73,6 +73,10 @@ next_reopening_condition: "Événement qui justifie un nouvel essai"
 
 Cette fiche est un modèle conceptuel, **pas** une API branchée au système en cours. Les reçus doivent correspondre à des artefacts vérifiables, pas à des affirmations du modèle.
 
+### Raccord explicite à la colonne vertébrale glyphique
+
+La fiche ci-dessus est une **projection éditoriale vers les types de glyphes déjà existants**, et non la spécification d'une nouvelle base. `intent` correspond à `goal`, `starting_frame` à `concept`/`hypothesis`, `falsifier` à `critique`, les résultats attestés à `evidence`/`outcome`, la révision à `learning` avec `supersedes` et `derived_from`. Le pont documenté dans [SYN_GLYPH_SCENE_BRIDGE_V1.md](SYN_GLYPH_SCENE_BRIDGE_V1.md) ne convertit aujourd'hui que des références documentaires typées ; les autres champs exigeraient des événements réels et des sources explicites.
+
 ## 5. Deux changements de perspective à comparer
 
 ### Perspective contextualisée (« l'interprète »)

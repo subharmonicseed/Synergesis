@@ -1,8 +1,22 @@
 # SYN — continuité du travail agentique
 
+Pour utiliser **ChatGPT directement comme moteur de SYN**, commencer par
+`SYN_START_HERE.md` et `docs/chatgpt/STATE.md`. Le dialogue est le mode par défaut ;
+une question d'évaluation ne déclenche pas automatiquement la veille. Les sources
+de continuité et les observations sont actuellement sur deux branches publiées :
+suivre les références explicites du point d'entrée, sans supposer que `main` les contient.
+
 Au début d'une session sur ce dépôt, lire `docs/SYN_AGENT_CONTINUITY.md`, puis
 les entrées datées qu'il désigne. Vérifier la branche et le commit avant d'agir.
 Si un référentiel manque, signaler la limite ; ne pas inventer son contenu.
+
+Pour reconstruire une scène conceptuelle de SYN, **réutiliser d'abord les glyphes** :
+[protocole de raccord de scène](docs/SYN_GLYPH_SCENE_BRIDGE_V1.md) et
+`synergesis_glyph_protocol.py`. Git versionne les sources ; `GlyphAuditGraph`
+porte leur identité, provenance et révision. Ne pas créer de système concurrent.
+L'adaptateur local demande un journal privé hors dépôt et un import explicite ;
+il n'est ni un rappel sémantique général ni un contexte automatiquement chargé.
+
 
 Travailler à partir de cet héritage : reprendre les décisions, les preuves et les
 questions ouvertes pertinentes, puis effectuer les actions autorisées utiles.

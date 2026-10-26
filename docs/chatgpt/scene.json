@@ -1,0 +1,295 @@
+{
+  "schema": "syn-chatgpt-context-v1",
+  "generated_at": "2026-10-26T16:59:44.647481+00:00",
+  "scope": "public_documentary_projection_only",
+  "sources": {
+    "glyph-protocol": {
+      "path": "synergesis_glyph_protocol.py",
+      "sha256": "11eb769095b0c1e6693372cae4a97bbbddac4fb505eac7c4615f8e84f69e3cec",
+      "git_blob_sha": "c08032e1594c301a7d5e437b6000ab2a8d7a4177"
+    },
+    "scope": {
+      "path": "docs/continuity/2026-10-25-002.md",
+      "sha256": "b79adbae5e09399a2d893ebf13dc31a1c84e281dc3ef90f354066aa882c9ea66",
+      "git_blob_sha": "51ab627fa8d53b3da9ce4ee55dd7e3491c3ce324"
+    },
+    "scaphandre": {
+      "path": "docs/SYN_SCAPHANDRE_ONTOLOGIQUE_V1.md",
+      "sha256": "11f96d941d6e56940da0a2897632757dc8f7b40a7020017e4a69c8e895de4471",
+      "git_blob_sha": "efa73dd035c36c0817d1531ea0f2a38bba75bade"
+    },
+    "frontier": {
+      "path": "docs/SYN_FRONTIERE_DU_POSSIBLE_V1.md",
+      "sha256": "d14266730a331d2b5c1b938a21ab7e965f2b820bcd0a143edd3ea3a86d4e5024",
+      "git_blob_sha": "69679794507b788affe2e7929228fdfaef3adaaf"
+    },
+    "continuity": {
+      "path": "docs/SYN_AGENT_CONTINUITY.md",
+      "sha256": "3fce2e579f0475d39c30f1242ddf5f7a5cc1c89a5da4dd60ebe834185642afe0",
+      "git_blob_sha": "8c436688fe986598e93a02ca303ac80580834f35"
+    },
+    "chatgpt-engine": {
+      "path": "docs/SYN_CHATGPT_ENGINE_V1.md",
+      "sha256": "d92d76a0db7e1fd5d26dbf0ed82afc751ebce683ba615476ec2c451d3af57ae9",
+      "git_blob_sha": "1edaf8f0251f5623280bafefeba7b4445876756b"
+    },
+    "chatgpt-state": {
+      "path": "docs/chatgpt/STATE.md",
+      "sha256": "93f1fb4e11ee75a44be3bb98dd0b04f6b558846174a9604d17af9229d21e62d0",
+      "git_blob_sha": "f9f0a38b89ae31a5d2fcb479e2ef9cb8ee78d41f"
+    }
+  },
+  "glyphs": [
+    {
+      "glyph_id": "g:17e850a7c84ee59cc8f60767d18b7112",
+      "glyph_type": "concept",
+      "schema_version": "synergesis.glyph.v1",
+      "created_at": "2026-10-26T16:59:44.637122+00:00",
+      "actor": "SYN-SCENE-BRIDGE",
+      "content": {
+        "description": "Actual typed glyph ledger and relationship API",
+        "epistemic_status": "curated_document_not_empirical_proof",
+        "kind": "curated_git_scene_reference",
+        "scene_key": "glyph-protocol",
+        "source_path": "synergesis_glyph_protocol.py",
+        "source_sha256": "11eb769095b0c1e6693372cae4a97bbbddac4fb505eac7c4615f8e84f69e3cec"
+      },
+      "external_refs": [
+        "syn-scene:glyph-protocol",
+        "syn-scene:glyph-protocol:sha256:11eb769095b0c1e6693372cae4a97bbbddac4fb505eac7c4615f8e84f69e3cec"
+      ],
+      "confidence": null,
+      "metadata": {}
+    },
+    {
+      "glyph_id": "g:de3b59783bea57ac1c1b56591a73ff33",
+      "glyph_type": "decision",
+      "schema_version": "synergesis.glyph.v1",
+      "created_at": "2026-10-26T16:59:44.638001+00:00",
+      "actor": "SYN-SCENE-BRIDGE",
+      "content": {
+        "description": "SYN is the whole cooperation; Synergesis is a technical instrument",
+        "epistemic_status": "curated_document_not_empirical_proof",
+        "kind": "curated_git_scene_reference",
+        "scene_key": "scope",
+        "source_path": "docs/continuity/2026-10-25-002.md",
+        "source_sha256": "b79adbae5e09399a2d893ebf13dc31a1c84e281dc3ef90f354066aa882c9ea66"
+      },
+      "external_refs": [
+        "syn-scene:scope",
+        "syn-scene:scope:sha256:b79adbae5e09399a2d893ebf13dc31a1c84e281dc3ef90f354066aa882c9ea66"
+      ],
+      "confidence": null,
+      "metadata": {}
+    },
+    {
+      "glyph_id": "g:3e68fed865ff66f59754fd348012927d",
+      "glyph_type": "concept",
+      "schema_version": "synergesis.glyph.v1",
+      "created_at": "2026-10-26T16:59:44.638735+00:00",
+      "actor": "SYN-SCENE-BRIDGE",
+      "content": {
+        "description": "Orient, estrange, test and inherit without equating agreement and truth",
+        "epistemic_status": "curated_document_not_empirical_proof",
+        "kind": "curated_git_scene_reference",
+        "scene_key": "scaphandre",
+        "source_path": "docs/SYN_SCAPHANDRE_ONTOLOGIQUE_V1.md",
+        "source_sha256": "11f96d941d6e56940da0a2897632757dc8f7b40a7020017e4a69c8e895de4471"
+      },
+      "external_refs": [
+        "syn-scene:scaphandre",
+        "syn-scene:scaphandre:sha256:11f96d941d6e56940da0a2897632757dc8f7b40a7020017e4a69c8e895de4471"
+      ],
+      "confidence": null,
+      "metadata": {}
+    },
+    {
+      "glyph_id": "g:78ab0dadba0a2ce43dab542fed1a7e9c",
+      "glyph_type": "hypothesis",
+      "schema_version": "synergesis.glyph.v1",
+      "created_at": "2026-10-26T16:59:44.639419+00:00",
+      "actor": "SYN-SCENE-BRIDGE",
+      "content": {
+        "description": "Transformation of possible actions is an untested hypothesis",
+        "epistemic_status": "hypothesis_not_tested",
+        "kind": "curated_git_scene_reference",
+        "scene_key": "frontier",
+        "source_path": "docs/SYN_FRONTIERE_DU_POSSIBLE_V1.md",
+        "source_sha256": "d14266730a331d2b5c1b938a21ab7e965f2b820bcd0a143edd3ea3a86d4e5024"
+      },
+      "external_refs": [
+        "syn-scene:frontier",
+        "syn-scene:frontier:sha256:d14266730a331d2b5c1b938a21ab7e965f2b820bcd0a143edd3ea3a86d4e5024"
+      ],
+      "confidence": null,
+      "metadata": {}
+    },
+    {
+      "glyph_id": "g:00d7639284ebbda8257d9db9499ba265",
+      "glyph_type": "decision",
+      "schema_version": "synergesis.glyph.v1",
+      "created_at": "2026-10-26T16:59:44.640163+00:00",
+      "actor": "SYN-SCENE-BRIDGE",
+      "content": {
+        "description": "Explicit decisions, objections, open hypotheses and status",
+        "epistemic_status": "curated_document_not_empirical_proof",
+        "kind": "curated_git_scene_reference",
+        "scene_key": "continuity",
+        "source_path": "docs/SYN_AGENT_CONTINUITY.md",
+        "source_sha256": "3fce2e579f0475d39c30f1242ddf5f7a5cc1c89a5da4dd60ebe834185642afe0"
+      },
+      "external_refs": [
+        "syn-scene:continuity",
+        "syn-scene:continuity:sha256:3fce2e579f0475d39c30f1242ddf5f7a5cc1c89a5da4dd60ebe834185642afe0"
+      ],
+      "confidence": null,
+      "metadata": {}
+    },
+    {
+      "glyph_id": "g:b8b7ceb1c58f88052b497124e1f1c21e",
+      "glyph_type": "decision",
+      "schema_version": "synergesis.glyph.v1",
+      "created_at": "2026-10-26T16:59:44.644750+00:00",
+      "actor": "SYN-CHATGPT-PUBLIC-CONTEXT",
+      "content": {
+        "description": "ChatGPT is the selected reasoning engine; dialogue is the default mode",
+        "epistemic_status": "design_decision_not_performance_evidence",
+        "kind": "curated_git_scene_reference",
+        "scene_key": "chatgpt-engine",
+        "source_path": "docs/SYN_CHATGPT_ENGINE_V1.md",
+        "source_sha256": "d92d76a0db7e1fd5d26dbf0ed82afc751ebce683ba615476ec2c451d3af57ae9"
+      },
+      "external_refs": [
+        "syn-scene:chatgpt-engine"
+      ],
+      "confidence": null,
+      "metadata": {}
+    },
+    {
+      "glyph_id": "g:9c255e3daacbdb4da24fae66a7ce56be",
+      "glyph_type": "decision",
+      "schema_version": "synergesis.glyph.v1",
+      "created_at": "2026-10-26T16:59:44.645191+00:00",
+      "actor": "SYN-CHATGPT-PUBLIC-CONTEXT",
+      "content": {
+        "description": "Compact current decisions, negative results and unresolved objections",
+        "epistemic_status": "design_decision_not_performance_evidence",
+        "kind": "curated_git_scene_reference",
+        "scene_key": "chatgpt-state",
+        "source_path": "docs/chatgpt/STATE.md",
+        "source_sha256": "93f1fb4e11ee75a44be3bb98dd0b04f6b558846174a9604d17af9229d21e62d0"
+      },
+      "external_refs": [
+        "syn-scene:chatgpt-state"
+      ],
+      "confidence": null,
+      "metadata": {}
+    }
+  ],
+  "edges": [
+    {
+      "edge_id": "e:6fbcc8bb01743fd9e6c3c195fd26743a",
+      "source": "g:3e68fed865ff66f59754fd348012927d",
+      "target": "g:de3b59783bea57ac1c1b56591a73ff33",
+      "relation": "derived_from",
+      "created_at": "2026-10-26T16:59:44.640749+00:00",
+      "actor": "SYN-SCENE-BRIDGE",
+      "metadata": {
+        "scope": "curated_scene_link_not_proof"
+      }
+    },
+    {
+      "edge_id": "e:56efd6767ec5d4f155dde1cde2b2c407",
+      "source": "g:78ab0dadba0a2ce43dab542fed1a7e9c",
+      "target": "g:3e68fed865ff66f59754fd348012927d",
+      "relation": "derived_from",
+      "created_at": "2026-10-26T16:59:44.641247+00:00",
+      "actor": "SYN-SCENE-BRIDGE",
+      "metadata": {
+        "scope": "curated_scene_link_not_proof"
+      }
+    },
+    {
+      "edge_id": "e:7469973fd617290b951137890efb9338",
+      "source": "g:00d7639284ebbda8257d9db9499ba265",
+      "target": "g:de3b59783bea57ac1c1b56591a73ff33",
+      "relation": "derived_from",
+      "created_at": "2026-10-26T16:59:44.641688+00:00",
+      "actor": "SYN-SCENE-BRIDGE",
+      "metadata": {
+        "scope": "curated_scene_link_not_proof"
+      }
+    },
+    {
+      "edge_id": "e:2c658eeeaa09b004d1a45426f1604994",
+      "source": "g:00d7639284ebbda8257d9db9499ba265",
+      "target": "g:3e68fed865ff66f59754fd348012927d",
+      "relation": "derived_from",
+      "created_at": "2026-10-26T16:59:44.642163+00:00",
+      "actor": "SYN-SCENE-BRIDGE",
+      "metadata": {
+        "scope": "curated_scene_link_not_proof"
+      }
+    },
+    {
+      "edge_id": "e:14204596e8d71821799668748a57844b",
+      "source": "g:00d7639284ebbda8257d9db9499ba265",
+      "target": "g:78ab0dadba0a2ce43dab542fed1a7e9c",
+      "relation": "derived_from",
+      "created_at": "2026-10-26T16:59:44.642622+00:00",
+      "actor": "SYN-SCENE-BRIDGE",
+      "metadata": {
+        "scope": "curated_scene_link_not_proof"
+      }
+    },
+    {
+      "edge_id": "e:e3fb33d8e07401d1142ca7e3dd2c55c9",
+      "source": "g:00d7639284ebbda8257d9db9499ba265",
+      "target": "g:17e850a7c84ee59cc8f60767d18b7112",
+      "relation": "derived_from",
+      "created_at": "2026-10-26T16:59:44.643057+00:00",
+      "actor": "SYN-SCENE-BRIDGE",
+      "metadata": {
+        "scope": "curated_scene_link_not_proof"
+      }
+    },
+    {
+      "edge_id": "e:2e1b0244f06f9698464d5942d1a6678a",
+      "source": "g:b8b7ceb1c58f88052b497124e1f1c21e",
+      "target": "g:00d7639284ebbda8257d9db9499ba265",
+      "relation": "derived_from",
+      "created_at": "2026-10-26T16:59:44.645655+00:00",
+      "actor": "SYN-CHATGPT-PUBLIC-CONTEXT",
+      "metadata": {
+        "scope": "editorial_dependency_not_empirical_proof"
+      }
+    },
+    {
+      "edge_id": "e:b9e6d31454269ecab62d3fc081d43d60",
+      "source": "g:b8b7ceb1c58f88052b497124e1f1c21e",
+      "target": "g:17e850a7c84ee59cc8f60767d18b7112",
+      "relation": "derived_from",
+      "created_at": "2026-10-26T16:59:44.646134+00:00",
+      "actor": "SYN-CHATGPT-PUBLIC-CONTEXT",
+      "metadata": {
+        "scope": "editorial_dependency_not_empirical_proof"
+      }
+    },
+    {
+      "edge_id": "e:2d15c917a41bb5103c0f8a7e0e3efb9e",
+      "source": "g:9c255e3daacbdb4da24fae66a7ce56be",
+      "target": "g:b8b7ceb1c58f88052b497124e1f1c21e",
+      "relation": "derived_from",
+      "created_at": "2026-10-26T16:59:44.646570+00:00",
+      "actor": "SYN-CHATGPT-PUBLIC-CONTEXT",
+      "metadata": {
+        "scope": "editorial_dependency_not_empirical_proof"
+      }
+    }
+  ],
+  "limits": [
+    "No private conversation or runtime profile imported",
+    "File identity is not claim truth or cognitive improvement",
+    "Fresh projection; earlier snapshots remain in Git history"
+  ]
+}

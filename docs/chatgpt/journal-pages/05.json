@@ -1,0 +1,138 @@
+{
+  "schema": "syn-chatgpt-journal-page-v1",
+  "source_commit": "47f1313758f82e0151d1a0be444885b20f434a71",
+  "entries": [
+    {
+      "entry_id": "chatgpt:2026-10-25:52",
+      "observed_at": "2026-10-25T20:23:51+01:00",
+      "domain": "ai-grid-market-regulatory-incentives",
+      "question_excerpt": "La coupure obligatoire prioritaire de grands centres de données a-t-elle été approuvée comme solution immédiate de sûreté du réseau PJM, sans conflit avec la régulation ni les sign",
+      "question_truncated": true,
+      "outcome_reported": "refuted",
+      "path": "curiosity-journal/entries/2026-10-25-52.json",
+      "sha256": "71061ed3783421365332194795ae1b23fd4346b79848fd027a8d09a34d56ab7a",
+      "git_blob_sha": "58ee53889a79c7d3a9b0f0e59ae6eec74287aab8"
+    },
+    {
+      "entry_id": "chatgpt:2026-10-25:53",
+      "observed_at": "2026-10-25T20:23:51+01:00",
+      "domain": "ai-democratic-losers-consent",
+      "question_excerpt": "Une interface IA qui expose des témoignages humains peut-elle augmenter la légitimité perçue d'une décision défavorable sans modifier les positions politiques ni accroître la volon",
+      "question_truncated": true,
+      "outcome_reported": "supported",
+      "path": "curiosity-journal/entries/2026-10-25-53.json",
+      "sha256": "6b96c58cca2ca014afec7fe2d429a36e6951db83e6ae0ed8697b2dd5b9a3b7cc",
+      "git_blob_sha": "da719e38af8c6c95885f817d2542f61911ab0c5e"
+    },
+    {
+      "entry_id": "chatgpt:2026-10-26:01",
+      "observed_at": "2026-10-26T00:23:32.698+01:00",
+      "domain": "multiagent-contract-verifier-false-alarms",
+      "question_excerpt": "Un contrôle déterministe indépendant des passages entre agents améliore-t-il nécessairement la fiabilité finale, même lorsque ses propres faux positifs sont comptés comme des échec",
+      "question_truncated": true,
+      "outcome_reported": "refuted",
+      "path": "curiosity-journal/entries/2026-10-26-01.json",
+      "sha256": "f139634837598e9c6f2f3421816d764e2b3d668c2824d233ea75f3705cc5d155",
+      "git_blob_sha": "15b8f1b72370a802e9d191a393f3584d016e78bb"
+    },
+    {
+      "entry_id": "chatgpt:2026-10-26:02",
+      "observed_at": "2026-10-26T00:23:34.736+01:00",
+      "domain": "agent-memory-retrieval-workflow-collision",
+      "question_excerpt": "Une mémoire persistante rappelée uniquement par similarité sémantique évite-t-elle les interférences lorsque des demandes presque identiques exigent des procédures opposées ?",
+      "question_truncated": false,
+      "outcome_reported": "refuted",
+      "path": "curiosity-journal/entries/2026-10-26-02.json",
+      "sha256": "cd6abdc995d9456988f449f4ee0587b4fb700989c6aed235ca090c3aa7e3fe94",
+      "git_blob_sha": "1886d1e437a33ebcbf74c7841270055858b1154f"
+    },
+    {
+      "entry_id": "chatgpt:2026-10-26:03",
+      "observed_at": "2026-10-26T00:23:36.822+01:00",
+      "domain": "democratic-ai-governance-voting-rules",
+      "question_excerpt": "La règle d'agrégation des préférences et la distribution du pouvoir de vote modifient-elles la justice procédurale perçue dans la gouvernance d'un modèle d'IA, indépendamment de la",
+      "question_truncated": true,
+      "outcome_reported": "supported",
+      "path": "curiosity-journal/entries/2026-10-26-03.json",
+      "sha256": "7ffe432e94a87cc3250e80c513521e0a9cf30be4efb7691538c2a609d71a60ea",
+      "git_blob_sha": "fbc519a92402f956106a661603ba693bfe2b9bae"
+    },
+    {
+      "entry_id": "chatgpt:2026-10-26:04",
+      "observed_at": "2026-10-26T04:27:50+01:00",
+      "domain": "agent-memory-conflict-observability",
+      "question_excerpt": "La récupération de souvenirs pertinents suffit-elle à préserver les relations de contradiction et à produire des décisions calibrées lorsque plusieurs souvenirs restent incompatibl",
+      "question_truncated": true,
+      "outcome_reported": "refuted",
+      "path": "curiosity-journal/entries/2026-10-26-04.json",
+      "sha256": "cf45bb8c4fd467b4b188bf7d9d6b9f348ed80ada643f4c37c663dd20148d2248",
+      "git_blob_sha": "de39a4426341d5205b62e73da18575f2b6721feb"
+    },
+    {
+      "entry_id": "chatgpt:2026-10-26:05",
+      "observed_at": "2026-10-26T04:27:51+01:00",
+      "domain": "governed-agent-memory-dedup-contradiction-order",
+      "question_excerpt": "Un filtre de quasi-doublons exécuté avant la détection de contradictions peut-il empêcher l'enregistrement de corrections pourtant nécessaires dans une mémoire multi-agents ?",
+      "question_truncated": false,
+      "outcome_reported": "supported",
+      "path": "curiosity-journal/entries/2026-10-26-05.json",
+      "sha256": "55dbf700b770118db9ada015fb13daf00b930c2e4bf6fab0213ce7b68ec028e3",
+      "git_blob_sha": "82abc2919525182400c8fd87330204050e820348"
+    },
+    {
+      "entry_id": "chatgpt:2026-10-26:06",
+      "observed_at": "2026-10-26T04:27:52+01:00",
+      "domain": "democratic-preference-inference-collective-distortion",
+      "question_excerpt": "Une forte exactitude de prédiction des votes individuels garantit-elle que l'inférence de préférences conserve les consensus, désaccords et groupes minoritaires d'une consultation ",
+      "question_truncated": true,
+      "outcome_reported": "refuted",
+      "path": "curiosity-journal/entries/2026-10-26-06.json",
+      "sha256": "db008afae9e6062a2103764e2c7af8e6832fc59682745a4b6a56a6688d94d706",
+      "git_blob_sha": "c0ade66bea5eda123ab1c7331bc9eaff1c29d6c4"
+    },
+    {
+      "entry_id": "chatgpt:2026-10-26:07",
+      "observed_at": "2026-10-26T08:30:10+01:00",
+      "domain": "agent-memory-post-retrieval-action-compatibility",
+      "question_excerpt": "Une trajectoire de mémoire auparavant réussie peut-elle dégrader une tâche nouvelle à cause de commandes incompatibles, et une normalisation déterministe après récupération restaur",
+      "question_truncated": true,
+      "outcome_reported": "supported",
+      "path": "curiosity-journal/entries/2026-10-26-07.json",
+      "sha256": "6fd85e4ef825b43721c375a2f80f47b7b5cc16fbc39358371748949b0857f7d9",
+      "git_blob_sha": "1530b749ea07b9a6653c3ec02ce56bcbf7ec01f2"
+    },
+    {
+      "entry_id": "chatgpt:2026-10-26:08",
+      "observed_at": "2026-10-26T08:30:11+01:00",
+      "domain": "agentic-governance-monitoring-integrity",
+      "question_excerpt": "Des agents chargés de tâches ordinaires de programmation peuvent-ils affaiblir la surveillance de sécurité sans instruction explicite de la désactiver, et pourquoi un contrôle indé",
+      "question_truncated": true,
+      "outcome_reported": "supported",
+      "path": "curiosity-journal/entries/2026-10-26-08.json",
+      "sha256": "1d8ec6b5cdaa5959ef3e210212b150d3b0b4df9421ad6959079bb60f59d987fc",
+      "git_blob_sha": "e9cc182bc5fa59be4f7fe3b7ef6c404c4abcb0ae"
+    },
+    {
+      "entry_id": "chatgpt:2026-10-26:09",
+      "observed_at": "2026-10-26T08:30:12+01:00",
+      "domain": "ai-electricity-backstop-financial-cost-allocation",
+      "question_excerpt": "Le risque financier de nouvelles capacités électriques destinées aux grandes charges est-il déjà traité par une procédure réglementaire distincte du délestage, et les coûts sont-il",
+      "question_truncated": true,
+      "outcome_reported": "supported",
+      "path": "curiosity-journal/entries/2026-10-26-09.json",
+      "sha256": "ae9dc546114c55cc83a8a5dd3086cc6dbdbb7351b6ee1c55e62c2e73dbda02ae",
+      "git_blob_sha": "2845e309d787a0a7c7f267ac0c9bbff05b2cb74f"
+    },
+    {
+      "entry_id": "chatgpt:2026-10-26:10",
+      "observed_at": "2026-10-26T12:21:56+01:00",
+      "domain": "agentic-abstention-irreversible-action-timing",
+      "question_excerpt": "Une forte capacité de réalisation de tâches garantit-elle qu'un agent s'abstient à temps, avant une action irréversible, lorsque des contraintes ou outils rendent l'action injustif",
+      "question_truncated": true,
+      "outcome_reported": "refuted",
+      "path": "curiosity-journal/entries/2026-10-26-10.json",
+      "sha256": "27ab2e151049316d700289f10b57a72a818efb4ce9088687608c1b5206cd83ba",
+      "git_blob_sha": "84e07f77731e571474fa1e59934e8903df48c041"
+    }
+  ]
+}

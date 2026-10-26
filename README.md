@@ -1,5 +1,17 @@
 # Synergesis
 
+## Utiliser ChatGPT comme moteur de SYN
+
+Lire [SYN_START_HERE.md](SYN_START_HERE.md) : état de reprise compact, carte issue
+des glyphes natifs, sources de la veille et protocole de dialogue. Ce mode utilise
+le modèle choisi dans ChatGPT avec l'accès GitHub ; aucun modèle local n'est requis.
+Les branches sont publiées et lisibles sans fusion dans `main`. La lecture du
+contexte doit être explicite ; une publication ne l'injecte pas dans les conversations.
+
+## Colonne vertébrale glyphique et continuité
+
+Le [raccordement du contexte de scène au Glyph Protocol](docs/SYN_GLYPH_SCENE_BRIDGE_V1.md) réutilise le `GlyphLedger` / `GlyphAuditGraph` existant pour relier les décisions et hypothèses documentées dans Git. Les glyphes portent les relations de provenance et les révisions ; Git versionne les sources. Ses cinq tests ont été exécutés avec succès sous Linux le 26 octobre 2026. Pour ChatGPT, une projection publique permet de suivre ces références sans lancer le runtime local. Le chargement dans la conversation reste explicite.
+
 ## Reprise du travail agentique
 
 Lire le [référentiel de continuité SYN](docs/SYN_AGENT_CONTINUITY.md) pour retrouver

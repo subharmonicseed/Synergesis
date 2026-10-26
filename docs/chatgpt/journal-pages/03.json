@@ -1,0 +1,138 @@
+{
+  "schema": "syn-chatgpt-journal-page-v1",
+  "source_commit": "47f1313758f82e0151d1a0be444885b20f434a71",
+  "entries": [
+    {
+      "entry_id": "chatgpt:2026-10-25:28",
+      "observed_at": "2026-10-25T13:01:02.966+01:00",
+      "domain": "forecast-data-permissions",
+      "question_excerpt": "L'accès technique à une API publique de prévisions autorise-t-il par défaut une évaluation automatisée d'agents IA utilisant les données obtenues ?",
+      "question_truncated": false,
+      "outcome_reported": "refuted",
+      "path": "curiosity-journal/entries/2026-10-25-28.json",
+      "sha256": "032095a6f717c94bb9ca0197417cb8ec6876a1ac781930c76fe57c709417599e",
+      "git_blob_sha": "285438a045ea0417756f1768a6d2832101416a7e"
+    },
+    {
+      "entry_id": "chatgpt:2026-10-25:29",
+      "observed_at": "2026-10-25T13:01:05.784+01:00",
+      "domain": "prospective-evaluation-preregistration",
+      "question_excerpt": "Quels engagements minimum rendent une évaluation de la curiosité de SYN falsifiable au lieu de seulement rétrospective ?",
+      "question_truncated": false,
+      "outcome_reported": "supported",
+      "path": "curiosity-journal/entries/2026-10-25-29.json",
+      "sha256": "7f6de76d56324261be2fcaca8d7dd443b6fb420f6c4d72f04d680bdcc1563693",
+      "git_blob_sha": "6ce8e7e749103d18b5634e1105d823f894758813"
+    },
+    {
+      "entry_id": "chatgpt:2026-10-25:30",
+      "observed_at": "2026-10-25T13:07:03.698+01:00",
+      "domain": "agi-agentic-architecture",
+      "question_excerpt": "Un modèle de langage à poids fixes, entouré d'un curriculum autonome, d'une mémoire de compétences et d'évaluateurs externes, peut-il améliorer ses capacités mesurées sans réentraî",
+      "question_truncated": true,
+      "outcome_reported": "supported",
+      "path": "curiosity-journal/entries/2026-10-25-30.json",
+      "sha256": "c6d5663552bcc446c51907e74b8b8eee10d9d6b53533d77e28e52bc60c72a585",
+      "git_blob_sha": "0487c088937ab43590d43a5d7e278746cb40431e"
+    },
+    {
+      "entry_id": "chatgpt:2026-10-25:31",
+      "observed_at": "2026-10-25T13:07:06.901+01:00",
+      "domain": "cross-domain-skill-transfer",
+      "question_excerpt": "Une mémoire toujours plus vaste et une boucle d'auto-critique suffisent-elles à faire émerger des compétences fiables, transférables entre domaines ?",
+      "question_truncated": false,
+      "outcome_reported": "refuted",
+      "path": "curiosity-journal/entries/2026-10-25-31.json",
+      "sha256": "3f1f7496771c4c267df4a76deb616337565b685a92f024d339d82585d0a75220",
+      "git_blob_sha": "0c349673d2bf79043a3a4ab09e736fb5fa0eba9f"
+    },
+    {
+      "entry_id": "chatgpt:2026-10-25:32",
+      "observed_at": "2026-10-25T13:07:10.163+01:00",
+      "domain": "self-modification-evaluation-integrity",
+      "question_excerpt": "Une IA qui définit ses propres expériences, produit les résultats et contrôle son évaluateur peut-elle être considérée comme s'améliorant sans validation indépendante ?",
+      "question_truncated": false,
+      "outcome_reported": "supported",
+      "path": "curiosity-journal/entries/2026-10-25-32.json",
+      "sha256": "7d3a7fbfc203e2beeb649001990d74e1ce8c01abefbe1600816c0cb04d838b6f",
+      "git_blob_sha": "39ce34488068e29f03d29e0d70969c3a1cbd2247"
+    },
+    {
+      "entry_id": "chatgpt:2026-10-25:33",
+      "observed_at": "2026-10-25T13:16:39.860+01:00",
+      "domain": "generalization-of-agent-skills",
+      "question_excerpt": "Les gains acquis par des compétences auto-améliorées sur les tâches d'entraînement se transfèrent-ils intégralement aux tâches tenues à l'écart ?",
+      "question_truncated": false,
+      "outcome_reported": "refuted",
+      "path": "curiosity-journal/entries/2026-10-25-33.json",
+      "sha256": "2c562aaddc875f15c5408edb756b421b4120ab89778fbb59559dee05bf13e721",
+      "git_blob_sha": "e82e6002610361a69e6926e3709b0a5467b4975a"
+    },
+    {
+      "entry_id": "chatgpt:2026-10-25:34",
+      "observed_at": "2026-10-25T13:16:42.688+01:00",
+      "domain": "agent-skills-negative-transfer",
+      "question_excerpt": "Des compétences rédigées automatiquement par un agent améliorent-elles en moyenne ses résultats autant que des procédures vérifiées par des humains ?",
+      "question_truncated": false,
+      "outcome_reported": "refuted",
+      "path": "curiosity-journal/entries/2026-10-25-34.json",
+      "sha256": "294e6d4449ad2b154a1eca0eb2fd64a436c7444aa2506693304839a5f0312cbc",
+      "git_blob_sha": "b84df8e8e094ed046d8cffdf76f8d1b59f5cb4a5"
+    },
+    {
+      "entry_id": "chatgpt:2026-10-25:35",
+      "observed_at": "2026-10-25T13:16:45.153+01:00",
+      "domain": "syn-held-out-evaluation",
+      "question_excerpt": "Après génération et promotion de compétences par SYN, un évaluateur indépendant peut-il montrer un gain apparié hors échantillon supérieur à mémoire-journal seule, sans régression ",
+      "question_truncated": true,
+      "outcome_reported": "not_tested",
+      "path": "curiosity-journal/entries/2026-10-25-35.json",
+      "sha256": "a72e2462d8d9f59e11b4ccd43f745a39239c09af2ea1ec1ce5ad8fdf1e4042df",
+      "git_blob_sha": "116fda1bcdabd73e25c63c352dead168a41ab127"
+    },
+    {
+      "entry_id": "chatgpt:2026-10-25:36",
+      "observed_at": "2026-10-25T13:24:55.136+01:00",
+      "domain": "agentic-harness-context-continuity",
+      "question_excerpt": "À modèle comparable, la conservation du contexte entre actions et sa compaction peuvent-elles améliorer fortement la planification interactive sans réentraîner les poids du modèle ",
+      "question_truncated": true,
+      "outcome_reported": "supported",
+      "path": "curiosity-journal/entries/2026-10-25-36.json",
+      "sha256": "f006951f9ab21c0d756efd31e6256d446538214871e96f8cf79ae55c36f98e95",
+      "git_blob_sha": "29ff0f915e540e9ba58737df644dfcec7e252973"
+    },
+    {
+      "entry_id": "chatgpt:2026-10-25:37",
+      "observed_at": "2026-10-25T13:24:58.239+01:00",
+      "domain": "general-agent-architectures",
+      "question_excerpt": "La réussite d'une architecture d'agent sur la totalité d'un jeu public ARC-AGI-3 démontre-t-elle à elle seule l'intelligence générale hors distribution ?",
+      "question_truncated": false,
+      "outcome_reported": "refuted",
+      "path": "curiosity-journal/entries/2026-10-25-37.json",
+      "sha256": "f9ef3ff8b5fc8d553d043a76a33fdfabe8e0abbd1faea0883323b7b69f3da125",
+      "git_blob_sha": "0a0e423331b75fec8379e0d0fc7623abdda84e06"
+    },
+    {
+      "entry_id": "chatgpt:2026-10-25:38",
+      "observed_at": "2026-10-25T13:25:00.798+01:00",
+      "domain": "syn-heldout-harness-ablation",
+      "question_excerpt": "En isolant séparément la continuité de contexte et la récupération de compétences, SYN obtient-elle des gains réplicables sur tâches interactives inédites et à budget fixé ?",
+      "question_truncated": false,
+      "outcome_reported": "not_tested",
+      "path": "curiosity-journal/entries/2026-10-25-38.json",
+      "sha256": "842fa0daad9c4faee948a586f9e57bc238b9b98571b81ac1620ebf25510921f1",
+      "git_blob_sha": "f94e4698dc64378665eac9c0f6a6955dcceacae6"
+    },
+    {
+      "entry_id": "chatgpt:2026-10-25:39",
+      "observed_at": "2026-10-25T13:39:28.027+01:00",
+      "domain": "syn-ablation-negative-control",
+      "question_excerpt": "Le premier banc de tâches de transfert pour quatre conditions de SYN permet-il vraiment de distinguer une amélioration de compétence d'un simple effet de plafond ?",
+      "question_truncated": false,
+      "outcome_reported": "supported",
+      "path": "curiosity-journal/entries/2026-10-25-39.json",
+      "sha256": "0dc2f7aacffef62b3ae11abc273f6e94a937b6c3b7a6a49d973079e194a6259b",
+      "git_blob_sha": "c592bdf7182c128e536dbfb459f2ae6304b8c306"
+    }
+  ]
+}

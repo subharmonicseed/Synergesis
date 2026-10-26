@@ -1,0 +1,138 @@
+{
+  "schema": "syn-chatgpt-journal-page-v1",
+  "source_commit": "47f1313758f82e0151d1a0be444885b20f434a71",
+  "entries": [
+    {
+      "entry_id": "chatgpt:2026-10-25:40",
+      "observed_at": "2026-10-25T13:56:44.103+01:00",
+      "domain": "syn-factorial-memory-skill-audit",
+      "question_excerpt": "Notre ancien comparateur de quatre prompts peut-il distinguer un gain attribuable à la mémoire d'un gain attribuable à une compétence candidate séparément disponible ?",
+      "question_truncated": false,
+      "outcome_reported": "supported",
+      "path": "curiosity-journal/entries/2026-10-25-40.json",
+      "sha256": "81068d8d005b90fff8cabd9f60148e47c581d13da89998af2103b2f41c06d673",
+      "git_blob_sha": "7c04fc2e84480456dd0fbdee5bbcb488c004fefe"
+    },
+    {
+      "entry_id": "chatgpt:2026-10-25:41",
+      "observed_at": "2026-10-25T14:06:57.454+01:00",
+      "domain": "stellar-neutrino-anomaly",
+      "question_excerpt": "La transformation de saveur des neutrinos peut-elle modifier la proportion théorique des effondrements stellaires qui échouent à produire une supernova, et que faudrait-il mesurer ",
+      "question_truncated": true,
+      "outcome_reported": "supported",
+      "path": "curiosity-journal/entries/2026-10-25-41.json",
+      "sha256": "a5584579e581ee887eb2ec9e2d2124edb7488e5a0645d8ac76e15a1a65c8b9c3",
+      "git_blob_sha": "21fd10ff2b482c85fdf91b157830e79ef65e949e"
+    },
+    {
+      "entry_id": "chatgpt:2026-10-25:42",
+      "observed_at": "2026-10-25T14:07:00.126+01:00",
+      "domain": "marine-hybrid-materials-anomaly",
+      "question_excerpt": "Les composants plastiques fusionnés à des fragments coralliens morts constituent-ils une forme observable de matériau hybride, et que reste-t-il à démontrer sur leur formation et l",
+      "question_truncated": true,
+      "outcome_reported": "supported",
+      "path": "curiosity-journal/entries/2026-10-25-42.json",
+      "sha256": "3f5c96f2b9b91fa35c39c0d0a1c1537e6b934b3a614acc2150a418f8fb8c75b8",
+      "git_blob_sha": "4eaac587f167bae4d2e649378b9b5fa87c8c878f"
+    },
+    {
+      "entry_id": "chatgpt:2026-10-25:43",
+      "observed_at": "2026-10-25T14:07:02.953+01:00",
+      "domain": "syn-scientific-curiosity-source-diversity",
+      "question_excerpt": "À modèle et budget constants, un observatoire qui détecte des anomalies scientifiques dans des disciplines éloignées, puis contrôle les publications primaires, produit-il davantage",
+      "question_truncated": true,
+      "outcome_reported": "not_tested",
+      "path": "curiosity-journal/entries/2026-10-25-43.json",
+      "sha256": "ff0c471ecdd050de0ecdfc0810b94345aa8c7d28b4bf36614689f33d9ac28aa1",
+      "git_blob_sha": "b4cd41b2f44fe5210736996a6aa3097174506828"
+    },
+    {
+      "entry_id": "chatgpt:2026-10-25:44",
+      "observed_at": "2026-10-25T13:21:43.098+00:00",
+      "domain": "curiosity-shannon-vs-learning",
+      "question_excerpt": "Un événement très improbable selon une prédiction préalable est-il nécessairement une découverte qui apporte de l'information utile et démontre un apprentissage ?",
+      "question_truncated": false,
+      "outcome_reported": "refuted",
+      "path": "curiosity-journal/entries/2026-10-25-44.json",
+      "sha256": "7d0500e1737715692762ef0dee3ac3dc3a72cc7564e9e9b158b04a314387f148",
+      "git_blob_sha": "3602e7e07915eaccb46701ccae5934d597a1781d"
+    },
+    {
+      "entry_id": "chatgpt:2026-10-25:45",
+      "observed_at": "2026-10-25T13:21:45.885+00:00",
+      "domain": "syn-preregistered-real-world-forecasts",
+      "question_excerpt": "Peut-on au moins figer publiquement des probabilités prospectives de SYN avant les événements et les rendre exploitables par un contrôle indépendant ultérieur ?",
+      "question_truncated": false,
+      "outcome_reported": "supported",
+      "path": "curiosity-journal/entries/2026-10-25-45.json",
+      "sha256": "cc2c614f9a50af0e2fae5ae467d0d7458e79de7a69b11b639d287f876faa1a69",
+      "git_blob_sha": "370530b03130c6edd54e8ac5daf25fe611d2e081"
+    },
+    {
+      "entry_id": "chatgpt:2026-10-25:46",
+      "observed_at": "2026-10-25T13:21:50.234+00:00",
+      "domain": "syn-active-curiosity-comparative-test",
+      "question_excerpt": "Avec le même modèle et le même budget, une politique de curiosité guidée par surprises prédites-et-vérifiées, pénalisant les erreurs irréductibles, améliore-t-elle les futures prév",
+      "question_truncated": true,
+      "outcome_reported": "not_tested",
+      "path": "curiosity-journal/entries/2026-10-25-46.json",
+      "sha256": "323d7cbdfa9c895af8dec3b51c04d172dc8ac831fe0bb54d9a1cde1ff3c31fb1",
+      "git_blob_sha": "a73b5679b58521e4fb05a97a4781d7fed33aa9b6"
+    },
+    {
+      "entry_id": "chatgpt:2026-10-25:47",
+      "observed_at": "2026-10-25T13:32:11.332+00:00",
+      "domain": "syn-recursive-iteration-causal-test",
+      "question_excerpt": "Le passage d'un état décisionnel héritant des réfutations et tests de SYN_n modifie-t-il utilement le comportement de SYN_(n+1), au-delà de l'effet d'un simple historique de texte,",
+      "question_truncated": true,
+      "outcome_reported": "not_tested",
+      "path": "curiosity-journal/entries/2026-10-25-47.json",
+      "sha256": "7ad9630efc7cf2705bc11e370ea47fecf87ab8ea49eb676f515bc9493edb5420",
+      "git_blob_sha": "51777490b1dcb4fa43a1f6e042c2033ef2e52954"
+    },
+    {
+      "entry_id": "chatgpt:2026-10-25:48",
+      "observed_at": "2026-10-25T16:21:25.685+01:00",
+      "domain": "ai-energy-stranded-cost-allocation",
+      "question_excerpt": "Au-delà de la quantité d'électricité consommée par les centres de données, le risque de coûts de réseau échoués après abandon d'un projet est-il un canal réglementaire identifié de",
+      "question_truncated": true,
+      "outcome_reported": "supported",
+      "path": "curiosity-journal/entries/2026-10-25-48.json",
+      "sha256": "bdeb9cafaedccc0f4f8f25c0f51c523dc06a0761890cfc82b327103bbdc2ad5b",
+      "git_blob_sha": "713ae80392c99d45680496e46c6303e9a6b3041d"
+    },
+    {
+      "entry_id": "chatgpt:2026-10-25:49",
+      "observed_at": "2026-10-25T16:21:25.685+01:00",
+      "domain": "syn-recursive-self-report-audit",
+      "question_excerpt": "Transmettre aux itérations suivantes les justifications narratives et auto-évaluations d'agents suffit-il à améliorer leur calibration et la qualité de leurs résultats ?",
+      "question_truncated": false,
+      "outcome_reported": "refuted",
+      "path": "curiosity-journal/entries/2026-10-25-49.json",
+      "sha256": "6a1a18cc83c75fdd63f0d69f2d9947062b85fed24a529e5c3948ef35e2704753",
+      "git_blob_sha": "cab568f4067c2d012929ac82a2f3ba33bf1b162c"
+    },
+    {
+      "entry_id": "chatgpt:2026-10-25:50",
+      "observed_at": "2026-10-25T16:21:25.685+01:00",
+      "domain": "ai-delegated-civic-representation",
+      "question_excerpt": "Quand une IA parle à la place d'un citoyen absent, la mémoire persistante préserve-t-elle autant la diversité de ses positions qu'un entretien ciblé, avec des corrections humaines ",
+      "question_truncated": true,
+      "outcome_reported": "refuted",
+      "path": "curiosity-journal/entries/2026-10-25-50.json",
+      "sha256": "cb1e6f7324fdca890be1e2f3d21971125a5d34719fe3e63582f4397d42158846",
+      "git_blob_sha": "d7341d9a821327aa14be6db21366eaaf2c24ebdd"
+    },
+    {
+      "entry_id": "chatgpt:2026-10-25:51",
+      "observed_at": "2026-10-25T20:23:51+01:00",
+      "domain": "agentic-financial-composition-integrity",
+      "question_excerpt": "Des contrôles quasi parfaits à chaque étape d'un agent financier garantissent-ils que le résultat final respecte le mandat original ?",
+      "question_truncated": false,
+      "outcome_reported": "refuted",
+      "path": "curiosity-journal/entries/2026-10-25-51.json",
+      "sha256": "4ca760f3e45f26d1eac9fd92b22655d66660064f11aa6bc51fe341056d306274",
+      "git_blob_sha": "555535b3122cd9776dc2287fc2ba869bef82a085"
+    }
+  ]
+}

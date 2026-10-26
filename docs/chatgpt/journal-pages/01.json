@@ -1,0 +1,138 @@
+{
+  "schema": "syn-chatgpt-journal-page-v1",
+  "source_commit": "47f1313758f82e0151d1a0be444885b20f434a71",
+  "entries": [
+    {
+      "entry_id": "chatgpt:2026-10-25:01",
+      "observed_at": "2026-10-25T12:19:02.331+01:00",
+      "domain": "systemic-financial-risk",
+      "question_excerpt": "Le financement de l'IA, les valorisations boursières et les marchés de dette souveraine forment-ils déjà une boucle de contagion financière susceptible de provoquer une crise mondi",
+      "question_truncated": true,
+      "outcome_reported": "inconclusive",
+      "path": "curiosity-journal/entries/2026-10-25-01.json",
+      "sha256": "bb4e7c744e87d76b2b717336652e0856c3cc1e2ccaa48e6703af309440fc3cbc",
+      "git_blob_sha": "7cd81879b61aaa8a19d6847ab8f2cfd51aa19720"
+    },
+    {
+      "entry_id": "chatgpt:2026-10-25:02",
+      "observed_at": "2026-10-25T12:19:00+01:00",
+      "domain": "energy-ai-governance",
+      "question_excerpt": "La croissance électrique des centres de données d'IA menace-t-elle surtout l'approvisionnement mondial ou certains réseaux locaux et la répartition des coûts ?",
+      "question_truncated": false,
+      "outcome_reported": "supported",
+      "path": "curiosity-journal/entries/2026-10-25-02.json",
+      "sha256": "925f636791d2bf33d51a8cec1c4f41e3b7f2958f820565c88a9934ec47f00d5e",
+      "git_blob_sha": "636890dc30dc5dbe635287684928318502fd98b3"
+    },
+    {
+      "entry_id": "chatgpt:2026-10-25:03",
+      "observed_at": "2026-10-25T12:19:00+01:00",
+      "domain": "ai-democratic-governance",
+      "question_excerpt": "Les outils d'IA pour la participation citoyenne améliorent-ils durablement la représentation et la qualité des décisions démocratiques ?",
+      "question_truncated": false,
+      "outcome_reported": "inconclusive",
+      "path": "curiosity-journal/entries/2026-10-25-03.json",
+      "sha256": "ebbdba6a06264b4e4f648ec95bd36518a9169a9731f304a84d75c0aedab3de77",
+      "git_blob_sha": "0c1a9856bc6822237fac5233bfcc2c50d97861ec"
+    },
+    {
+      "entry_id": "chatgpt:2026-10-25:04",
+      "observed_at": "2026-10-25T12:30:22.048+01:00",
+      "domain": "ai-metacognition",
+      "question_excerpt": "Les modèles de langage peuvent-ils utiliser des signaux de confiance pour choisir de s'abstenir et détecter une erreur, sans que leur confiance verbalisée soit nécessairement bien ",
+      "question_truncated": true,
+      "outcome_reported": "supported",
+      "path": "curiosity-journal/entries/2026-10-25-04.json",
+      "sha256": "adda243111e684ff5e7e70c7352bb2906cd2f1cf3c1fef628a78d8bc2c95a752",
+      "git_blob_sha": "27d567065286e2eb2b009ca89699b353a6f1e642"
+    },
+    {
+      "entry_id": "chatgpt:2026-10-25:05",
+      "observed_at": "2026-10-25T12:30:24.637+01:00",
+      "domain": "ai-democratic-deliberation",
+      "question_excerpt": "Une médiation par IA peut-elle améliorer le consensus au sein de petits groupes tout en dissuadant d'autres citoyens de participer ?",
+      "question_truncated": false,
+      "outcome_reported": "supported",
+      "path": "curiosity-journal/entries/2026-10-25-05.json",
+      "sha256": "f4d28fdd23bafdb675eaac02adf718b44f71752daea087cc9fcf6a77dc87aae3",
+      "git_blob_sha": "398902a99a5f27edc3e2759c21c0f0d296b0a246"
+    },
+    {
+      "entry_id": "chatgpt:2026-10-25:06",
+      "observed_at": "2026-10-25T12:30:27.339+01:00",
+      "domain": "systemic-financial-amplification",
+      "question_excerpt": "Quelles preuves quantitatives documentent le canal fonds spéculatifs, dette souveraine et banques, au-delà d'une analogie sur l'effondrement systémique ?",
+      "question_truncated": false,
+      "outcome_reported": "supported",
+      "path": "curiosity-journal/entries/2026-10-25-06.json",
+      "sha256": "0bf1eb82cad83d68af270d47ba3c764bb39acb0b1cf155fab8700e6eb1d3b5ee",
+      "git_blob_sha": "8f86f330366502734c782df5a8598641a6d62f5e"
+    },
+    {
+      "entry_id": "chatgpt:2026-10-25:07",
+      "observed_at": "2026-10-25T12:31:25.980+01:00",
+      "domain": "ai-civic-metacognition",
+      "question_excerpt": "Une IA médiatrice qui affiche ses incertitudes calibrées et permet la contestation améliore-t-elle la participation réelle et la confiance civique, ou accentue-t-elle la défiance e",
+      "question_truncated": true,
+      "outcome_reported": "not_tested",
+      "path": "curiosity-journal/entries/2026-10-25-07.json",
+      "sha256": "b626ebb308c5d5da695ba58d99f1700b8f1e55059b8458e899971e401ff68c71",
+      "git_blob_sha": "44481cceedc8ae9edaf755d82b38325ced8fe70f"
+    },
+    {
+      "entry_id": "chatgpt:2026-10-25:08",
+      "observed_at": "2026-10-25T12:35:46.412+01:00",
+      "domain": "human-ai-confidence-calibration",
+      "question_excerpt": "Des scores d'incertitude correctement calibrés améliorent-ils les décisions humaines davantage que des scores mal calibrés, et que changent les formulations verbales de doute ?",
+      "question_truncated": false,
+      "outcome_reported": "supported",
+      "path": "curiosity-journal/entries/2026-10-25-08.json",
+      "sha256": "27934673cd4d873397243d93bb24756dccca5e409e673a40ca5a14017b850a92",
+      "git_blob_sha": "3d7baa5f4ffe69b0c08966c0d1585a5278755b49"
+    },
+    {
+      "entry_id": "chatgpt:2026-10-25:09",
+      "observed_at": "2026-10-25T12:35:48.929+01:00",
+      "domain": "ai-uncertainty-interface-risk",
+      "question_excerpt": "La multiplication des avertissements verbaux et des jauges numériques d'incertitude réduit-elle systématiquement l'adhésion aux mauvaises réponses d'une IA ?",
+      "question_truncated": false,
+      "outcome_reported": "refuted",
+      "path": "curiosity-journal/entries/2026-10-25-09.json",
+      "sha256": "29f1163bac121961552dbbe82a0e806ee09e17581a587f5495662f9b03a7d14e",
+      "git_blob_sha": "74aaa051a34790cc285d8df57337ad3aa039336a"
+    },
+    {
+      "entry_id": "chatgpt:2026-10-25:10",
+      "observed_at": "2026-10-25T12:35:51.588+01:00",
+      "domain": "ai-facilitation-procedural-legitimacy",
+      "question_excerpt": "Un médiateur IA peut-il faire paraître une discussion plus inclusive sans améliorer l'équité effective de la participation, tout en orientant subtilement le résultat ?",
+      "question_truncated": false,
+      "outcome_reported": "supported",
+      "path": "curiosity-journal/entries/2026-10-25-10.json",
+      "sha256": "b598298ae4354c805d8f6c7153104ec17d6ae8cf81f778d3e60d67ab123ecb54",
+      "git_blob_sha": "16a5e1e3934d27c5b8d99192f76b5d902e250b9d"
+    },
+    {
+      "entry_id": "chatgpt:2026-10-25:11",
+      "observed_at": "2026-10-25T12:35:54.584+01:00",
+      "domain": "syn-experimental-design-civic-trust",
+      "question_excerpt": "Une interface de médiation IA montrant preuves, incertitude réellement calibrée et possibilité de contester améliore-t-elle à la fois la vérification indépendante, la participation",
+      "question_truncated": true,
+      "outcome_reported": "not_tested",
+      "path": "curiosity-journal/entries/2026-10-25-11.json",
+      "sha256": "7ceaef3b12ed314a9af2c7fc246b8ed93a9a13333c5a2aa8a8996fa7b239296a",
+      "git_blob_sha": "fc2aad4120a0503e4af3f7a147f376790e832d79"
+    },
+    {
+      "entry_id": "chatgpt:2026-10-25:12",
+      "observed_at": "2026-10-25T12:39:26.995+01:00",
+      "domain": "human-ai-independent-judgment",
+      "question_excerpt": "Un jugement humain enregistré avant l'avis d'une IA réduit-il l'adoption de recommandations trompeuses par rapport à une présentation de l'avis en premier ?",
+      "question_truncated": false,
+      "outcome_reported": "supported",
+      "path": "curiosity-journal/entries/2026-10-25-12.json",
+      "sha256": "a04a6be3501ce4a4451235a37c4fcb581488b075754e8d27d897ca9469530ea2",
+      "git_blob_sha": "e2e0019228c01d208de148a69e2803e5b6af0d1b"
+    }
+  ]
+}
