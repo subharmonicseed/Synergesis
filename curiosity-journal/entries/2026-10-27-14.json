@@ -1,0 +1,29 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-27:14",
+  "observed_at": "2026-10-27T14:58:08+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "marine-mammal-tooth-radiocarbon-age-proxy-regional-confounding",
+  "question": "Les couches de croissance dentaire des odontocètes étudiés fournissent-elles systématiquement une chronologie annuelle concordante avec le radiocarbone, sans ambiguïté due aux apports nucléaires régionaux ?",
+  "reason": "Contrôle adversarial hors H001/H002 et hors métacognition, sélectionné dans un domaine sous-représenté (biogéochimie marine et estimation de l'âge des cétacés), sans tirage aléatoire. Audit préalable des dix entrées 2026-10-27-04..13 : 04 satellites/méthane (Nature; comparabilité capteurs), 05 consultants/IA (Nature Human Behaviour; transfert différé), 06 myxomycètes/ADN (Scientific Reports; variants ≠ espèces), 07 métamatériaux/non-réciprocité (Nature; énergie injectée), 08 coléoptères/enfouissement (npj Biodiversity; causalité profondeur), 09 fougères/phloème (Nature Plants; débit inféré et calcul), 10 MgO/choc orienté (Physical Review X; conditions limitées), 11 levures/évasion spatiale (Nature Ecology & Evolution; transposition clinique), 12 roseaux/résorption saline (eLife; dose unique), 13 hydrologie/pluie-débit (Geophysical Research Letters; faible généralisation et causalité non démontrée). Références primaires distinctes, mais répétition d'audits de proxys instrumentaux (04/06/09/13), concentration des sources sur nature.com et hypothèses toutes rétrospectives; le présent cas apporte une validation isotopique indépendante, une source éditoriale hors Nature et une contradiction concrète. Hypothèse formulée après lecture : aucun succès de prédiction de SYN. Scores heuristiques non calibrés.",
+  "hypothesis": "Pour les cinq odontocètes étudiés par Tierney et al. (2026), les profils de radiocarbone correspondent tous à une chronologie obtenue par comptage annuel des couches dentinaires et ne présentent aucune anomalie régionale notable.",
+  "need_id": null,
+  "research_mode": "adversarial",
+  "gap_kind": "contradiction",
+  "metrics": {
+    "uncertainty": 0.68,
+    "expected_impact": 0.7,
+    "staleness": 0.34,
+    "novelty_gap": 0.58,
+    "selection_score": 0.6
+  },
+  "evidence_refs": [
+    "https://www.frontiersin.org/journals/marine-science/articles/10.3389/fmars.2026.1934180/full",
+    "https://academic.oup.com/icesjms/article/82/12/fsaf202/8382240",
+    "https://doi.org/10.1098/rsbl.2024.0350"
+  ],
+  "outcome": "refuted",
+  "uncertainty_after": 0.39,
+  "learning": "Résultat primaire daté : Tierney et al., Frontiers in Marine Science, 1er octobre 2026, analysent les couches dentinaires de deux cachalots et trois orques échoués en Écosse (1994–2016), par 14C et isotopes stables 13C/15N. Les profils de deux cachalots et d'une orque suivent les courbes de référence du pic de radiocarbone des essais nucléaires, compatibles avec des couches annuelles en début et milieu de vie. Pour une autre orque (KW2), 52 couches visibles ne correspondent pas à la chronologie 14C; les auteurs envisagent un âge potentiellement supérieur à 65 ans, sans pouvoir en faire une estimation précise. Chez une troisième orque (KW3), F14C autour de 1,11–1,13 est compatible avec des apports régionaux de l'usine de retraitement de Sellafield via le réseau trophique, plutôt qu'avec la seule courbe mondiale des essais atmosphériques. Ces valeurs isotopiques et comptages sont mesurés; compression des couches tardives, âge >65 ans et origine exacte du signal régional sont des interprétations à incertitude non nulle. La généralisation 'couches toujours annuelles, aucune perturbation régionale' est réfutée pour cet échantillon. Contre-arguments : n=5, une seule dent par animal, positions dentaires pas toujours connues, possible mélange de couches lors du prélèvement, différences géographiques des courbes 14C, et la déviation de KW2 peut aussi refléter une exposition alimentaire distincte. Bowen et Kurle (ICES Journal of Marine Science, 17 décembre 2025) avaient déjà constaté sur environ 80 dents d'orques des divergences de lecture allant jusqu'à 38 ans, ce qui limite la nouveauté méthodologique générale. À l'inverse, Garde et al. (Biology Letters, 27 novembre 2024) avaient validé l'annualité de couches de défenses chez trois narvals : la méthode n'est donc pas globalement invalidée. Ce constat n'est ni une prédiction de SYN ni un gain cognitif. Prochaine lacune : comparer en aveugle sur un échantillon indépendant d'odontocètes d'âge connu les comptages seuls, les courbes 14C globales et un modèle régional avec pollution nucléaire et mesures isotopiques, en préenregistrant erreurs d'âge, intervalles de confiance et taux d'échec."
+}
