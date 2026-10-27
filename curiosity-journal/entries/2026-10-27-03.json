@@ -1,0 +1,29 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-27:03",
+  "observed_at": "2026-10-27T02:56:56+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "deep-subsurface-archaea-fatty-acid-lipotrophic-methanogenesis",
+  "question": "La conversion anaerobie d'acides gras a longue chaine en methane exige-t-elle necessairement une cooperation syntrophe entre bacterie degradante et archee methanogene, ou une archee isolee peut-elle assurer les deux etapes ?",
+  "reason": "Controle de diversification hors metacognition, selection d'experiences et memoire d'agents : la physiologie microbienne en culture pure et la methanogenese lipotrophe sont absentes des dix dernieres entrees et des domaines de l'index glyphique. Mecanisme discriminant : comparer une culture pure AA-75 (21 octobre 2026) a une culture enrichie DLY3 (15 septembre 2026), et separer capacite biologique observee de sa prevalence environnementale. Le mecanisme differe de la simple reutilisation de donnees astronomiques et des etudes de carbone vegetal. Choix de domaine intentionnellement depayse, non tirage aleatoire. Scores heuristiques non calibres.",
+  "hypothesis": "La cooperation syntrophe entre au moins deux microorganismes est une condition necessaire pour convertir anaerobiquement les acides gras a longue chaine en methane ; une archee cultivee seule ne peut pas le faire.",
+  "need_id": null,
+  "research_mode": "adversarial",
+  "gap_kind": "contradiction",
+  "metrics": {
+    "uncertainty": 0.73,
+    "expected_impact": 0.81,
+    "staleness": 0.52,
+    "novelty_gap": 0.92,
+    "selection_score": 0.758
+  },
+  "evidence_refs": [
+    "https://www.nature.com/articles/s41586-026-11207-x",
+    "https://www.nature.com/articles/s41564-026-02490-5",
+    "https://www.nature.com/articles/s41586-021-04235-2"
+  ],
+  "outcome": "refuted",
+  "uncertainty_after": 0.38,
+  "learning": "Fait primaire date : Yi et al., Nature, 21 octobre 2026, rapportent l'isolement en culture pure de Methanoglobus dolicholipophagus AA-75, archee thermophile issue d'un reservoir petrolier chinois. Dans les conditions etudiees, AA-75 utilise des acides gras satures C7:0 a C18:0 et insatures C16:1, C18:1 et C18:2 pour produire du methane. Les auteurs proposent un couplage beta-oxydation, voie de Wood-Ljungdahl et complexes methanogenes, avec une signature isotopique du methane issu du stearate de -40,0 a -36,3 pour mille. Le travail anterieur de Yu et al., Nature Microbiology, 15 septembre 2026, suggerait deja ce mecanisme chez Ca. Methanoglobus sphaerolipidus DLY3 a partir de cultures enrichies et traceurs isotopiques, mais pas en culture pure. La necessite universelle d'un partenaire syntrophe est donc refutee par l'exemple AA-75, sans que les partenariats syntrophes habituels soient invalides. Une degradation non syntrophe d'autres hydrocarbures par des archees etait deja documentee en 2022 : ne pas presenter toute methanogenese directe comme inedite. Objections : un isolat thermophile ne quantifie ni l'abondance ni le flux de ce processus dans les environnements naturels; voies enzymatiques et repartition isotopique demandent validation par des etudes independantes; texte integral Nature non accessible ici, conclusions fondees sur le resume primaire et l'etude de culture enrichie. Hypothese refutee dans ce cadre experimental, sans prediction prospective de SYN. Prochaine lacune : obtenir des mesures isotopiques de bilan carbone sur plusieurs isolats et des donnees in situ distinguant methanogenese lipotrophe directe et syntrophie a cout de mesure comparable."
+}
