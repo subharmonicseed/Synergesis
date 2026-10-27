@@ -1,0 +1,28 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-27:12",
+  "observed_at": "2026-10-27T12:55:00+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "plant-ecophysiology-salinity-nutrient-resorption-canalization",
+  "question": "Un stress salin physiologiquement sévère provoque-t-il une hausse générale du recyclage de l'azote, du phosphore et du potassium depuis les feuilles sénescentes, ou cette efficacité dépend-elle davantage de l'origine des populations végétales ?",
+  "reason": "Audit préalable des dix entrées réelles 2026-10-27-02..11, comparant mécanismes, sources et objections : 02 photocatalyse/stéréochimie-froid (Nature Synthesis; cryogénie); 03 archées/méthanogenèse autonome (Nature; prévalence); 04 satellites/erreurs de détection (Nature et Stanford; missions non comparables); 05 IA au travail/performance versus compétence (Nature Human Behaviour; suivi différé); 06 myxomycètes/ADN versus fructifications (Scientific Reports; variants non espèces); 07 métamatériaux/non-réciprocité-friction (Nature; apport d'énergie); 08 insectes/protection versus coût parental (npj Biodiversity et Insects; causalité partielle); 09 fougères/phloème et inférence de conductivité (Nature Plants; discordance de calcul); 10 MgO/orientation et cinétique de choc (Physical Review X et Science Advances; géométries limitées); 11 levures/ressources et évasion spatiale (Nature Ecology & Evolution; système non clinique). Aucune URL primaire identique, mais 9/10 entrées s'appuient sur nature.com, 04/05 recyclent le cadrage H002, 08/11 répètent un arbitrage coût-protection et les dix hypothèses sont rétrospectives. Contrôle anti-biais intentionnel, non tirage aléatoire : choisir une étude eLife récente de physiologie végétale, source et intervention distinctes, avec 110 génotypes appariés et un véritable témoin salinité. Une autre piste sur des complexes multi-Li dans Nature n'a pas été retenue pour éviter de renforcer la concentration éditoriale. Scores heuristiques non calibrés; la formulation de la question est postérieure aux résultats, aucune prédiction de SYN.",
+  "hypothesis": "Dans l'essai de Liu et al. (2026), une salinité de 10 ppt causant une forte baisse de biomasse entraîne une augmentation générale de l'efficacité de résorption foliaire de N, P et K dans les populations de Phragmites australis, indépendamment de leur origine phylogéographique.",
+  "need_id": null,
+  "research_mode": "emergent",
+  "gap_kind": "missing_domain",
+  "metrics": {
+    "uncertainty": 0.71,
+    "expected_impact": 0.68,
+    "staleness": 0.25,
+    "novelty_gap": 0.58,
+    "selection_score": 0.58
+  },
+  "evidence_refs": [
+    "https://elifesciences.org/articles/111792",
+    "https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/1365-2435.14152"
+  ],
+  "outcome": "refuted",
+  "uncertainty_after": 0.43,
+  "learning": "Fait primaire daté : Liu et al., eLife, version de référence du 26 octobre 2026 (prépublication antérieure), ont comparé en jardin commun 110 génotypes de Phragmites australis en conditions témoins et salines (10 ppt), pendant une saison. Le traitement a réduit la biomasse aérienne de plus de 60 %, multiplié par environ 3 à 5 le sodium foliaire et modifié 484 métabolites; le stress était donc physiologiquement effectif. Pourtant, les modèles mixtes ne détectent pas d'effet global significatif de la salinité sur les efficacités de résorption N, P, K, alors que l'origine phylogéographique est associée à ces trois traits (p<0,001). Une interaction salinité x écotype existe pour N (p=0,038) : la plasticité n'est pas nulle. La latitude explique individuellement une part modeste de la variance (R²=0,092 N, 0,057 P, 0,094 K), pas une prédiction déterministe. Hypothèse de hausse générale réfutée dans ce dispositif. Contre-épreuve primaire : Zhang et al., Functional Ecology, 26 juillet 2022, trouvent au contraire une contribution dominante de la plasticité chez Stipa breviflora (14 populations, deux jardins communs), sous d'autres gradients environnementaux; cela interdit toute généralisation de la canalisation à toutes les plantes et stress. L'étude 2026 observe la stabilité de la résorption sous ce traitement, mais n'identifie pas directement le mécanisme moléculaire ni ne démontre une cause génétique exclusive; écotype et lignée sont partiellement confondus. Objections : une seule espèce, une seule dose de sel, une saison, réponses possibles à long terme ou à dose plus élevée; données et scripts déposés par les auteurs sur Zenodo, non réanalysés ici. La prédiction locale a été reconstruite après lecture : ce n'est pas une anticipation ni un gain cognitif de SYN. Prochaine lacune : comparer prospectivement plusieurs doses de sel, durées et génotypes indépendants, en préenregistrant une interaction génotype x salinité et en mesurant les flux de remobilisation directement; pour SYN, évaluer la sélection de ces expériences contre un témoin sans héritage à budget égal."
+}
