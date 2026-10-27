@@ -1,0 +1,28 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-27:07",
+  "observed_at": "2026-10-27T05:56:54+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "active-metamaterials-nonreciprocal-wave-coarsening-frictional-arrest",
+  "question": "Dans un métamatériau mécatronique actif, des interactions non réciproques peuvent-elles transformer des vibrations locales en oscillation collective, et la friction peut-elle arrêter cette croissance de longueur d'onde malgré une alimentation continue ?",
+  "reason": "Contrôle de diversification et de mécanisme : les dix dernières entrées 2026-10-26-19 à 2026-10-27-06 couvrent climat, sommeil, mousse, astronomie, glaciologie, catalyse, archées, méthane satellitaire, performance humaine assistée par IA et écologie moléculaire. Aucun DOI primaire identique dans cette fenêtre, mais 22/04/05 réemploient le cadrage H002 de la capacité instrumentale, et 19/22/01/02/03/04/05/06 reconstruisent souvent l'hypothèse après le résultat. La dynamique de coarsening d'ondes dans des réseaux mécaniques actifs est absente des domaines recensés; son mécanisme d'interaction non réciproque et son intervention par friction diffèrent de l'excitation optique cohérente de phonons (entrée 2026-10-26-13) et des oscillations neuronales du sommeil (entrée 20). Pouvoir discriminant : comparaison du couplage non réciproque, de la friction et de la cohérence spatiale, avec alimentation et géométrie contrôlées. Choix dirigé vers un domaine sous-représenté, pas un tirage aléatoire. Scores heuristiques non calibrés.",
+  "hypothesis": "Dans les réseaux mécatroniques unidimensionnels et bidimensionnels de Veenstra et al., des interactions élastiques actives non réciproques entraînent une croissance progressive des longueurs d'onde et une oscillation collective, tandis que la friction peut interrompre le grossissement des ondes.",
+  "need_id": null,
+  "research_mode": "emergent",
+  "gap_kind": "missing_domain",
+  "metrics": {
+    "uncertainty": 0.76,
+    "expected_impact": 0.74,
+    "staleness": 0.45,
+    "novelty_gap": 0.92,
+    "selection_score": 0.722
+  },
+  "evidence_refs": [
+    "https://www.nature.com/articles/s41586-026-11163-6",
+    "https://zenodo.org/records/22541069"
+  ],
+  "outcome": "supported",
+  "uncertainty_after": 0.41,
+  "learning": "Fait primaire daté : Veenstra et al., Nature, publié le 14 octobre 2026 (numéro du 22 octobre), rapportent le 'wave coarsening' dans des métamatériaux mécatroniques actifs en une et deux dimensions. Les oscillations initiales de courte longueur d'onde croissent en période, longueur d'onde et amplitude jusqu'à un état collectif synchronisé qualifié de cristal temporel classique hors équilibre. Les expériences et modèles montrent qu'introduire de la friction, rompant la conservation de la quantité de mouvement, peut arrêter ce grossissement et produire des ondes localisées au bord. Les éléments de preuve sont le résumé primaire et les légendes des figures/vidéos de l'article; le dépôt Zenodo des auteurs, version du 6 septembre 2026, fournit données, simulations et environnement de réplication, mais ses archives volumineuses n'ont pas été téléchargées ni exécutées ici. Contre-arguments : l'oscillation est entretenue par capteurs et actionneurs alimentés; ce n'est ni une oscillation perpétuelle sans apport énergétique, ni une démonstration de cristal temporel quantique. Les réalisations sont des réseaux artificiels limités, et la robustesse universelle, le contrôle de formes en trois dimensions et l'utilité robotique restent non démontrés. Les interactions non réciproques, la dissipation et la géométrie sont liées au montage; une comparaison strictement appariée à puissance injectée égale reste une lacune utile. Hypothèse locale soutenue, mais reconstruite après lecture des résultats : aucune prédiction prospective ni gain cognitif de SYN démontré. Prochaine lacune : préenregistrer une prédiction sur un réseau inédit, avec témoin réciproque, friction variable, puissance injectée appariée, mesures de longueur de corrélation et stabilité hors échantillon, puis réplication indépendante."
+}
