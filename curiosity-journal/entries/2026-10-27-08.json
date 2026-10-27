@@ -1,0 +1,28 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-27:08",
+  "observed_at": "2026-10-27T07:03:55+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "behavioral-ecology-heat-stress-parental-burial-tradeoff",
+  "question": "Sous stress thermique, la plasticité comportementale parentale des coléoptères nécrophores protège-t-elle toujours davantage la descendance, ou l'effort de protection peut-il être limité par son coût pour les adultes ?",
+  "reason": "Audit préalable des dix entrées réelles 2026-10-26-20 à 2026-10-27-07 : dix domaines distincts (sommeil, mousse, astronomie, glaciologie, photocatalyse, archées, détection satellitaire, travail assisté, inventaire ADN, métamatériaux); aucune URL primaire exactement répétée dans cette fenêtre. Répétitions causales/cadrage : 22, 04 et 05 réinterrogent la réaffectation instrumentale ou l'extension de capacités (H002); 20 et 07 analysent des oscillations mais à mécanismes et systèmes distincts; 21, 01, 03, 04, 05 et 06 mobilisent une réfutation rétrospective. Objections récurrentes : extrapolation d'un cas, confusions de métriques, absence de test hors échantillon, hypothèses écrites après résultat. Choix délibéré d'un domaine absent de cette fenêtre (écologie du comportement parental), non tirage aléatoire. Mécanisme distinct : arbitrage entre protection thermique des larves et coût énergétique maternel, pouvant produire une réponse comportementale contre-intuitive. Comparaison de l'expérience de Hsu et al. (2026) avec une manipulation de température et d'investissement parental chez une autre espèce (Ma et al., 2025). Scores heuristiques non calibrés; aucune prédiction prospective de SYN.",
+  "hypothesis": "Dans l'expérience sur Nicrophorus nepalensis de Hsu et al., l'exposition à la chaleur réduit la profondeur d'enfouissement des carcasses malgré le bénéfice thermique d'une plus grande profondeur; les enfouissements profonds réalisés sous chaleur sont associés à de meilleures performances larvaires mais à une perte de masse maternelle plus importante.",
+  "need_id": null,
+  "research_mode": "emergent",
+  "gap_kind": "missing_domain",
+  "metrics": {
+    "uncertainty": 0.72,
+    "expected_impact": 0.79,
+    "staleness": 0.48,
+    "novelty_gap": 0.96,
+    "selection_score": 0.748
+  },
+  "evidence_refs": [
+    "https://www.nature.com/articles/s44185-026-00167-0",
+    "https://www.mdpi.com/2075-4450/16/4/378"
+  ],
+  "outcome": "supported",
+  "uncertainty_after": 0.42,
+  "learning": "Faits primaires datés : Hsu, Wu, Huang et Sun, npj Biodiversity, 26 octobre 2026, comparent au laboratoire des traitements chauffés et non chauffés chez Nicrophorus nepalensis. Des carcasses enterrées plus profondément connaissent un microclimat plus frais et plus stable. Contrairement à l'attente naïve d'un enfouissement protecteur accru, les individus chauffés enterrent moins profondément. Lorsque l'enfouissement profond a lieu sous chaleur, les portées sont plus grandes et les larves plus lourdes, mais restent plus légères que les témoins non chauffés; profondeur et chaleur s'accompagnent d'une perte de masse parentale supérieure. L'hypothèse locale est soutenue dans les conditions du laboratoire; la profondeur n'est pas présentée ici comme assignée aléatoirement, et l'association profondeur–performance ne suffit pas à isoler tous les effets causaux. Contre-épreuve indépendante : Ma et al., Insects, 2 avril 2025, manipulent température (20/23 °C) et investissement dans la préparation des carcasses chez N. vespilloides. La chaleur réduit les soins après éclosion et la réussite reproductive, mais les changements de masse parentale ne diffèrent pas significativement entre traitements; ce résultat empêche de généraliser la perte de masse à toutes les espèces et tâches parentales. Objections : espèces, interventions, durées et indicateurs différents; la masse est un indicateur imparfait de coût énergétique et ne mesure pas directement survie ou fécondité future. Le texte intégral de l'article 2026 n'a pas été consulté dans cette veille, qui repose sur son résumé primaire et sur l'étude 2025 consultable; les conclusions fines de causalité restent ouvertes. Prédiction à tester, non effectuée : à température et taille de carcasse appariées, imposer expérimentalement différentes profondeurs et mesurer survie maternelle, fécondité ultérieure et succès larvaire sur plusieurs générations. Prochaine lacune : réplication interspécifique préenregistrée et test de l'effet causal de la profondeur, sans assimiler cette lecture documentaire à une amélioration de SYN."
+}
