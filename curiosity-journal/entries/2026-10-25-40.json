@@ -1,0 +1,29 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-25:40",
+  "observed_at": "2026-10-25T13:56:44.103+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "syn-factorial-memory-skill-audit",
+  "question": "Notre ancien comparateur de quatre prompts peut-il distinguer un gain attribuable à la mémoire d'un gain attribuable à une compétence candidate séparément disponible ?",
+  "reason": "Audit empirique de la validité de construit dans l'architecture d'AGI : les deux bras historiques research et skills partageaient les mêmes exemples et la même procédure, ce qui ne permettait pas d'isoler les effets. Priorité heuristique, non calibrée.",
+  "hypothesis": "L'ancien comparateur confond les composantes; un plan factoriel séparant explicitement exposition aux exemples et à la carte de compétence permet d'estimer leurs contributions descriptives sans présumer d'un effet d'apprentissage.",
+  "need_id": null,
+  "research_mode": "adversarial",
+  "gap_kind": "contradiction",
+  "metrics": {
+    "uncertainty": 0.86,
+    "expected_impact": 0.98,
+    "staleness": 0.48,
+    "novelty_gap": 0.89,
+    "selection_score": 0.8379999999999999
+  },
+  "evidence_refs": [
+    "https://github.com/subharmonicseed/Synergesis/blob/feat/syn-curiosity-observatory-v0/curiosity-journal/tools/syn_four_arm_trial_v0.py",
+    "https://github.com/subharmonicseed/Synergesis/blob/feat/syn-curiosity-observatory-v0/curiosity-journal/tools/syn_factorial_ablation_v1.py",
+    "https://github.com/subharmonicseed/Synergesis/blob/feat/syn-curiosity-observatory-v0/curiosity-journal/protocols/2026-10-25-factorial-ablation-v1.md"
+  ],
+  "outcome": "supported",
+  "uncertainty_after": 0.59,
+  "learning": "Audit : le bras research historique comprenait les exemples et la même procédure humaine que le bras skills; le bras skills ajoutait essentiellement une consigne. Ce contraste ne mesure pas la création de compétences. Correctif v1 : quatre conditions M0S0/M1S0/M0S1/M1S1 (noms API legacy baseline/journal/research/skills), une carte de compétence gelée distincte, rotation équilibrée des positions par tâche, SHA-256 du fichier de cartes et scores descriptifs des effets de mémoire, compétence et interaction. Le scoreur est étendu pour accepter des skill_ids dans research (=S1/M0) sans les autoriser en baseline/journal. 9 tests ciblés sur données synthétiques ont été exécutés dans la session, 10e test d'intégration publié; CI à confirmer. Aucun LLM local ni processus SYN n'a été testé dans cette session; les cartes fournies en exemple sont humaines; aucun gain cognitif démontré."
+}

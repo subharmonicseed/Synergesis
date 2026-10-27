@@ -1,0 +1,25 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-25:46",
+  "observed_at": "2026-10-25T13:21:50.234+00:00",
+  "producer": "chatgpt",
+  "stage": "proposed",
+  "domain": "syn-active-curiosity-comparative-test",
+  "question": "Avec le même modèle et le même budget, une politique de curiosité guidée par surprises prédites-et-vérifiées, pénalisant les erreurs irréductibles, améliore-t-elle les futures prévisions ou la résolution de tâches davantage qu'une politique guidée par nouveauté éditoriale ?",
+  "reason": "Question créée à partir de l'échec conceptuel de la «surprise attribuée après coup» et des limites du Shannon surprisal. Proposer une ablation : nouveauté du titre, surprisal réalisé, progression prédictive vérifiable, avec vérificateur indépendant et tâches non vues. Ne pas évaluer avant exécution.",
+  "hypothesis": "La progression de compétence/qualité de prédiction testée sur données indépendantes guide mieux l'exploration à long terme que la poursuite de surprise forte seule; une surprise élevée peut aussi signaler bruit, erreur de modèle ou source douteuse.",
+  "need_id": null,
+  "research_mode": "emergent",
+  "gap_kind": "unverified",
+  "metrics": {
+    "uncertainty": 0.98,
+    "expected_impact": 0.99,
+    "staleness": 0.56,
+    "novelty_gap": 0.96,
+    "selection_score": 0.896
+  },
+  "evidence_refs": [],
+  "outcome": "not_tested",
+  "uncertainty_after": null,
+  "learning": null
+}

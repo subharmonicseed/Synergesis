@@ -1,0 +1,29 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-25:34",
+  "observed_at": "2026-10-25T13:16:42.688+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "agent-skills-negative-transfer",
+  "question": "Des compétences rédigées automatiquement par un agent améliorent-elles en moyenne ses résultats autant que des procédures vérifiées par des humains ?",
+  "reason": "La boucle SYN prévoit d'autoproduire des compétences; il faut tester la différence entre disposer de davantage d'instructions et disposer de connaissances procédurales fiables et utiles. Scores heuristiques non calibrés.",
+  "hypothesis": "Toute compétence auto-rédigée qui semble applicable améliore automatiquement la résolution de nouvelles tâches par l'agent.",
+  "need_id": null,
+  "research_mode": "adversarial",
+  "gap_kind": "unverified",
+  "metrics": {
+    "uncertainty": 0.87,
+    "expected_impact": 0.96,
+    "staleness": 0.72,
+    "novelty_gap": 0.87,
+    "selection_score": 0.876
+  },
+  "evidence_refs": [
+    "https://www.skillsbench.ai/skillsbench.pdf",
+    "https://cxcscmu.github.io/SkillLearnBench/",
+    "https://arxiv.org/abs/2608.03874"
+  ],
+  "outcome": "refuted",
+  "uncertainty_after": 0.62,
+  "learning": "SkillsBench, prépublication 13 février 2026, 7 configurations modèle-agent et 7308 trajectoires sur 84 tâches évaluées : compétences humaines sélectionnées +16,2 points de taux de réussite moyen, compétences auto-générées aucun gain moyen; 16/84 tâches présentent des effets négatifs, et les écarts varient selon domaines. SkillLearnBench (COLM 2026) démontre aussi l'hétérogénéité inter-domaines, les effets parfois bénéfiques d'un feedback externe et la dérive sous auto-feedback seul. L'auto-écriture ne suffit donc pas à prouver une utilité causale. Pour SYN : distinguer compétence candidate, qualité à l'entraînement, transfert indépendant et échec/régression, avec coût de calcul."
+}

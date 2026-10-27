@@ -1,0 +1,30 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-25:31",
+  "observed_at": "2026-10-25T13:07:06.901+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "cross-domain-skill-transfer",
+  "question": "Une mémoire toujours plus vaste et une boucle d'auto-critique suffisent-elles à faire émerger des compétences fiables, transférables entre domaines ?",
+  "reason": "Tester sévèrement l'intuition 'récursion + journal = croissance générale' en comparant feedback interne, feedback externe, stockage explicite et adaptation par contexte sur tâches nouvelles. Scores heuristiques non calibrés.",
+  "hypothesis": "L'accumulation de compétences décrites et l'auto-feedback suffisent à assurer un gain stable et transférable dans tous les domaines, sans vérification extérieure.",
+  "need_id": null,
+  "research_mode": "adversarial",
+  "gap_kind": "contradiction",
+  "metrics": {
+    "uncertainty": 0.92,
+    "expected_impact": 0.99,
+    "staleness": 0.62,
+    "novelty_gap": 0.95,
+    "selection_score": 0.894
+  },
+  "evidence_refs": [
+    "https://arxiv.org/abs/2604.20087",
+    "https://arxiv.org/abs/2608.03874",
+    "https://arxiv.org/abs/2605.10999",
+    "https://aclanthology.org/2026.findings-emnlp.1637/"
+  ],
+  "outcome": "refuted",
+  "uncertainty_after": 0.67,
+  "learning": "SkillLearnBench (COLM 2026, 20 tâches/15 sous-domaines) : toutes les méthodes testées battent la condition sans compétences, mais aucune n'est meilleure dans toutes les tâches; l'auto-feedback seul entraîne une dérive récursive, le retour externe améliore les compétences dans plusieurs cycles. ContinualSkillBench (août 2026, 5 domaines x 100 tâches) : progrès séquentiels variables, parfois autant avec simple contexte qu'avec compétences explicites; beaucoup de compétences restent fragmentaires. SkillGen prépublication (mai 2026) compare directement les mêmes instances avec et sans compétence et vérifie corrections et régressions; MSCE EMNLP 2026 rapporte des gains de transfert avec politiques procédurales liées à des preuves. Thèse universelle réfutée; résultats spécifiques et non démonstration d'AGI. Prochaine exigence : généralisation hors tâche, récupération utile et anti-régressions."
+}

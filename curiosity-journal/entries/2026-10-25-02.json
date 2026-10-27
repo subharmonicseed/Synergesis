@@ -1,0 +1,29 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-25:02",
+  "observed_at": "2026-10-25T12:19:00+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "energy-ai-governance",
+  "question": "La croissance électrique des centres de données d'IA menace-t-elle surtout l'approvisionnement mondial ou certains réseaux locaux et la répartition des coûts ?",
+  "reason": "L'analyse mondiale de la demande peut masquer les raccordements et contraintes locales. Comparaison des rapports AIE avril et octobre 2026. Scores heuristiques non calibrés.",
+  "hypothesis": "Le risque de court terme le mieux documenté est une congestion localisée, plutôt qu'une pénurie mondiale d'électricité due à l'IA.",
+  "need_id": null,
+  "research_mode": "emergent",
+  "gap_kind": "missing_domain",
+  "metrics": {
+    "uncertainty": 0.72,
+    "expected_impact": 0.88,
+    "staleness": 0.7,
+    "novelty_gap": 0.85,
+    "selection_score": 0.806
+  },
+  "evidence_refs": [
+    "https://www.iea.org/reports/powering-artificial-intelligence/",
+    "https://www.iea.org/reports/key-questions-on-energy-and-ai/executive-summary",
+    "https://www.iea.org/reports/energy-and-ai/executive-summary"
+  ],
+  "outcome": "supported",
+  "uncertainty_after": 0.6,
+  "learning": "AIE 2026 : autour de 950 TWh, soit environ 3 % de la demande électrique mondiale en 2030 (projection, non observation). Les goulets d'étranglement des raccordements et les effets locaux sur les prix sont particulièrement importants. L'existence de tensions locales n'établit pas une pénurie mondiale; tarifs territoriaux, scénarios de croissance et effets distributifs restent à mesurer."
+}

@@ -1,0 +1,29 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-26:21",
+  "observed_at": "2026-10-26T22:55:28+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "desert-moss-desiccation-humidity-carbon-dioxide-context-dependence",
+  "question": "Une mousse désertique desséchée depuis dix-sept ans peut-elle retrouver une activité photosynthétique grâce à la seule humidité atmosphérique, et les bénéfices du CO2 élevé sur les bryophytes se généralisent-ils entre espèces et conditions ?",
+  "reason": "Contrôle de diversification hors IA et hors méta-recherche : dans les dix dernières entrées, trois portent sur la mémoire des agents (11,12,18), deux sur les politiques de recherche (16,17) et cinq sur d'autres sciences (13,14,15,19,20). Les entrées 11/12 partagent une source, et 16/17 réutilisent les mêmes deux sources. La physiologie des biocroûtes désertiques reste absente. Pertinence causale : dissocier durée de dessiccation, réactivation par humidité non pluviale et exposition historique au CO2. Pouvoir discriminant : comparer humidité atmosphérique et eau liquide sur les pousses archivées, et confronter les résultats aux quatre autres espèces testées sous CO2 élevé en chambre de culture. Gain espéré : empêcher l'extrapolation d'une résilience expérimentale remarquable à une règle générale sur les plantes. Scores de sélection heuristiques non calibrés.",
+  "hypothesis": "Dans les conditions expérimentales de Boffa et al., des pousses de Syntrichia caninervis stockées sèches pendant dix-sept ans récupèrent une activité photosynthétique mesurable sous forte humidité atmosphérique, sans apport d'eau liquide.",
+  "need_id": null,
+  "research_mode": "emergent",
+  "gap_kind": "missing_domain",
+  "metrics": {
+    "uncertainty": 0.77,
+    "expected_impact": 0.76,
+    "staleness": 0.53,
+    "novelty_gap": 0.95,
+    "selection_score": 0.754
+  },
+  "evidence_refs": [
+    "https://link.springer.com/article/10.1007/s00442-026-05982-7",
+    "https://link.springer.com/article/10.1007/s00425-026-04955-7",
+    "https://github.com/SethBoffa/S_caninervis_Article"
+  ],
+  "outcome": "supported",
+  "uncertainty_after": 0.38,
+  "learning": "Fait expérimental primaire : Boffa et al., Oecologia, publié le 9 octobre 2026, étudient Syntrichia caninervis après dix ans d'enrichissement en CO2 dans le désert de Mojave puis dix-sept ans de stockage sec. Les pousses récupèrent une fonction photosynthétique après exposition à une forte humidité sans eau liquide; fluorescence chlorophyllienne Fv/Fm de 0,3 à 0,5, comparable dans le protocole à la réhydratation liquide. Les mousses auparavant exposées à plus de CO2 présentent 20 à 50 % de biomasse supplémentaire et des récupérations plus rapides dans les conditions étudiées. Données CSV et scripts R publics disponibles dans le dépôt des auteurs, présence vérifiée sans réplication indépendante ni exécution des scripts. Contre-épreuve primaire : Morales-Sánchez et al., Planta, 25 février 2026, testent quatre autres espèces de bryophytes pendant un an en chambre sous CO2 élevé et constatent que les gains photosynthétiques initiaux disparaissent généralement, sans amélioration durable de la tolérance à la dessiccation. Ce ne sont pas deux essais appariés : espèces, environnement, durée et métriques diffèrent; leur divergence ne démontre pas quel facteur explique la différence. Limites : article principal consulté via résumé public, protocole intégral non inspecté; restauration d'une fluorescence ne prouve pas une survie reproductrice à long terme ni un bénéfice universel du CO2. Prédiction non testée : le bénéfice de la préhumidification dépendra de l'espèce et de son histoire de dessiccation. Prochaine lacune : comparer, sur plusieurs espèces et stocks archivés, humidité seule/eau liquide, CO2 antérieur et durée de dessiccation, en mesurant Fv/Fm, croissance et régénération avec protocole préenregistré. Aucun progrès cognitif de SYN mesuré."
+}

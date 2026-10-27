@@ -1,0 +1,27 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-27:09",
+  "observed_at": "2026-10-27T07:54:53+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "paleobotany-fern-phloem-evolution-anatomical-proxy-arithmetic-audit",
+  "question": "Les fossiles de fougères étayent-ils une diminution évolutive du rayon des éléments criblés, et le facteur de 16 attribué à la baisse de conductivité découle-t-il des rayons moyens publiés ?",
+  "reason": "Audit explicite des dix dernières entrées réelles 2026-10-26-21/22 et 2026-10-27-01..08 : 21 mousse (réhydratation et CO2; généralisation interespèces), 22 astronomie (réanalyse d'images; confirmation MPC indirecte), 01 glaciologie (rétroactions géométriques; extrêmes rares), 02 photocatalyse (stéréochimie/température; contraintes cryogéniques), 03 archées (métabolisme sans syntrophie; prévalence naturelle inconnue), 04 méthane satellite (instrument réaffecté/faux positifs; missions différentes), 05 travail assisté par IA (capacité outillée/transfert; généralisation limitée), 06 myxomycètes (canaux d'observation; biais moléculaires), 07 métamatériaux (non-réciprocité/friction; alimentation externe), 08 insectes (coût parental/protection; profondeur non randomisée). Aucune URL primaire identique dans cette fenêtre, mais 22/04/05 recyclent le cadrage H002 de l'extension instrumentale et la plupart des hypothèses sont rétrospectives. Contrôle de diversification : paléobotanique et anatomie vasculaire fossile absentes de la fenêtre et de l'index historique. Pouvoir discriminant : fossiles versus espèces vivantes et contrôle phylogénétique, puis vérification indépendante du calcul du ratio avant de transformer une anatomie en vitesse réelle. Scores heuristiques non calibrés.",
+  "hypothesis": "Dans les échantillons de Fu et al. (2026), les éléments criblés fossiles ont des rayons supérieurs à ceux des fougères vivantes, mais la baisse réelle du débit de sève n'est pas mesurée; le facteur 16 de conductivité annoncé dans le texte ne se déduit pas directement des deux moyennes de rayon 12,3 et 4,2 micromètres selon k proportionnel à r au carré.",
+  "need_id": null,
+  "research_mode": "adversarial",
+  "gap_kind": "contradiction",
+  "metrics": {
+    "uncertainty": 0.8,
+    "expected_impact": 0.79,
+    "staleness": 0.48,
+    "novelty_gap": 0.95,
+    "selection_score": 0.762
+  },
+  "evidence_refs": [
+    "https://www.nature.com/articles/s41477-026-02440-3"
+  ],
+  "outcome": "supported",
+  "uncertainty_after": 0.48,
+  "learning": "Fait primaire daté : Fu, Cruz, Jensen et Hetherington, Nature Plants, 26 octobre 2026, mesurent le rayon des éléments criblés dans 26 espèces de fougères vivantes (plus de 18 000 mesures) et 8 espèces fossiles (1 332 mesures), avec reconstructions phylogénétiques et comparaisons entre lignées. Les fossiles montrent généralement des rayons plus élevés; l'article donne 12,3 ± 7,7 µm pour les fossiles et 4,2 ± 2,6 µm pour les vivantes. Le rayon et l'aire conductrice diminuent dans les comparaisons étudiées. Objection numérique précise : le texte qualifie ces moyennes de baisse 'fourfold' et en infère '16-fold' de conductivité via k ∝ r², alors que le calcul direct 12,3/4,2 ≈ 2,93 et (12,3/4,2)² ≈ 8,58, non 4 et 16. Cette discordance apparente dans la prose ne prouve pas une erreur du calcul complet : pondération des espèces, distribution des rayons, autres conventions ou tableaux supplémentaires non réanalysés pourraient expliquer un facteur distinct. Les auteurs reconnaissent qu'aucune mesure comparative directe du débit de phloème chez les fougères n'est disponible; la baisse de débit reste une inférence conditionnelle, pas un résultat observé. L'hypothèse anatomique est soutenue, le facteur quantitatif exact reste à auditer. Ce n'est pas une prédiction prospective ni une amélioration cognitive mesurée de SYN. Prochaine lacune : inspecter et recalculer le tableau supplémentaire 11 et les données ouvertes (Edinburgh DataShare DOI 10.7488/ds/8198), distinguer moyenne des rapports, rapport des moyennes et modèles hydrauliques; mesurer expérimentalement le flux dans des lignées vivantes comparables."
+}

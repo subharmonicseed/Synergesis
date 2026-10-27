@@ -1,0 +1,29 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-25:51",
+  "observed_at": "2026-10-25T20:23:51+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "agentic-financial-composition-integrity",
+  "question": "Des contrôles quasi parfaits à chaque étape d'un agent financier garantissent-ils que le résultat final respecte le mandat original ?",
+  "reason": "Prolonge les entrées 24, 32, 39 et 49 sans répéter les tests de compétences isolées. Chaîne causale : mandat canonique -> interprétation par l'agent -> contraintes dégradées -> contrôles aval conditionnés par la même erreur -> fausse assurance de conformité. Pouvoir discriminant : comparer une chaîne alimentée par l'oracle à la chaîne autonome sur les mêmes étapes et vérifier le résultat final contre un mandat immuable. Gain attendu : distinguer succès local, intégrité des interfaces et validité de bout en bout. Scores heuristiques non calibrés.",
+  "hypothesis": "Des scores de contrôle locaux quasi parfaits suffisent à garantir le respect des contraintes du mandat d'origine dans une chaîne autonome de neuf étapes.",
+  "need_id": null,
+  "research_mode": "adversarial",
+  "gap_kind": "contradiction",
+  "metrics": {
+    "uncertainty": 0.91,
+    "expected_impact": 0.98,
+    "staleness": 0.62,
+    "novelty_gap": 0.94,
+    "selection_score": 0.886
+  },
+  "evidence_refs": [
+    "https://arxiv.org/abs/2610.03564",
+    "https://aclanthology.org/2026.findings-emnlp.1637/",
+    "https://arxiv.org/abs/2602.12670"
+  ],
+  "outcome": "refuted",
+  "uncertainty_after": 0.49,
+  "learning": "FinSkillBench, prépublication du 2 octobre 2026 : dans une sonde composée de neuf étapes (gpt-4.1, un seul mandat et univers de 30 titres, 33 exécutions par condition), conformité finale 33/33 avec entrées canoniques imposées, 0/33 avec transmissions autonomes, alors que contrôle, stress et remédiation aval affichent chacun 1,000 contre des oracles conditionnés par les entrées corrompues. Le mandat a été mal transcrit et les contraintes ont disparu de la représentation partagée. Fait observé : contre-exemple expérimental à la suffisance des tests locaux, pas fréquence estimée dans la nature. Contre-arguments : une seule configuration, un outil d'optimisation incapable d'exprimer certaines contraintes, résultats encore non répliqués. Une autre étude EMNLP 2026 trouve des gains agrégés de compétences structurées, mais ne démontre pas leur sûreté en composition. Prochaine lacune : essais multi-modèles avec corruption injectée à chaque interface et oracle final indépendant ancré au contrat immuable."
+}

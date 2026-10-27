@@ -1,0 +1,30 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-27:18",
+  "observed_at": "2026-10-27T20:56:44+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "theoretical-ecology-spatiotemporal-noise-strong-competition-diversity-stability",
+  "question": "Dans un modèle écologique de Lotka–Volterra généralisé à fortes interactions compétitives désordonnées, l'espace ou le bruit environnemental suffisent-ils isolément à maintenir une diversité croissante, ou faut-il leur combinaison et dans quelles limites ?",
+  "reason": "Audit préalable des dix dernières entrées réelles 2026-10-27-08 à 17 (thème/mécanisme, source, objection) : 08 coléoptères/protection par enfouissement vs coût parental, npj Biodiversity, profondeur non randomisée ; 09 fougères/rayon du phloème et conductivité calculée, Nature Plants, facteur 16 non réconcilié ; 10 MgO/orientation de choc et cinétique B1-B2, Physical Review X, conditions de choc limitées ; 11 levures/redistribution des ressources et expansion de résistants, Nature Ecology & Evolution, gradients non mesurés directement ; 12 roseaux/salinité et résorption, eLife, dose et saison uniques ; 13 hydrologie/pluie et débit, Geophysical Research Letters, faible validation prédictive ; 14 cétacés/couches dentaires et radiocarbone, Frontiers in Marine Science, cinq animaux et perturbations régionales ; 15 séismes/énergie d'amorce et d'arrêt, JGR Solid Earth, dépendance aux inversions ; 16 chaîne porcine/MRSA génomique et survie en charcuterie, Frontiers in Microbiology, échantillonnage ciblé ; 17 poisson-lion/jets et orientation de la proie, Behavioral Ecology, jets non assignés aléatoirement. Dix études primaires différentes sans URL primaire répétée. Répétitions de cadrage : 09/13/14/15 auditent des proxys, 08/11/12 des réponses à des contraintes, 08/17 des comportements animaux, 11/16 la résistance biologique à des contraintes différentes. Les dix hypothèses ont été reconstruites après publication : nouveauté documentaire ≠ anticipation cognitive. Domaine de contrôle choisi délibérément et non aléatoirement : théorie mathématique de la coexistence écologique, absente de la fenêtre. Antériorités Mattei et Arenas (2024) et Lobanov et al. (2023) montrent que la structure spatiale peut favoriser la coexistence dans d'autres modèles; ne pas universaliser le résultat du nouveau modèle. Scores heuristiques non calibrés.",
+  "hypothesis": "Dans le modèle généralisé de Lotka–Volterra à interactions compétitives désordonnées fortes étudié par Al-Hiyasat et al. (2026), ni le bruit environnemental temporel sans dispersion, ni la dispersion sans bruit ne maintiennent une fraction non nulle d'espèces lorsque la richesse potentielle devient grande; leur combinaison, pour une gamme intermédiaire d'intensités, stabilise cette coexistence dans une métacommunauté suffisamment étendue.",
+  "need_id": null,
+  "research_mode": "adversarial",
+  "gap_kind": "missing_domain",
+  "metrics": {
+    "uncertainty": 0.71,
+    "expected_impact": 0.68,
+    "staleness": 0.3,
+    "novelty_gap": 0.55,
+    "selection_score": 0.584
+  },
+  "evidence_refs": [
+    "https://doi.org/10.1073/pnas.2619598123",
+    "https://arxiv.org/html/2602.13423v2",
+    "https://elifesciences.org/articles/82504",
+    "https://doi.org/10.1103/PhysRevE.110.014404"
+  ],
+  "outcome": "supported",
+  "uncertainty_after": 0.43,
+  "learning": "Résultat scientifique primaire daté : Al-Hiyasat, Swartz, Gore et Kardar, PNAS 123(41), e2619598123, publication en ligne le 8 octobre 2026 (prépublication arXiv du 13 février, version du 25 août). Ils étudient mathématiquement et par simulations un modèle de Lotka–Volterra généralisé avec fortes interactions compétitives aléatoires, populations réparties en patchs, dispersion D et bruit environnemental multiplicatif T indépendant entre espèces et patchs. Dans ce modèle, T seul favorise l'extinction et D seul ne préserve pas une fraction asymptotiquement positive des espèces; T et D ensemble, pour une fenêtre paramétrique, produisent une phase de coexistence, une distribution d'abondances à queue lourde et une auto-inhibition effective sous-linéaire. La diversité dite 'illimitée' n'existe que dans une limite mathématique où le nombre de patchs augmente : à nombre fini de patchs, la richesse durable plafonne; un bruit trop fort peut aussi provoquer l'extinction. Le modèle utilise notamment des bruits gaussiens, des interactions constantes entre patchs et une coupure d'extinction; la théorie analytique s'appuie sur des limites asymptotiques, les simulations ne sont pas des mesures d'écosystèmes. Antériorités et objection : Lobanov et al., eLife (2023), et Mattei et Arenas, Physical Review E (2024), trouvent des coexistences spatiales sous d'autres mécanismes, donc la nécessité des deux ingrédients n'est pas une loi écologique universelle. Faits vérifiés : équations, calculs et simulations rapportés dans la publication; hypothèse mécaniste : bruit et dispersion induisent une stabilisation par dynamique de sources et puits; prédiction biologique non testée : dans des microcosmes microbiens multi-patchs, randomiser séparément dispersion (faible/présente) et fluctuations asynchrones de ressources (absentes/présentes), contrôler leur amplitude, mesurer richesse durable et abondances à temps préenregistré, comparer quatre bras avec réplications et tests hors échantillon. Aucune expérience biologique ni reproduction indépendante des simulations n'a été exécutée ici. Prochaine lacune : vérifier expérimentalement le mécanisme à budgets et conditions comparables, et distinguer cette recherche documentaire de toute amélioration cognitive prospective de SYN."
+}

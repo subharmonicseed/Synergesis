@@ -1,0 +1,29 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-27:17",
+  "observed_at": "2026-10-27T20:04:32+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "marine-behavioral-ecology-lionfish-jet-rheotaxis-headfirst-capture-vs-strike-success",
+  "question": "Chez Pterois miles, les jets d'eau dirigés vers des poissons-proies sont-ils sans effet sur leur réorientation et la proportion de captures tête la première, et l'association avec une meilleure orientation implique-t-elle une meilleure réussite de l'attaque ?",
+  "reason": "Audit préalable des dix dernières entrées réellement présentes (2026-10-27-07 à 16), thème / mécanisme / source / objection : 07 métamatériaux, non-réciprocité et friction (Nature ; énergie externe) ; 08 coléoptères, protection thermique et coût parental (npj Biodiversity ; profondeur non randomisée) ; 09 fougères, rayon du phloème et conductivité inférée (Nature Plants ; calcul 16 fois non réconcilié) ; 10 MgO, orientation du choc et cinétique B1-B2 (Physical Review X ; conditions de laboratoire) ; 11 levures, ressources et expansion de résistants (Nature Ecology & Evolution ; gradients non mesurés directement, transposition clinique interdite) ; 12 roseaux, salinité et résorption (eLife ; dose unique) ; 13 hydrologie, pluie-débit et modèle statistique (Geophysical Research Letters ; généralisation hors échantillon faible) ; 14 cétacés, couches dentaires et radiocarbone (Frontiers in Marine Science ; cinq animaux et contamination régionale) ; 15 séismes, énergie d'amorce/arrêt (JGR Solid Earth ; inversion des fonctions sources) ; 16 chaîne porcine, culture et génomique MRSA (Frontiers in Microbiology ; échantillonnage ciblé). Dix domaines et 26 URL distinctes, mais 09/13/14/15 recyclent l'audit de proxys, 08/11/12 les réponses biologiques aux contraintes, et les dix hypothèses sont rétrospectives. Moyenne novelty_gap 0,699, score 0,6376, non calibrés. Contrôle de domaine sous-représenté choisi de façon dirigée, non aléatoire : manipulation comportementale de proies mobiles par jets d'eau chez des poissons prédateurs. Albins et Lyons (2012) avaient déjà décrit les jets chez P. volitans et proposé une réorientation, donc la nouveauté n'est PAS l'existence du comportement : Bottacini et al. (2026) apportent deux comparaisons quantitatives sur P. miles et dissocient orientation, capture tête la première et réussite de l'attaque. Hypothèse reconstruite après lecture, aucune prédiction prospective de SYN. Notes heuristiques non calibrées.",
+  "hypothesis": "Dans les deux séries de Bottacini et al. (2026), la présence d'un jet d'eau pendant l'approche n'est associée ni à une réorientation de la proie vers le prédateur ni à une fréquence accrue de capture tête la première.",
+  "need_id": null,
+  "research_mode": "adversarial",
+  "gap_kind": "contradiction",
+  "metrics": {
+    "uncertainty": 0.58,
+    "expected_impact": 0.62,
+    "staleness": 0.3,
+    "novelty_gap": 0.48,
+    "selection_score": 0.52
+  },
+  "evidence_refs": [
+    "https://academic.oup.com/beheco/article/37/5/arag087/8741288",
+    "https://www.int-res.com/articles/feature/m448p001.pdf",
+    "https://datadryad.org/dataset/doi%3A10.5061/dryad.ncjsxktbd"
+  ],
+  "outcome": "refuted",
+  "uncertainty_after": 0.34,
+  "learning": "Source primaire datée : Bottacini et al., Behavioral Ecology 37(5), arag087, publié le 24 juillet 2026, corrigé/mis en forme le 4 août. Deux expériences contrôlées mais observationnelles sur le choix spontané de souffler, avec des groupes distincts de Pterois miles et des proies bar/seabass et dorade/seabream. Sur 167 vidéos de bar et 215 de dorade retenues, les approches avec jets sont associées à une capture tête la première 11,9 fois (IC95 % 4,5–31,2) et 7,8 fois (4,14–14,7) plus probable respectivement, selon les modèles mixtes publiés ; les proies s'orientent davantage vers le prédateur. L'hypothèse locale d'absence d'association est réfutée. Point discriminant : aucune différence significative de réussite de l'attaque dans l'expérience sur le bar (p=0,82) ; chez la dorade, 100 % des attaques sont réussies dans les deux conditions, donc cette mesure est non informative. L'effet de la présence du jet sur la distance d'attaque n'apparaît que chez la dorade (environ +3,1 cm, IC95 % 2,20–4,04 cm), pas chez le bar. La taille du prédateur prédit fortement la propension à souffler, l'orientation initiale de la proie ne la prédit pas. L'article compare les essais avec et sans jets, mais n'assigne PAS aléatoirement les poissons à une intervention jet : une causalité isolée n'est pas démontrée, et les facteurs individuels/espèces peuvent confondre l'effet. La réorientation peut refléter une rhéotaxie positive ; une surcharge de la ligne latérale reste une explication alternative non exclue. Antériorité primaire : Albins et Lyons, Marine Ecology Progress Series, 23 février 2012, avaient déjà observé les jets chez P. volitans et suggéré leur effet sur l'orientation (petit échantillon aquarium). Les données de Bottacini et al. sont déposées sur Dryad, publiées le 14 juillet et mises à jour le 21 juillet 2026, mais les analyses n'ont pas été réexécutées ici. Faits : vidéos, fréquences de captures, orientation et statistiques des auteurs. Hypothèse causale : jets induisant une rhéotaxie et facilitant l'ingestion, non démontrée isolément. Prédiction prospective NON testée : sur des proies et prédateurs appariés, appliquer aléatoirement un jet artificiel d'intensité équivalente ou un témoin, avec manipulation de la sensibilité de la ligne latérale, mesurer orientation, capture tête la première, temps d'ingestion, taux de fuite et puissance statistique préenregistrée. Prochaine lacune : réplication interventionnelle indépendante, puis mesurer séparément si l'héritage des objections de SYN améliore le choix de cette expérience à budget égal. Une découverte documentaire n'est pas une amélioration cognitive mesurée."
+}

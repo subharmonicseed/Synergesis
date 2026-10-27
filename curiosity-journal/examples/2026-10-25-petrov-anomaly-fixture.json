@@ -1,0 +1,44 @@
+[
+  {
+    "schema": "syn-science-anomaly-v0",
+    "id": "neutrino-collapse-2026",
+    "headline": "Neutrino flavors might change which collapsing stars explode",
+    "domain": "stellar-evolution",
+    "lead_url": "https://www.youtube.com/watch?v=4Op_5mnXTWI",
+    "primary_url": "https://arxiv.org/abs/2605.16504",
+    "primary_status": "primary_checked",
+    "publication_date": "2026-08-18",
+    "evidence_kind": "simulation",
+    "finding": "Published modeling with 195 stellar progenitors suggests that neutrino-flavor conversion changes supernova explodability and predicted remnant demographics; this is a model result, not direct proof from observed supernovae.",
+    "baseline_expectation": "Stellar-collapse population predictions that neglect flavor-conversion effects may incorrectly estimate black-hole and neutron-star fractions.",
+    "competing_explanation": "Assumed schematic neutrino flavor conversions or other explosion-model uncertainties, not the specific physical mechanism, may dominate the simulated effect.",
+    "falsifier": "Independent simulations with alternative neutrino-transport prescriptions plus future remnant-population observations could test robustness of predicted distributions.",
+    "cross_domain_question": "How do hidden state transformations in a system change the distribution of macro-level outcomes despite apparently similar initial conditions?",
+    "heuristics": {
+      "surprise": 0.85,
+      "testability": 0.75,
+      "cross_domain_relevance": 0.75
+    }
+  },
+  {
+    "schema": "syn-science-anomaly-v0",
+    "id": "plasticoral-okinawa-2026",
+    "headline": "Plastic polymers found fused into coral skeleton rubble",
+    "domain": "marine-materials",
+    "lead_url": "https://www.spacetv.net/anton-petrov/",
+    "primary_url": "https://doi.org/10.1016/j.marpolbul.2026.120310",
+    "primary_status": "primary_checked",
+    "publication_date": "2026-09-04",
+    "evidence_kind": "observation",
+    "finding": "Field-collected fragments of dead coral rubble from Okinawa were identified with microscopy and spectroscopy as containing fused household plastic polymers; toxicity and specific formation pathways remain unverified.",
+    "baseline_expectation": "Some environmental surveys categorize plastic waste and biogenic carbonate rubble separately, undercounting physically integrated hybrid debris.",
+    "competing_explanation": "Plastic fusion could be a local beach-fire phenomenon, not an ecosystem-wide transformation of live coral mineral growth.",
+    "falsifier": "Replicate surveys in multiple locations; test formation mechanisms under controlled conditions; distinguish dead-rubble composites from live reef skeletons.",
+    "cross_domain_question": "Can hybrid material created by pollution become a measurable indicator of industrial impact without implying a new mineral species or direct biological toxicity?",
+    "heuristics": {
+      "surprise": 0.7,
+      "testability": 0.9,
+      "cross_domain_relevance": 0.87
+    }
+  }
+]

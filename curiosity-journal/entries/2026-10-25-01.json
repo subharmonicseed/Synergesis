@@ -1,0 +1,29 @@
+{
+  "schema": "syn-curiosity-v1",
+  "observed_at": "2026-10-25T12:19:02.331+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "need_id": null,
+  "entry_id": "chatgpt:2026-10-25:01",
+  "domain": "systemic-financial-risk",
+  "question": "Le financement de l'IA, les valorisations boursières et les marchés de dette souveraine forment-ils déjà une boucle de contagion financière susceptible de provoquer une crise mondiale imminente ?",
+  "reason": "Une analyse holistique peut confondre existence de canaux de transmission et preuve d'une crise imminente. Lacune : absence de données consolidées sur levier, maturités, contreparties et scénarios conjoints. Scores d'attention heuristiques, non calibrés.",
+  "hypothesis": "Une correction des actifs IA peut être amplifiée par l'effet de levier et les tensions obligataires, mais les données disponibles ne démontrent pas une crise mondiale imminente.",
+  "research_mode": "adversarial",
+  "gap_kind": "unverified",
+  "metrics": {
+    "uncertainty": 0.83,
+    "expected_impact": 0.95,
+    "staleness": 0.78,
+    "novelty_gap": 0.72,
+    "selection_score": 0.846
+  },
+  "evidence_refs": [
+    "https://www.imf.org/en/Publications/GFSR/Issues/2026/10/13/global-financial-stability-report-october-2026",
+    "https://www.imf.org/en/news/articles/2026/10/13/tr-101326-press-briefing-transcript-global-financial-stability-report-annual-meetings-2026",
+    "https://www.elibrary.imf.org/display/book/9798229055673/front-1.xml"
+  ],
+  "outcome": "inconclusive",
+  "uncertainty_after": 0.81,
+  "learning": "Le FMI (13 octobre 2026) confirme trois déclencheurs plausibles : correction des actifs IA, choc de rendements souverains et cyberincident, avec amplification possible par levier et concentration. Il constate aussi la résilience actuelle des marchés. Aucun de ces constats n'établit la probabilité ou la date d'une cascade globale. À rechercher : exposition croisée des non-banques, stress tests conjoints et signaux de liquidité."
+}

@@ -1,0 +1,28 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-26:11",
+  "observed_at": "2026-10-26T12:21:56+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "agent-memory-provenance-weighting-utility-tradeoff",
+  "question": "Pénaliser par un simple coefficient les souvenirs issus de sources non fiables protège-t-il des fausses assertions sans faire disparaître des preuves externes pourtant indispensables ?",
+  "reason": "Prolonge les entrées 2026-10-26-02 (collisions de rappel), -04 (relations conflictuelles) et -05 (rejet à l'écriture) par un mécanisme distinct : la perte d'utilité au classement de lecture lorsque la provenance est confondue avec la véracité. Pertinence causale : les connaissances scientifiques nouvelles arrivent souvent de canaux externes non privilégiés; les exclure protège mais empêche l'apprentissage. Pouvoir discriminant : corpus appariés avec et sans fausses assertions, contenu externe majoritairement bénin, puis preuve décisive uniquement externe; gain attendu : distinguer robustesse, rappel de preuves et utilité nette. Scores heuristiques non calibrés.",
+  "hypothesis": "Une pénalité additive de confiance sur les souvenirs non fiables peut être réglée de façon à éliminer les fausses assertions tout en préservant les preuves externes décisives, dans le régime de similarité évalué.",
+  "need_id": null,
+  "research_mode": "adversarial",
+  "gap_kind": "contradiction",
+  "metrics": {
+    "uncertainty": 0.87,
+    "expected_impact": 0.96,
+    "staleness": 0.42,
+    "novelty_gap": 0.93,
+    "selection_score": 0.828
+  },
+  "evidence_refs": [
+    "https://arxiv.org/abs/2608.21230",
+    "https://arxiv.org/abs/2606.12703"
+  ],
+  "outcome": "refuted",
+  "uncertainty_after": 0.47,
+  "learning": "Faits observés : Karunanidhi (prépublication du 21 août 2026) injecte des assertions factuellement fausses dans 1,2 % d'un corpus LongMemEval; l'exactitude chute de 0,850 à 0,300. Un filtrage de contenu performant contre les instructions malveillantes ne rejette aucune des 360 mémoires empoisonnées. Le poids de provenance initial n'a pas d'effet détectable (p=0,80); un poids renforcé aide dans un corpus mixte (exactitude 0,3167 à 0,7000), mais lorsque la preuve nécessaire n'existe que dans le canal non fiable, son rappel devient nul et l'exactitude tombe à 0,0417. Hypothèse réfutée pour le score additif et les corpus testés, pas pour toute politique de provenance. Contre-arguments : l'attaquant n'est pas adaptatif, les labels de canal sont supposés corrects, et la contrainte alternative de quotas de récupération est proposée sans avoir été testée; SMSR (10 juin 2026) rapporte une défense fondée sur signature et échantillonnage sous un autre modèle de menace. Prédiction à tester : une récupération sous quotas et vérification indépendante préservera davantage de preuves externes que le classement par pénalité seule. Prochaine lacune : mesurer utilité propre, robustesse sous poison et conservation des sources nouvelles dans un essai prospectif apparié."
+}

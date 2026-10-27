@@ -1,0 +1,28 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-27:04",
+  "observed_at": "2026-10-27T03:54:30+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "satellite-methane-blind-validation-repurposing-false-positives",
+  "question": "Une analyse de données satellitaires réorientée vers le méthane atteint-elle nécessairement une fiabilité comparable à celle d'instruments dédiés lorsque les rejets négatifs, faux positifs et conditions atmosphériques sont évalués à l'aveugle ?",
+  "reason": "Contre-épreuve empirique non redondante de l'entrée 2026-10-26-22 sur la réutilisation fructueuse d'un instrument : un succès de découverte isolé ne renseigne pas sur les faux positifs ni l'utilité moyenne. Dans les dix dernières entrées, les domaines se diversifient mais la plupart des hypothèses sont reconstruites après lecture des résultats; cette étude apporte un véritable protocole expérimental indépendant à contrôles négatifs, sans constituer une prédiction de SYN. Mécanisme causal à examiner : adéquation instrument-tâche, algorithme de détection, nébulosité et visibilité de la source. Pouvoir discriminant : émissions mesurées, contrôles blancs et analystes aveugles, comparaison instruments dédiés/réaffectés/scanners généralistes. Scores de priorité heuristiques non calibrés.",
+  "hypothesis": "Dans l'essai en aveugle de Reuland et al. (2026), les instruments spatiaux réaffectés à la détection de méthane atteignent une fiabilité de détection comparable aux capteurs conçus spécialement pour cette tâche, sans augmentation problématique des faux positifs.",
+  "need_id": null,
+  "research_mode": "adversarial",
+  "gap_kind": "contradiction",
+  "metrics": {
+    "uncertainty": 0.76,
+    "expected_impact": 0.91,
+    "staleness": 0.58,
+    "novelty_gap": 0.88,
+    "selection_score": 0.808
+  },
+  "evidence_refs": [
+    "https://www.nature.com/articles/s41586-026-11115-0",
+    "https://eao.stanford.edu/publications/detection-technology-benchmarking/evaluating-space-based-methane-detection-through-one"
+  ],
+  "outcome": "refuted",
+  "uncertainty_after": 0.42,
+  "learning": "Fait primaire daté : Reuland et al., Nature, 14 octobre 2026, ont organisé un essai en simple aveugle d'un an avec 746 événements dont 481 rejets de méthane étalonnés (9,5 à 1 183,7 kg/h) et 265 contrôles sans rejet, en synchronisation avec les survols de 12 satellites; 15 équipes de neuf pays ont fourni plus de 2 250 estimations. Les instruments spécialisés obtiennent 92 à 100 % de vrais positifs et 0 à 11 % de faux positifs dans les conditions testées; les instruments réaffectés atteignent 62 à 88 % de détection, et les scanners généralistes sont moins sensibles aux débits testés. Les méthodes fondées sur l'IA représentent 79 % des faux positifs recensés : ce chiffre n'est PAS un taux de faux positifs de 79 %. Une couverture nuageuse mesurée au sol supérieure à 20 % dégrade les résultats. La généralisation d'une équivalence de performance est réfutée dans cet essai, mais certains instruments réaffectés restent utiles. Objections : l'emplacement approximatif de la source était connu, les débits et conditions d'Arizona ne représentent pas tous les émetteurs mondiaux, les performances varient entre équipes et capteurs, et les scanners généralistes offrent couverture mondiale et archives que les capteurs ciblés n'ont pas nécessairement. L'étude n'évalue ni SYN ni H002; la formulation de l'hypothèse ici est rétrospective, donc ne constitue pas une prédiction prospective réussie. Prédiction à tester : sur un jeu d'images inédit et une vérité terrain masquée, un pipeline réaffecté augmentera parfois le rappel, mais son utilité nette dépendra des faux positifs, du coût et de la couverture; comparer à budget égal avec capteurs ou pipelines spécialisés. Lacune suivante : préenregistrer pour SYN un problème hors domaine, des témoins aléatoires et spécialisés, une métrique de valeur nette et des résultats cachés avant toute recherche de succès."
+}

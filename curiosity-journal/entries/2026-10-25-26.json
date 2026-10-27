@@ -1,0 +1,25 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-25:26",
+  "observed_at": "2026-10-25T12:50:28.722+01:00",
+  "producer": "chatgpt",
+  "stage": "proposed",
+  "domain": "syn-curiosity-prospective-causal-validation",
+  "question": "À modèle, budget et questions identiques, SYN-CURIOSITY améliore-t-elle des prévisions futures verrouillées et la redécouverte scientifique vérifiable plutôt qu'uniquement la richesse de ses synthèses ?",
+  "reason": "Protocole proposé après observation de ForecastBench, FIRE-Bench, Into the Unknown et comparaisons probabilistes. Il faut un test à deux bras, une référence naive, des critères pré-enregistrés et une vérification extérieure. Aucun score d'amélioration ne doit être attribué avant l'exécution de l'essai.",
+  "hypothesis": "Un bras de SYN avec recherche déclenchée par lacunes et journal contradictoire surpassera un bras témoin disposant du même modèle et du même budget mais sans agenda de curiosité sur précision prévisionnelle, calibration et fidélité aux preuves; l'effet est actuellement inconnu.",
+  "need_id": null,
+  "research_mode": "emergent",
+  "gap_kind": "unverified",
+  "metrics": {
+    "uncertainty": 0.96,
+    "expected_impact": 0.99,
+    "staleness": 0.55,
+    "novelty_gap": 0.99,
+    "selection_score": 0.896
+  },
+  "evidence_refs": [],
+  "outcome": "not_tested",
+  "uncertainty_after": null,
+  "learning": null
+}

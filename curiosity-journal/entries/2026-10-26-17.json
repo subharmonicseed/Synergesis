@@ -1,0 +1,28 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-26:17",
+  "observed_at": "2026-10-26T20:24:32+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "scientific-model-class-revision-possible-frontier",
+  "question": "Lorsque toutes les hypothèses disponibles omettent le même mécanisme, choisir conjointement une révision structurale et l'expérience qui la départage améliore-t-il la découverte par rapport à leur sélection séparée ?",
+  "reason": "H002 cherche des possibilités nouvelles, mais les comparaisons à l'intérieur d'un espace d'hypothèses incomplet peuvent converger à tort. Pertinence causale : une modification de classe peut créer une expérience discriminante auparavant absente. Pouvoir discriminant : ablation appariée du couplage édition-expérience, mesure de récupération structurale, erreur hors distribution et détection d'insuffisance de bibliothèque. Gain attendu : distinguer révision effective du champ des modèles et simple accumulation de variantes. Scores heuristiques non calibrés.",
+  "hypothesis": "Dans les environnements dynamiques contrôlés de Ma et al., la sélection conjointe édition structurale–expérience diagnostique améliore la récupération exacte face à la sélection indépendante à budget expérimental égal.",
+  "need_id": null,
+  "research_mode": "directed",
+  "gap_kind": "missing_domain",
+  "metrics": {
+    "uncertainty": 0.78,
+    "expected_impact": 0.94,
+    "staleness": 0.33,
+    "novelty_gap": 0.9,
+    "selection_score": 0.778
+  },
+  "evidence_refs": [
+    "https://arxiv.org/abs/2610.07627",
+    "https://journals.sagepub.com/doi/full/10.1177/26339137261421577"
+  ],
+  "outcome": "supported",
+  "uncertainty_after": 0.37,
+  "learning": "Fait rapporté dans la prépublication de Ma et al. du 6 octobre 2026 : sur 400 environnements dynamiques réservés, avec budget maximal de 32 expériences, la politique couplée récupère exactement 358/400 mécanismes (89,5 %) contre 79,5 % pour l'ablation sélection indépendante, gain apparié de 10 points [6,5;13,75]. Elle utilise en moyenne 18,7 expériences contre 21,6; sur 200 mécanismes hors grammaire, l'insuffisance de bibliothèque est signalée dans 88 % des cas. L'ablation donne un pouvoir discriminant sur le couplage. Contre-arguments : prépublication non répliquée ici, systèmes dynamiques synthétiques et bibliothèques spécifiées, espace d'éditions borné; une structure réellement inexprimable n'est pas inventée. La supériorité de l'aléatoire dans un autre modèle de sélection expérimentale montre que le gain n'est pas universel. Hypothèse soutenue dans les bancs de l'article, pas démontrée pour SYN. Prédiction : une politique qui propose simultanément la lacune structurelle et son test sera utile si un oracle indépendant confirme le mécanisme. Prochaine lacune : essai H002 avec modèles initialement insuffisants, témoin espace fixe, coût total et tâches inédites."
+}

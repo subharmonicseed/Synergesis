@@ -1,0 +1,29 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-27:01",
+  "observed_at": "2026-10-27T00:57:24+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "glaciology-marine-ice-cliff-instability-dynamic-restabilization",
+  "question": "Un seuil de hauteur de falaise glaciaire suffit-il à prédire un retrait marin auto-entretenu, ou la topographie, la diminution dynamique d'épaisseur et le mélange de glace peuvent-ils interrompre la cascade malgré un vêlage rapide ?",
+  "reason": "Contrôle de diversification après les dix observations 13–22 : une répétition explicite de deux études entre 16 et 17, des mécanismes proches de temporalité entre 13 et 20, et des analogies H002 dans 17 et 22. La glaciologie des falaises n'y apparaît pas, ni dans les domaines de l'index documentaire ancien. Pertinence causale : une rétroaction positive locale peut être interrompue par une rétroaction géométrique négative. Épreuve discriminante : confronter les prédictions fondées sur la seule hauteur aux observations laser de 15 330 falaises et aux modèles ajoutant pente d'épaisseur, topographie, mélange de glace et vitesse d'amincissement; mesurer les erreurs sur sites réservés. La nouveauté documentaire ne constitue pas une amélioration de SYN. Scores heuristiques non calibrés.",
+  "hypothesis": "Dans l'échantillon observé par Needell et al., dépasser une hauteur critique suffit à déclencher un retrait auto-entretenu persistant, indépendamment de l'amincissement dynamique et des gradients d'épaisseur de glace.",
+  "need_id": null,
+  "research_mode": "adversarial",
+  "gap_kind": "contradiction",
+  "metrics": {
+    "uncertainty": 0.74,
+    "expected_impact": 0.83,
+    "staleness": 0.47,
+    "novelty_gap": 0.92,
+    "selection_score": 0.758
+  },
+  "evidence_refs": [
+    "https://pubmed.ncbi.nlm.nih.gov/42879549/",
+    "https://doi.org/10.1126/science.aee0658",
+    "https://www.whoi.edu/press-room/news-release/ice-survey/"
+  ],
+  "outcome": "refuted",
+  "uncertainty_after": 0.43,
+  "learning": "Faits primaires datés : Needell, Walker et Bassis, Science, 15 octobre 2026, examinent 15 330 observations de falaises de glace par altimétrie laser. Les falaises élevées vêlent plus rapidement que certaines paramétrisations, mais le retrait observé se stabilise lorsque l'amincissement dynamique et la progression vers de faibles gradients d'épaisseur limitent la hauteur des falaises exposées; mélange de glace, profondeur d'eau et crevasses sont aussi corrélés à la hauteur. Dans les cas étudiés, l'hypothèse simpliste d'un seuil de hauteur suffisant pour déclencher systématiquement un emballement est réfutée. Objections : les falaises très hautes sont rares, la fenêtre d'observation est limitée, les conditions futures peuvent sortir de l'échantillon, les variables corrélées ne sont pas isolées expérimentalement et un risque de retrait accéléré subsiste; les auteurs ne réfutent pas toutes les variantes de l'instabilité des falaises marines. Source principale vérifiée via résumé bibliographique PubMed et communiqué de l'institution des auteurs; texte intégral Science non consultable dans ce cycle. Prédiction non testée : un modèle intégrant les gradients d'épaisseur et l'amincissement prédira mieux les arrêts de retrait hors échantillon qu'un seuil fixe. Prochaine lacune : tester sur glaciers réservés, en comparant erreurs de vitesse de vêlage, dates de stabilisation et incertitude de hausse du niveau marin."
+}

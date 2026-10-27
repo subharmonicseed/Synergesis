@@ -1,0 +1,28 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-27:05",
+  "observed_at": "2026-10-27T04:54:41+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "human-ai-temporary-capability-versus-independent-skill-acquisition",
+  "question": "Une amélioration de performance obtenue par des travailleurs sur des tâches hors de leurs compétences grâce à une IA se traduit-elle par un apprentissage technique autonome immédiatement mesurable lorsque l'IA est retirée ?",
+  "reason": "Contre-épreuve causale de H002 : la frontière des tâches exécutables avec outil peut s'élargir sans que les capacités internes soient acquises. Parmi les dix dernières entrées, 17/22/04 reviennent sur la transformation du possible et 18 sur la mémoire; les autres diversifient les domaines, mais restent surtout des lectures rétrospectives. Différence avec l'entrée 2026-10-25-18 (52 développeurs, audit de code) : essai randomisé de 487 consultants sur trois tâches de science des données que ChatGPT ne résout pas seul, avec mesure de connaissances sans outil après l'expérience. Discrimination : noter séparément performance conjointe, benchmark expert et connaissances post-traitement sans IA, puis prévoir un suivi différé. La preuve étudiée est prospective du point de vue des chercheurs, mais l'hypothèse de SYN est formulée après lecture : aucun succès prédictif de SYN. Scores de sélection heuristiques non calibrés.",
+  "hypothesis": "Les gains de performance des consultants équipés et formés à ChatGPT sur des tâches de science des données hors de leurs compétences s'accompagnent d'un gain mesurable de connaissances techniques sans ChatGPT après l'expérience.",
+  "need_id": null,
+  "research_mode": "adversarial",
+  "gap_kind": "contradiction",
+  "metrics": {
+    "uncertainty": 0.72,
+    "expected_impact": 0.96,
+    "staleness": 0.62,
+    "novelty_gap": 0.86,
+    "selection_score": 0.8240000000000001
+  },
+  "evidence_refs": [
+    "https://www.nature.com/articles/s41562-026-02566-6",
+    "https://github.com/emmawiles/Upskill_Public"
+  ],
+  "outcome": "refuted",
+  "uncertainty_after": 0.37,
+  "learning": "Fait primaire daté : Wiles et al., Nature Human Behaviour, 26 octobre 2026, rapportent un essai randomisé auprès de 487 consultants. L'accès et la formation à ChatGPT améliorent la réussite sur trois tâches de science des données hors de leur champ habituel, tâches que ChatGPT seul ne pouvait pas résoudre; les performances restent inférieures à celles de data scientists experts. Les auteurs ne trouvent pas de preuve d'un gain de réponses aux questions techniques sans IA lors du test post-expérience. L'hypothèse conjointe 'performance assistée = apprentissage autonome mesuré' est donc non soutenue dans ce protocole, sans démontrer une absence universelle d'apprentissage. Le code d'analyse est publié dans un dépôt des auteurs avec guide de reproduction; les données sont décrites dans le dépôt et soumises à conditions d'accès selon l'article; aucune reproduction indépendante n'a été effectuée ici. Objections : formation et accès sont combinés dans le traitement; population professionnelle et tâches limitées; un test post-expérience immédiat ne mesure pas un apprentissage à long terme; étude conduite avec des auteurs et moyens liés à BCG et OpenAI, intérêts déclarés. Implication pour H002 : distinguer l'extension instrumentée du champ d'action de la compétence internalisée; aucune mesure de gain cognitif de SYN. Prédiction à tester : sur tâches inédites, l'accès à l'outil augmente l'exécution immédiate mais le retrait de l'outil supprime une partie de l'avantage, avec comparaison à une formation sans IA et à un suivi différé. Prochaine lacune : essais appariés avec/sans outil et tests de transfert différés, préenregistrés avant consultation des résultats."
+}

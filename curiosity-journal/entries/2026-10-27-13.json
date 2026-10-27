@@ -1,0 +1,29 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-27:13",
+  "observed_at": "2026-10-27T14:04:47+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "hydrology-precipitation-discharge-divergence-predictive-validation",
+  "question": "Les tendances à long terme des précipitations et des débits concordent-elles dans au moins 90 % des bassins étudiés, et le classement de leurs facteurs de divergence par forêt aléatoire démontre-t-il un mécanisme causal robuste ?",
+  "reason": "Contrôle de domaine sous-représenté, choisi intentionnellement et non aléatoirement : hydrologie des bassins versants et audit hors échantillon d'un modèle explicatif, hors métacognition de SYN. Comparaison préalable des dix dernières entrées réelles 2026-10-27-03..12 : 03 archées/bêta-oxydation autonome (Nature; prévalence in situ inconnue), 04 satellites/détection et faux positifs (Nature; capteurs non équivalents), 05 travail-IA/performance sans transfert (Nature Human Behaviour; suivi différé absent), 06 myxomycètes/ADN versus fructifications (Scientific Reports; variants non espèces), 07 métamatériaux/non-réciprocité et friction (Nature; énergie externe), 08 insectes/protection thermique et coût parental (npj Biodiversity; profondeur non randomisée), 09 fougères/rayon phloémien et conductivité inférée (Nature Plants; discordance de facteur), 10 MgO/orientation du choc et cinétique (Physical Review X; géométries limitées), 11 levures/ressources et évasion de résistants (Nature Ecology & Evolution; système non clinique), 12 roseaux/salinité et résorption foliaire (eLife; une dose et une saison). Aucune référence primaire identique dans cette fenêtre; domaines antérieurs de l'index et entrées 26-16..22 et 27-01..02 examinés sans observation hydrologique analogue. Répétitions : 04/05 réexaminent l'extension de capacité instrumentale H002; 08/11 partagent un arbitrage coût-bénéfice, sans identité de mécanisme; 03..12 formulent tous des hypothèses rétrospectives. Contrôle supplémentaire : revue AGU hors concentration nature.com. Ici la valeur distinctive n'est pas une simple surprise thématique : distinguer divergence mesurée, prédicteurs associés et validation hors échantillon faible. Hypothèse locale formulée après lecture des résultats, donc pas une prédiction de SYN. Scores heuristiques non calibrés.",
+  "hypothesis": "Dans l'échantillon de Berzonsky et al. (2026), les tendances annuelles de débit et de précipitation ont le même signe dans au moins 90 % des stations, et les variables les plus importantes du modèle de forêt aléatoire fournissent une explication causale fortement validée hors échantillon.",
+  "need_id": null,
+  "research_mode": "adversarial",
+  "gap_kind": "contradiction",
+  "metrics": {
+    "uncertainty": 0.66,
+    "expected_impact": 0.75,
+    "staleness": 0.22,
+    "novelty_gap": 0.54,
+    "selection_score": 0.584
+  },
+  "evidence_refs": [
+    "https://agupubs.onlinelibrary.wiley.com/doi/10.1029/2026GL122253",
+    "https://agupubs.onlinelibrary.wiley.com/doi/10.1029/2025EF006916",
+    "https://agupubs.onlinelibrary.wiley.com/doi/10.1029/2025EF007982"
+  ],
+  "outcome": "refuted",
+  "uncertainty_after": 0.33,
+  "learning": "Source primaire datée : Berzonsky, Smykalov, Sadayappan et Li, Geophysical Research Letters, première publication 25 août 2026, erratum 30 septembre 2026 corrigeant une figure illustrative (la version consultée est corrigée). Dans les 10 179 stations Caravan retenues sur la période 1951–2020, 27,4 % présentent des tendances de signes opposés entre précipitations et débit : 16,4 % débit en hausse malgré pluie en baisse, 11,0 % débit en baisse malgré pluie en hausse. Ainsi, la concordance des signes est 72,6 %, sous le seuil rétrospectif de 90 %. Ces proportions sont des observations statistiques de l'échantillon, pas une prévision climatique. Les auteurs associent l'ampleur de la divergence à l'aridité, aux fréquences de jours de précipitations faibles/fortes et au ratio d'écoulement, via une forêt aléatoire. Audit adversarial quantitatif : F1 d'entraînement 0,93 contre F1 de test 0,57, balanced accuracy 0,96 contre 0,56; ces écarts signalent une généralisation prédictive limitée malgré des importances de variables interprétables. Le modèle conserve un signal au-dessus du hasard pour trois classes, mais les classements SHAP ne prouvent pas la causalité; les auteurs le reconnaissent explicitement. Contrepoint primaire indépendant : Roy et Mishra, Earth's Future, 12 février 2026, attribuent dans les bassins Indus/Gange des changements de débit à une combinaison de précipitations et de pompage des eaux souterraines, mécanisme anthropique non isolable par la seule corrélation pluie-débit. Seubert et al., Earth's Future, 4 août 2026, produisent des projections par ensembles de modèles : ce sont des simulations prospectives, pas une validation causale des classements du modèle Caravan. Objections : l'échantillon Caravan ne couvre ni Afrique ni Asie, les durées de stations diffèrent (10 à 68 ans), les sites sont sélectionnés par filtres et sont géographiquement dépendants; la réanalyse ERA5-Land des pluies ajoute des incertitudes; les forêts aléatoires ne démontrent pas le mécanisme physique. L'étude n'a pas été reproduite ici et l'hypothèse de seuil est construite après lecture, non préenregistrée. Prochaine lacune : réserver des bassins et périodes indépendants, comparer des modèles hydrologiques causaux, une régression pluie seule et la forêt aléatoire avec incertitudes, et vérifier si les variables importantes prédisent hors région et hors période à budget égal; pour SYN, ne pas assimiler ce nouvel audit documentaire à un progrès cognitif."
+}

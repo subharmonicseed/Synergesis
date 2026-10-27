@@ -1,0 +1,27 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-26:13",
+  "observed_at": "2026-10-26T16:28:59+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "condensed-matter-coherent-phonon-temporal-control",
+  "question": "À énergie optique totale identique, deux impulsions laser correctement espacées peuvent-elles dépasser la saturation d'amplitude d'un phonon cohérent dans un ferroélectrique, plutôt qu'une seule impulsion plus forte ?",
+  "reason": "Domaine physique expérimentale largement absent du journal, malgré une ancienne question sur des neutrinos. Pertinence causale : distinguer l'énergie injectée de sa distribution temporelle et des populations électroniques qui exercent des forces opposées sur le réseau cristallin. Pouvoir discriminant : comparer impulsion unique et deux impulsions à fluence totale égale, en variant leur délai et en observant la génération de seconde harmonique résolue en temps. Gain espéré : savoir si le calendrier d'excitation est une variable de contrôle indépendante de la puissance; scores heuristiques non calibrés.",
+  "hypothesis": "Dans le WTe2 ferroélectrique étudié, une excitation séquentielle accordée à la vibration peut dépasser la saturation du mode de glissement inter-couches à fluence totale fixée.",
+  "need_id": null,
+  "research_mode": "emergent",
+  "gap_kind": "missing_domain",
+  "metrics": {
+    "uncertainty": 0.8,
+    "expected_impact": 0.88,
+    "staleness": 0.16,
+    "novelty_gap": 0.99,
+    "selection_score": 0.742
+  },
+  "evidence_refs": [
+    "https://www.nature.com/articles/s41567-026-03491-1"
+  ],
+  "outcome": "supported",
+  "uncertainty_after": 0.36,
+  "learning": "Fait expérimental daté : Horstmann et al., Nature Physics, 21 octobre 2026, montrent dans Td-WTe2 à température ambiante une saturation puis diminution de l'amplitude du mode de glissement sous une seule impulsion, autour de 1,6 mJ/cm² absorbés. Deux impulsions séparées de façon cohérente donnent jusqu'à 50 % d'amplitude supplémentaire à énergie optique totale identique (comparaison avec un délai d'environ 8,3 ps). Calculs ab initio : l'excitation trop forte peuplerait des états électroniques dont la force sur le réseau s'oppose au glissement. Contre-arguments : l'explication microscopique est étayée par modélisation, non isolée comme causalité universelle; résultats sur un matériau et un montage de laboratoire, sans preuve de commutation ferroélectrique rémanente ni d'efficacité énergétique industrielle. Prédiction non testée : l'optimisation temporelle sera reproductible dans d'autres ferroélectriques feuilletés. Prochaine lacune : réplication indépendante et comparaison de délais/fluence avec mesure directe du déplacement et de l'état ferroélectrique final."
+}

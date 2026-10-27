@@ -1,0 +1,29 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-25:27",
+  "observed_at": "2026-10-25T13:01:00.293+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "forecasting-official-benchmark-eligibility",
+  "question": "Une veille ChatGPT de quelques questions par cycle peut-elle être considérée comme une participation officielle à ForecastBench, ou faut-il une soumission structurée et suffisamment complète ?",
+  "reason": "L'hypothèse 026 appelle une évaluation extérieure; ne pas confondre utilisation de questions publiquement visibles et inscription sur le classement officiel. Lire la documentation opérationnelle du benchmark mise à jour en 2026. Scores heuristiques non calibrés.",
+  "hypothesis": "Un pilote conversationnel de quelques questions n'est pas une participation officielle à ForecastBench; le tournoi impose une inscription et une couverture minimale des questions.",
+  "need_id": null,
+  "research_mode": "directed",
+  "gap_kind": "unverified",
+  "metrics": {
+    "uncertainty": 0.68,
+    "expected_impact": 0.91,
+    "staleness": 0.81,
+    "novelty_gap": 0.79,
+    "selection_score": 0.82
+  },
+  "evidence_refs": [
+    "https://github.com/forecastingresearch/forecastbench/wiki/How-to-submit-to-ForecastBench",
+    "https://www.forecastbench.org/about/",
+    "https://www.forecastbench.org/datasets/"
+  ],
+  "outcome": "supported",
+  "uncertainty_after": 0.37,
+  "learning": "Documentation ForecastBench consultée le 25 octobre 2026 : inscription préalable via le formulaire du tournoi; 500 questions par tour (250 marchés, 250 séries), soumission avant 23:59:59 UTC de la date limite; couverture au moins 95% de chaque catégorie, les absences imputées à 0,5. Le protocole de SYN à 16 événements n'est PAS une entrée au tournoi ni une évaluation équivalente. Les données publiées facilitent un pilote interne distinct; taille et sélection peuvent créer de forts biais. Étape suivante : évaluer d'abord la faisabilité du dépôt prospectif et de la résolution indépendante."
+}

@@ -1,0 +1,29 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-25:37",
+  "observed_at": "2026-10-25T13:24:58.239+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "general-agent-architectures",
+  "question": "La réussite d'une architecture d'agent sur la totalité d'un jeu public ARC-AGI-3 démontre-t-elle à elle seule l'intelligence générale hors distribution ?",
+  "reason": "Tester l'interprétation excessive du succès annoncé par NVIDIA AVO; séparer adaptation sur tâches publiques, transfert entre ingénierie et jeu, et véritable acquisition ouverte de compétences. Scores heuristiques non calibrés.",
+  "hypothesis": "Un score de 100% sur le jeu public d'un benchmark interactif suffit à établir une AGI dans tous les domaines.",
+  "need_id": null,
+  "research_mode": "adversarial",
+  "gap_kind": "unverified",
+  "metrics": {
+    "uncertainty": 0.9,
+    "expected_impact": 0.98,
+    "staleness": 0.55,
+    "novelty_gap": 0.88,
+    "selection_score": 0.858
+  },
+  "evidence_refs": [
+    "https://developer.nvidia.com/blog/nvidia-avo-reaches-100-on-arc-agi-3-demonstrating-a-frontier-level-general-purpose-architecture-for-long-horizon-autonomous-agents/",
+    "https://arcprize.org/arc-agi/3",
+    "https://arcprize.org/blog/astra"
+  ],
+  "outcome": "refuted",
+  "uncertainty_after": 0.59,
+  "learning": "NVIDIA (21 août 2026) déclare AVO+Claude Opus 5 à 100,00 RHAE, tous les 25 jeux publics et 183 niveaux, comparé à un modèle de base environ 30%, avec mémoire et superviseur; NVIDIA dit avoir transposé le même agent depuis des optimisations de kernels GPU. Le résultat démontre une forte capacité dans ces tâches mais jeu PUBLIC, limites de coût et protocoles propres, et pas d'évaluation ouverte sur une vaste distribution de compétences humaines inédites. ARC Prize rapporte par ailleurs Astra 99,9% sur semi-privé sous un autre harness, sans conférer le statut AGI. La proposition universelle '100% public = AGI' n'est pas justifiée."
+}

@@ -1,0 +1,28 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-26:01",
+  "observed_at": "2026-10-26T00:23:32.698+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "multiagent-contract-verifier-false-alarms",
+  "question": "Un contrôle déterministe indépendant des passages entre agents améliore-t-il nécessairement la fiabilité finale, même lorsque ses propres faux positifs sont comptés comme des échecs ?",
+  "reason": "Suite non redondante de l'entrée 051 sur la corruption des contraintes entre agents. Pertinence causale : un contrat immuable peut arrêter la propagation d'une donnée fautive, mais un validateur mal configuré peut interrompre une tâche correcte. Pouvoir discriminant : compter séparément les blocages attribuables à un défaut réel, les fausses alarmes et les tâches terminées; gain espéré : définir un critère net de sécurité, pas seulement le taux de détection. Scores heuristiques non calibrés.",
+  "hypothesis": "Un garde-fou déterministe placé entre agents améliore systématiquement la fiabilité globale des workflows par rapport à l'absence de garde-fou.",
+  "need_id": null,
+  "research_mode": "adversarial",
+  "gap_kind": "contradiction",
+  "metrics": {
+    "uncertainty": 0.86,
+    "expected_impact": 0.98,
+    "staleness": 0.63,
+    "novelty_gap": 0.94,
+    "selection_score": 0.878
+  },
+  "evidence_refs": [
+    "https://arxiv.org/abs/2609.34017",
+    "https://arxiv.org/abs/2610.03564"
+  ],
+  "outcome": "refuted",
+  "uncertainty_after": 0.46,
+  "learning": "Observation primaire : Maat (prépublication du 27 septembre 2026, version corrigée v2) évalue 522 essais dans six workflows et rapporte 94 arrêts dans le bras gouverné, dont 35 fausses alarmes (37 %) liées aux validateurs. Après comptage des arrêts injustifiés comme échecs, le bras gouverné est moins performant dans quatre workflows sur six; sur les seuls arrêts attribuables à un défaut vérifié, cinq workflows montrent des gains de rubricage et un reste stable. L'audit a aussi corrigé des scorers qui récompensaient tout arrêt prématuré. Contre-argument : la validation déterministe reste utile pour des défauts exprimables par contrat, et des correctifs hors ligne ont été réalisés; aucune réexécution vivante après correctif n'est rapportée. Prochaine lacune : essai prospectif avec contrôles adverses, oracle final indépendant et coûts explicites des faux blocages. Aucune amélioration de SYN n'est mesurée."
+}

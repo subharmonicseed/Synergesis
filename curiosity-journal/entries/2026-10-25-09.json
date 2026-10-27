@@ -1,0 +1,28 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-25:09",
+  "observed_at": "2026-10-25T12:35:48.929+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "ai-uncertainty-interface-risk",
+  "question": "La multiplication des avertissements verbaux et des jauges numériques d'incertitude réduit-elle systématiquement l'adhésion aux mauvaises réponses d'une IA ?",
+  "reason": "Tester directement l'intuition issue de l'hypothèse 07 selon laquelle rendre la métacognition davantage visible améliore automatiquement la fiabilité de la décision humaine; distinguer calibration subjective et comportement. Heuristiques non calibrées.",
+  "hypothesis": "Dans une tâche de recherche d'information structurée, ajouter ensemble des marqueurs verbaux et une jauge de confiance fait nécessairement moins adopter de réponses fausses que l'absence de ces marqueurs.",
+  "need_id": null,
+  "research_mode": "adversarial",
+  "gap_kind": "contradiction",
+  "metrics": {
+    "uncertainty": 0.73,
+    "expected_impact": 0.91,
+    "staleness": 0.45,
+    "novelty_gap": 0.89,
+    "selection_score": 0.778
+  },
+  "evidence_refs": [
+    "https://www.sciencedirect.com/science/article/pii/S2949882126000587",
+    "https://www.microsoft.com/en-us/research/publication/im-not-sure-but-examining-the-impact-of-large-language-models-uncertainty-expression-on-user-reliance-and-trust/"
+  ],
+  "outcome": "refuted",
+  "uncertainty_after": 0.49,
+  "learning": "Expérience préenregistrée publiée en mai 2026, N=495 : jauges visuelles améliorent les indices subjectifs de discrimination entre réponses correctes et fausses, mais la condition combinant texte prudent + jauge augmente l'accord avec de mauvaises réponses (15,0% contre 10,7% en contrôle) et réduit la vérification externe. La proposition universelle «plus de marqueurs = moins d'erreurs» est réfutée dans cette tâche. Limites déclarées : l'ordre des essais est lié à la justesse, formulation verbale par bloc et score visuel par essai, composantes visuelles non isolées. Mesurer les décisions effectives et la vérification, non la confiance seule."
+}

@@ -1,0 +1,29 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-25:28",
+  "observed_at": "2026-10-25T13:01:02.966+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "forecast-data-permissions",
+  "question": "L'accès technique à une API publique de prévisions autorise-t-il par défaut une évaluation automatisée d'agents IA utilisant les données obtenues ?",
+  "reason": "Le journal précédent proposait des prévisions issues de plateformes; il faut vérifier séparément accès technique, authentification et conditions autorisant l'évaluation de modèles. Scores heuristiques non calibrés.",
+  "hypothesis": "Une API dont la documentation est publique peut être utilisée sans permission supplémentaire pour évaluer un agent IA.",
+  "need_id": null,
+  "research_mode": "adversarial",
+  "gap_kind": "contradiction",
+  "metrics": {
+    "uncertainty": 0.76,
+    "expected_impact": 0.97,
+    "staleness": 0.78,
+    "novelty_gap": 0.88,
+    "selection_score": 0.872
+  },
+  "evidence_refs": [
+    "https://github.com/Metaculus/metaculus/blob/main/docs/openapi.yml",
+    "https://www.metaculus.com/terms-of-use/",
+    "https://github.com/forecastingresearch/forecastbench-datasets"
+  ],
+  "outcome": "refuted",
+  "uncertainty_after": 0.42,
+  "learning": "Documentation officielle Metaculus API v2 : authentification exigée pour toutes les requêtes et conditions déclarant que l'utilisation de données d'API pour entraîner, évaluer ou développer des modèles IA nécessite une autorisation écrite préalable; l'existence de l'API n'emporte pas cette autorisation. Les données ForecastBench sont présentées sous licence CC BY-SA 4.0, mais les droits des sources sous-jacentes doivent être vérifiés distinctement. En l'absence d'accord Metaculus, le pilote SYN se limite aux données USGS fournies directement par une source primaire et ne reproduit pas de données Metaculus."
+}

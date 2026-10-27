@@ -1,0 +1,29 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-27:10",
+  "observed_at": "2026-10-27T11:04:22+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "high-pressure-mineral-physics-orientation-dependent-shock-phase-kinetics",
+  "question": "À pression et température extrêmes, la direction cristallographique de compression du MgO modifie-t-elle la voie et le seuil de transformation B1→B2, ou le choc efface-t-il cette dépendance ?",
+  "reason": "Contrôle scientifique hors préoccupations habituelles, sélectionné dans un domaine sous-représenté et non par tirage aléatoire. Comparaison préalable des dix dernières entrées (26-22 et 27-01 à 27-09) : astronomie/traînées d'images (confirmation MPC indirecte), glaciologie/amincissement géométrique (extrêmes rares), chimie/stéréochimie et froid (transfert industriel limité), microbiologie/méthanogenèse isolée (prévalence inconnue), télédétection/méthane en aveugle (missions non comparables), travail avec IA/performance sans apprentissage (suivi différé absent), écologie/ADN versus fructifications (biais des canaux), métamatériaux/non-réciprocité et friction (alimentation externe), éthologie/coût d'enfouissement (causalité partielle), paléobotanique/phloème (inférence et arithmétique à résoudre). Les sources primaires de ces dix entrées sont distinctes; les mécanismes H002 de réaffectation instrumentale reviennent surtout dans 26-22, 27-04 et 27-05. Aucune de ces dix entrées ne teste l'orientation de cristaux choqués à centaines de GPa. Le nouvel article compare des orientations de monocristaux et réexamine des mesures 2024 limitées à [100]. L'hypothèse locale est reconstruite après lecture des publications : elle n'est PAS une prédiction prospective de SYN. Les scores sont des priorités subjectives non calibrées.",
+  "hypothesis": "La direction de choc [111] ou [110]/[100] ne change pas substantiellement la pression d'apparition ni le chemin de transformation B1→B2 du MgO monocristallin sous choc extrême, une fois atteintes des centaines de GPa.",
+  "need_id": null,
+  "research_mode": "adversarial",
+  "gap_kind": "contradiction",
+  "metrics": {
+    "uncertainty": 0.62,
+    "expected_impact": 0.72,
+    "staleness": 0.24,
+    "novelty_gap": 0.78,
+    "selection_score": 0.616
+  },
+  "evidence_refs": [
+    "https://journals.aps.org/prx/abstract/10.1103/vt45-32bb",
+    "https://doi.org/10.1126/sciadv.adk0306",
+    "https://www.llnl.gov/article/55136/mineral-inside-planets-reveals-surprising-lesson-how-you-push-matters"
+  ],
+  "outcome": "refuted",
+  "uncertainty_after": 0.31,
+  "learning": "Résultat expérimental primaire daté : Smith et al., Physical Review X 16, 041019, 19 octobre 2026, ont soumis du MgO monocristallin à des chocs laser suivant plusieurs orientations, avec diffraction X nanoseconde, vélocimétrie et pyrométrie. Le long de [111], la transformation B1→B2 apparaît vers 330 GPa avec des paliers thermiques compatibles avec une transition proche de l'équilibre; suivant [110] et [100], le passage est retardé d'environ 80 GPa et les signatures de diffraction appuient l'hypothèse d'une couche transitoire désordonnée au front de choc. Au-dessus de 572±24 GPa, les orientations convergent vers la fusion complète à 13 200±600 K. La comparaison primaire avec Wicks et al., Science Advances, 7 juin 2024, montre que leur seuil 397–425 GPa provenait de chocs suivant [100] : ce n'était pas une loi universelle indépendante de l'orientation. Les données de diffraction et de température sont mesurées; la microcouche transitoire et les mécanismes atomistiques sont des interprétations mécanistiques soutenues par ces mesures, pas une imagerie directe de chaque atome. Objections : seulement quelques orientations, une géométrie uniaxiale et une fenêtre nanoseconde; les phases à l'équilibre, les mélanges MgO-FeO naturels et les histoires thermiques planétaires ne sont pas directement reproduits. Les extrapolations aux noyaux de planètes et à d'autres matériaux restent des prédictions, non des résultats mesurés. La réfutation porte sur l'indépendance d'orientation pour la transformation solide sous choc, non sur la fusion complète où les réponses convergent. Aucune expérience de SYN ni gain cognitif démontré. Prochaine lacune : comparer à l'aveugle les modèles cinétiques à orientation explicite versus un modèle isotrope sur des tirs de choc et orientations réservés, avec erreurs de pression de transition, signatures de diffraction et incertitude instrumentale."
+}

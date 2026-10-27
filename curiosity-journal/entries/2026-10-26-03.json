@@ -1,0 +1,28 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-26:03",
+  "observed_at": "2026-10-26T00:23:36.822+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "democratic-ai-governance-voting-rules",
+  "question": "La règle d'agrégation des préférences et la distribution du pouvoir de vote modifient-elles la justice procédurale perçue dans la gouvernance d'un modèle d'IA, indépendamment de la seule interface de médiation ?",
+  "reason": "Approfondissement distinct des entrées 050 et 053 : elles traitaient de la représentation déléguée et de la confiance envers l'interface, pas de l'effet causal des règles de vote. Pertinence causale : l'agrégation quadratique et l'égalité de pouvoir peuvent modifier l'expression des préférences minoritaires. Pouvoir discriminant : expérimentation factorielle 2x2 opposant vote classé/quadratique et pouvoir égal/inégal; gain espéré : séparer perception de justice, influence effective et participation durable. Scores heuristiques non calibrés.",
+  "hypothesis": "À participation donnée, le choix du mécanisme d'agrégation et de répartition du pouvoir peut modifier la justice et la démocratie perçues, sans démontrer à lui seul une représentation effective accrue.",
+  "need_id": null,
+  "research_mode": "directed",
+  "gap_kind": "missing_domain",
+  "metrics": {
+    "uncertainty": 0.78,
+    "expected_impact": 0.86,
+    "staleness": 0.74,
+    "novelty_gap": 0.85,
+    "selection_score": 0.818
+  },
+  "evidence_refs": [
+    "https://www.nature.com/articles/s41598-026-40180-8",
+    "https://deepmind.google/research/publications/224297/"
+  ],
+  "outcome": "supported",
+  "uncertainty_after": 0.51,
+  "learning": "Observation primaire : Sharma et al., Scientific Reports du 3 mars 2026, essai randomisé en ligne 2x2 (n=177) sur la spécification de modèles génératifs avec participants du Sud global et personnes handicapées. La combinaison d'agrégation quadratique et de répartition égale du pouvoir est perçue comme plus juste et démocratique dans ce contexte. Cela concerne une appréciation procédurale, pas une preuve de meilleure représentation durable ni de décisions collectives meilleures. Contre-argument : Parisi et al., FAccT du 26 juin 2026 (N=879), montrent que la préférence pour une facilitation IA peut coexister avec orientation des allocations et absence d'amélioration de l'équité de participation. Prochaine lacune : essai préenregistré mesurant influence minoritaire réelle, révisions de décisions, abstention, qualité de décision et fidélité des mandats dans le temps."
+}

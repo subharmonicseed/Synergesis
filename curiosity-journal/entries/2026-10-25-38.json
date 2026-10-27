@@ -1,0 +1,25 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-25:38",
+  "observed_at": "2026-10-25T13:25:00.798+01:00",
+  "producer": "chatgpt",
+  "stage": "proposed",
+  "domain": "syn-heldout-harness-ablation",
+  "question": "En isolant séparément la continuité de contexte et la récupération de compétences, SYN obtient-elle des gains réplicables sur tâches interactives inédites et à budget fixé ?",
+  "reason": "Question émergeant des entrées 35 à 37. Les performances ARC-AGI-3 varient beaucoup selon le harness, tandis que notre comparateur quatre bras baseline/journal/research/skills ne permet pas d'isoler une composante. Un protocole factoriel et un générateur de tâches à oracle séparé ont été enregistrés. Scores heuristiques non calibrés.",
+  "hypothesis": "La continuité de contexte et les compétences validées ont des effets indépendants ou synergiques sur l'adaptation hors échantillon; seules des conditions M0/S0, M1/S0, M0/S1 et M1/S1 appariées peuvent les départager.",
+  "need_id": null,
+  "research_mode": "emergent",
+  "gap_kind": "unverified",
+  "metrics": {
+    "uncertainty": 0.95,
+    "expected_impact": 0.99,
+    "staleness": 0.48,
+    "novelty_gap": 0.98,
+    "selection_score": 0.878
+  },
+  "evidence_refs": [],
+  "outcome": "not_tested",
+  "uncertainty_after": null,
+  "learning": null
+}

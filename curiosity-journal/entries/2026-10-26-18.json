@@ -1,0 +1,28 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-26:18",
+  "observed_at": "2026-10-26T20:24:32+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "agent-memory-ephemeral-abstraction-error-reproduction",
+  "question": "Conserver durablement des règles inférées à partir des trajectoires d'agents améliore-t-il systématiquement les tâches futures par rapport à conserver les trajectoires et synthétiser une aide temporaire à la demande ?",
+  "reason": "H001 et le système glyphique distinguent faits hérités et objections, mais la persistance de synthèses non validées peut réinjecter une erreur dans les trajectoires futures. Pertinence causale : la règle erronée modifie l'action, puis la nouvelle trajectoire sert à reproduire la règle. Pouvoir discriminant : comparer mémoire de trajectoires, abstractions persistantes, mémoire mixte et synthèse temporaire sur tâches réservées, modèles et budgets appariés. Gain attendu : préciser ce qui mérite une persistance durable plutôt qu'une simple réutilisation opportuniste. Scores heuristiques non calibrés.",
+  "hypothesis": "Dans les benchmarks et modèles évalués par Wang et al., les abstractions persistantes, seules ou jointes aux trajectoires, donnent systématiquement une meilleure réussite hors entraînement que des aides synthétisées à la demande puis écartées.",
+  "need_id": null,
+  "research_mode": "adversarial",
+  "gap_kind": "contradiction",
+  "metrics": {
+    "uncertainty": 0.82,
+    "expected_impact": 0.95,
+    "staleness": 0.28,
+    "novelty_gap": 0.92,
+    "selection_score": 0.784
+  },
+  "evidence_refs": [
+    "https://arxiv.org/abs/2610.27406",
+    "https://arxiv.org/abs/2601.22436"
+  ],
+  "outcome": "refuted",
+  "uncertainty_after": 0.4,
+  "learning": "Fait rapporté dans la prépublication Wang, Panaganti et Zhou du 19 octobre 2026 : sur ALFWorld, WebShop et ScienceWorld avec trois modèles et trois graines, la stratégie anti-persistence (trajectoires conservées, aide synthétisée puis jetée) est première dans 7 des 9 configurations. Moyenne égale des configurations : 59,9 % de réussite hors entraînement, contre 53,5 % pour trajectoires seules, 49,0 % pour abstractions persistantes et 49,3 % pour mémoire mixte; elle a aussi le coût moyen d'appels LLM le plus faible parmi les quatre. Hypothèse réfutée dans ces tests, non pour toutes les mémoires. Contre-arguments : seulement trois benchmarks textuels, trois modèles, 10 itérations, résultats dépendants des tâches; ScienceWorld favorise parfois la mémoire mixte; les abstractions temporaires peuvent indirectement contaminer les trajectoires, et une règle externe validée pourrait justifier une persistance. L'étude Zhao et al. (révision juin 2026) observe en outre une utilisation causale souvent faible des expériences condensées, sans comparer directement ce mécanisme. Prédiction à tester : une mémoire glyphique séparant observations immuables et conseils révisables réduira la reproduction d'erreurs, mais cela reste non démontré. Prochaine lacune : comparer persistance vérifiée, synthèse éphémère et héritage narratif, avec taux de correction et succès hors échantillon."
+}

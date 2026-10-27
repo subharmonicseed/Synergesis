@@ -1,0 +1,28 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-26:04",
+  "observed_at": "2026-10-26T04:27:50+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "agent-memory-conflict-observability",
+  "question": "La récupération de souvenirs pertinents suffit-elle à préserver les relations de contradiction et à produire des décisions calibrées lorsque plusieurs souvenirs restent incompatibles ?",
+  "reason": "Approfondit les lacunes des entrées 049 et 055 sans répéter la collision de similarité. Pertinence causale : une extraction peut conserver des faits isolés mais perdre les liens de source, de contexte et de succession qui déterminent si une action est justifiée. Pouvoir discriminant : comparer mémoire-oracle et extraction multi-session, mesurer conflit complet/partiel/absent puis clarification et calibration. Gain espéré : séparer rappel lexical, observabilité relationnelle et décision. Scores heuristiques non calibrés.",
+  "hypothesis": "Dans les systèmes de mémoire évalués, retrouver des souvenirs thématiquement pertinents suffit à préserver les contradictions utiles et à conduire à des décisions prudentes.",
+  "need_id": null,
+  "research_mode": "adversarial",
+  "gap_kind": "contradiction",
+  "metrics": {
+    "uncertainty": 0.84,
+    "expected_impact": 0.96,
+    "staleness": 0.44,
+    "novelty_gap": 0.95,
+    "selection_score": 0.83
+  },
+  "evidence_refs": [
+    "https://arxiv.org/abs/2608.13921",
+    "https://arxiv.org/abs/2608.19564"
+  ],
+  "outcome": "refuted",
+  "uncertainty_after": 0.46,
+  "learning": "Fait observé : TANGLE, prépublication du 14 août 2026, étudie 541 instances de conflits sur 40 profils et compare mémoire complète fournie par oracle et extraction depuis des dialogues multi-sessions. La structure entière du conflit est retrouvée dans 91,7 % des cas par Letta, 69,1 % par Mem0, 47,0 % par A-mem et 46,2 % par MemOS. Même avec mémoire complète, les modèles identifient mieux les conflits qu'ils ne calibrent leurs actions ou demandent une clarification ciblée. Hypothèse réfutée dans ce banc : pertinence du rappel ne garantit ni relations préservées ni décision adaptée. Contre-argument : Letta conserve une forte proportion des conflits et la qualité dépend du pipeline, des modèles et des types de conflit; aucune défaillance de SYN n'est établie. Une autre étude, MCB révisée le 12 octobre 2026, distingue vérification externe et clarification de l'intention, mais n'évalue pas une mémoire opérationnelle de bout en bout. Prochaine lacune : test prospectif avec glyphes contradictoires, comparaison FULL/PARTIAL/NONE, abstention et action vérifiée par oracle indépendant."
+}

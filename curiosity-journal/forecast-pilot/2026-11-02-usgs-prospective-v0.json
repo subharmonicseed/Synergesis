@@ -1,0 +1,40 @@
+{
+  "schema": "syn-usgs-prospective-v0",
+  "created_at_utc": "2026-10-25T13:19:00.771Z",
+  "status": "forecasts_frozen_before_first_observation_window",
+  "branch": "feat/syn-curiosity-observatory-v0",
+  "window_start": "2026-11-02T00:00:00Z",
+  "window_end": "2026-11-09T00:00:00Z",
+  "data_source": "https://earthquake.usgs.gov/fdsnws/event/1/",
+  "rates_source": "https://www.usgs.gov/programs/earthquake-hazards/science/earthquake-sequence-product",
+  "early_baseline_provenance": "USGS approximate 2015–2025 annual averages: about 110 magnitude 6.0–6.9, 13 magnitude 7.0–7.9 and 0.7 magnitude 8+ earthquakes; annual counts and clustering vary.",
+  "forecast_method": "stationary independent Poisson weekly count BASELINE, using an approximate 52 weeks/year; no information from after created_at_utc; p deliberately rounded; cannot forecast individual earthquakes or risks.",
+  "calculations": {
+    "m7_plus_annual_mean": 13.7,
+    "m6_plus_annual_mean": 123.7,
+    "annual_to_weekly_divisor": 52,
+    "p_at_least_one_m7_plus_formula": "1-exp(-13.7/52)",
+    "p_at_least_three_m6_plus_formula": "1-exp(-123.7/52)*(1+123.7/52+((123.7/52)^2)/2)"
+  },
+  "questions": [
+    {
+      "event_id": "usgs-2026w45-atleast1-m7",
+      "domain": "geophysics",
+      "question": "At least one worldwide USGS event with magnitude >= 7.0 and UTC time in [2026-11-02T00:00:00Z,2026-11-09T00:00:00Z)?",
+      "probability_true": 0.232
+    },
+    {
+      "event_id": "usgs-2026w45-atleast3-m6",
+      "domain": "geophysics",
+      "question": "At least three worldwide USGS events with magnitude >= 6.0 and UTC time in [2026-11-02T00:00:00Z,2026-11-09T00:00:00Z)?",
+      "probability_true": 0.425
+    }
+  ],
+  "resolution_rule": "After 2026-11-23T00:00:00Z, query USGS authoritative event catalog with strict UTC [start,end) filtering; count unique events, inclusive minmagnitude; record query and retrieved event IDs; cases of missing or inconsistent data remain unresolved.",
+  "caveats": [
+    "The Poisson assumption ignores aftershocks and temporal clustering; forecasts are simplistic statistical baselines, not hazard warnings.",
+    "Independent oracle verification, calibration and measured curiosity gain are not established by publishing a forecast.",
+    "Both questions share the same underlying earthquakes, so statistical dependence matters.",
+    "This is a public preregistration proof-of-concept; branch history can be rewritten; immutable-commit URL must be referenced in subsequent submissions."
+  ]
+}

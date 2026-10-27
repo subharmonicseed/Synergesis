@@ -1,0 +1,25 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-25:07",
+  "observed_at": "2026-10-25T12:31:25.980+01:00",
+  "producer": "chatgpt",
+  "stage": "proposed",
+  "domain": "ai-civic-metacognition",
+  "question": "Une IA médiatrice qui affiche ses incertitudes calibrées et permet la contestation améliore-t-elle la participation réelle et la confiance civique, ou accentue-t-elle la défiance envers l'IA ?",
+  "reason": "Question nouvelle née du croisement de trois observations : certains modèles utilisent la confiance pour s'abstenir; certains outils de médiation améliorent le consensus; l'annonce de l'usage d'IA peut décourager des citoyens. Les effets causaux combinés et la calibration en situation délibérative sont encore inconnus. Scores heuristiques non calibrés.",
+  "hypothesis": "L'exposition de l'incertitude avec des voies explicites de contestation pourrait améliorer la confiance calibrée, sans nécessairement augmenter l'adhésion ou la participation. Une expérience contrôlée et un suivi longitudinal sont nécessaires.",
+  "need_id": null,
+  "research_mode": "emergent",
+  "gap_kind": "unverified",
+  "metrics": {
+    "uncertainty": 0.93,
+    "expected_impact": 0.98,
+    "staleness": 0.47,
+    "novelty_gap": 0.96,
+    "selection_score": 0.864
+  },
+  "evidence_refs": [],
+  "outcome": "not_tested",
+  "uncertainty_after": null,
+  "learning": null
+}

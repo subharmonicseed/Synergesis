@@ -1,0 +1,28 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-25:25",
+  "observed_at": "2026-10-25T12:50:25.905+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "forecasting-calibration-baselines",
+  "question": "Les nouvelles versions ou tailles de modèles donnent-elles automatiquement de meilleures probabilités prédictives lorsqu'on tient constantes les questions, les dates et les conditions d'accès aux informations ?",
+  "reason": "Un risque de l'hypothèse 22 consiste à attribuer tout changement de score à SYN-CURIOSITY alors qu'il pourrait provenir d'un nouveau modèle, du choix des questions ou des fréquences de base. Examiner étude 2026 comparative Brier, avec réserves sur données historiques. Scores heuristiques non calibrés.",
+  "hypothesis": "Augmenter la génération ou le rang d'un modèle garantit à lui seul une diminution mesurable de l'erreur Brier hors échantillon, indépendamment de la composition des questions.",
+  "need_id": null,
+  "research_mode": "adversarial",
+  "gap_kind": "contradiction",
+  "metrics": {
+    "uncertainty": 0.82,
+    "expected_impact": 0.87,
+    "staleness": 0.83,
+    "novelty_gap": 0.8,
+    "selection_score": 0.838
+  },
+  "evidence_refs": [
+    "https://arxiv.org/abs/2609.32885",
+    "https://www.forecastbench.org/docs/"
+  ],
+  "outcome": "inconclusive",
+  "uncertainty_after": 0.62,
+  "learning": "Prépublication 26 septembre 2026 sur 3000 marchés binaires résolus et 9 catégories, mode question seule sans recherche : dans strate post-cutoff déclarée, quatre modèles Claude affichent Brier 0,183-0,192 et battent une référence de taux de base de 0,024-0,033; les changements Claude version/tier évalués n'améliorent pas significativement les scores; Qwen 32B fait mieux que 7B en comparaison appariée, sans écart significatif avec le taux de base. Le non-rejet d'un écart ne prouve pas l'absence d'effet, les données rétrospectives peuvent poser des risques de contamination. Résultat important : comparer les mêmes questions, séparer modèles et versions, garder un prédicteur de taux de base, étudier fiabilité/résolution séparément plutôt que juger par une seule moyenne Brier."
+}

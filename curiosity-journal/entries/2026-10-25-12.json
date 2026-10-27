@@ -1,0 +1,28 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-25:12",
+  "observed_at": "2026-10-25T12:39:26.995+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "human-ai-independent-judgment",
+  "question": "Un jugement humain enregistré avant l'avis d'une IA réduit-il l'adoption de recommandations trompeuses par rapport à une présentation de l'avis en premier ?",
+  "reason": "Continuation de l'hypothèse 11 : vérifier si le simple ordre des contributions protège l'indépendance cognitive. Expérience randomisée de septembre 2026 sur cas pédagogiques simulés ; scores d'attention heuristiques non calibrés.",
+  "hypothesis": "Demander une réponse indépendante avant le conseil IA réduit l'acceptation d'un mauvais conseil, sans nécessairement réduire les avantages d'un bon conseil.",
+  "need_id": null,
+  "research_mode": "directed",
+  "gap_kind": "unverified",
+  "metrics": {
+    "uncertainty": 0.77,
+    "expected_impact": 0.94,
+    "staleness": 0.5,
+    "novelty_gap": 0.83,
+    "selection_score": 0.796
+  },
+  "evidence_refs": [
+    "https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2026.1936522/full",
+    "https://pubmed.ncbi.nlm.nih.gov/42865604/"
+  ],
+  "outcome": "supported",
+  "uncertainty_after": 0.54,
+  "learning": "Frontiers in Psychology (28 septembre 2026), expérience randomisée de 240 futurs enseignants recrutés dans une université chinoise; 218 retenus après exclusions dans l'analyse générale. Sous recommandations IA trompeuses, la condition jugement indépendant avant IA surpasse IA avant premier jugement, OR=1,912 [1,413;2,589] sur la précision combinée plan+rationale; la différence sous recommandations conformes à la clé experte n'est pas statistiquement significative (OR 0,821, p=0,225). Attention: l'intervention combine chronologie, engagement initial et prompt de révision; validité externe vers débats citoyens non établie. Prochaine lacune: jugements sur valeurs sans réponse experte objective."
+}

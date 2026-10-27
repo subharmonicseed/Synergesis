@@ -1,0 +1,28 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-26:02",
+  "observed_at": "2026-10-26T00:23:34.736+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "agent-memory-retrieval-workflow-collision",
+  "question": "Une mémoire persistante rappelée uniquement par similarité sémantique évite-t-elle les interférences lorsque des demandes presque identiques exigent des procédures opposées ?",
+  "reason": "Prolonge les questions non résolues 031, 036, 047 et 049 sur la mémoire et l'héritage sans répéter la question générale du transfert de compétences. Pertinence causale : le rappel d'un précédent pertinent lexicalement mais incompatible procéduralement peut inverser la bonne action. Pouvoir discriminant : tâches BFCL avec arguments manquants versus complets, contrôle du groupe d'origine des souvenirs et exactitude sur tâches anciennes et nouvelles; gain espéré : distinguer persistance, bonne récupération et bonne application. Scores heuristiques non calibrés.",
+  "hypothesis": "Une récupération de souvenirs par similarité de requête suffit à empêcher le transfert négatif entre workflows proches et à préserver les performances antérieures.",
+  "need_id": null,
+  "research_mode": "adversarial",
+  "gap_kind": "contradiction",
+  "metrics": {
+    "uncertainty": 0.92,
+    "expected_impact": 0.99,
+    "staleness": 0.65,
+    "novelty_gap": 0.93,
+    "selection_score": 0.896
+  },
+  "evidence_refs": [
+    "https://arxiv.org/abs/2610.25858",
+    "https://arxiv.org/abs/2605.09315"
+  ],
+  "outcome": "refuted",
+  "uncertainty_after": 0.53,
+  "learning": "Observation primaire : Chen et al. (prépublication du 19 octobre 2026) comparent ReasoningBank, GEPA et Meta-Harness sur quatre flux changeants issus de BIRD, BFCL et ScienceWorld. Dans le flux combiné, 52 % des épisodes BFCL-Miss récupèrent à la fin un souvenir du workflow opposé BFCL-Base, et 46 % des épisodes BFCL-Base récupèrent l'inverse. Dans le flux de changement de workflow, cette collision accompagne une baisse de 8 points de l'exactitude BFCL-Miss après son pic. La similarité seule ne distingue pas les obligations de demander des précisions et d'agir immédiatement. Contre-argument : le rappel par similarité évite l'oubli post-bloc lorsque les domaines sont nettement séparés; ces résultats portent sur trois méthodes et des bancs déterminés, pas sur le Glyph Graph de SYN. L'étude indépendante de Yu et al. (10 mai 2026) observe également l'érosion de capacités lors de l'évolution des mémoires. Prochaine lacune : comparer rappel lexical, rappel typé par contrat et abstention sur cas de workflows contradictoires, avec contrôle des régressions."
+}

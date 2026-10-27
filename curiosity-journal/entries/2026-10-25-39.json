@@ -1,0 +1,29 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-25:39",
+  "observed_at": "2026-10-25T13:39:28.027+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "syn-ablation-negative-control",
+  "question": "Le premier banc de tâches de transfert pour quatre conditions de SYN permet-il vraiment de distinguer une amélioration de compétence d'un simple effet de plafond ?",
+  "reason": "Après production d'un lanceur quatre bras, évaluer la capacité discriminante des exercices sur une référence déterministe qui calcule les réponses sans lire l'oracle. Données synthétiques, scores d'attention non calibrés. Interprétation limitée à cette référence.",
+  "hypothesis": "Les tâches jouets sont trop simples pour un solveur déterministe spécialisé : les quatre bras atteindront leur plafond, ce qui interdira de conclure à un bénéfice causal des compétences.",
+  "need_id": null,
+  "research_mode": "adversarial",
+  "gap_kind": "unverified",
+  "metrics": {
+    "uncertainty": 0.75,
+    "expected_impact": 0.95,
+    "staleness": 0.31,
+    "novelty_gap": 0.82,
+    "selection_score": 0.756
+  },
+  "evidence_refs": [
+    "https://github.com/subharmonicseed/Synergesis/blob/feat/syn-curiosity-observatory-v0/curiosity-journal/protocols/2026-10-25-four-arm-negative-control-receipt.md",
+    "https://github.com/subharmonicseed/Synergesis/blob/feat/syn-curiosity-observatory-v0/curiosity-journal/tools/run_negative_control_v0.py",
+    "https://github.com/subharmonicseed/Synergesis/blob/feat/syn-curiosity-observatory-v0/curiosity-journal/tools/syn_four_arm_trial_v0.py"
+  ],
+  "outcome": "supported",
+  "uncertainty_after": 0.32,
+  "learning": "Contrôle négatif local effectivement exécuté : génération de 12 exercices d'entraînement et 24 tâches test (3 domaines), 96 réponses produites par un PROGRAMME DÉTERMINISTE SANS LLM ET SANS SYN, vérifiées ensuite par l'oracle séparé. Chaque condition (baseline/journal/research/skills) obtient 24/24, gain apparié nul; les 29 tests logiciels répartis sur trois suites passent. Ceci confirme un plafond POUR CE SOLVEUR et un chemin de code reproductible, pas une égalité des architectures ni une amélioration de SYN. Les bras research/skills restent des variantes de prompt à procédure humaine, non des modules autonomes. Prochain contrôle : faire réellement répondre un modèle fixé à des exercices plus difficiles, puis comparer à budget et oracle caché."
+}

@@ -1,0 +1,28 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-26:19",
+  "observed_at": "2026-10-26T22:04:07+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "stratospheric-seasonal-predictability-climate-model-blindspot",
+  "question": "Une relation prédictive saisonnière stratosphère-surface observée peut-elle être largement sous-représentée dans des modèles climatiques, et comment distinguer habileté rétrospective et prévision prospective ?",
+  "reason": "Contrôle de diversification : les dix dernières entrées concentrent de nombreuses analyses de mémoire et de métacognition; la prévisibilité stratosphérique est absente du journal. Pertinence causale : le vent méridien stratosphérique d'octobre peut précéder une évolution du vortex polaire puis du Southern Annular Mode estival. Pouvoir discriminant : comparaison des réanalyses ERA5/MERRA-2/JRA-55, du signal avec et sans contrôle de la persistance du SAM, et des 35 modèles CMIP6; un essai prospectif figé permettrait de tester l'utilité hors échantillon. Gain espéré : identifier une lacune structurelle de représentation d'un précurseur climatique sans confondre corrélation et prévision validée en temps réel. Scores heuristiques non calibrés.",
+  "hypothesis": "Dans les réanalyses examinées par Collingwood et al., un indice d'octobre de vent méridien de haute stratosphère est associé au Southern Annular Mode de décembre-janvier-février, alors que les modèles CMIP6 reproduisent insuffisamment cette téléconnexion.",
+  "need_id": null,
+  "research_mode": "emergent",
+  "gap_kind": "missing_domain",
+  "metrics": {
+    "uncertainty": 0.79,
+    "expected_impact": 0.8,
+    "staleness": 0.54,
+    "novelty_gap": 0.94,
+    "selection_score": 0.774
+  },
+  "evidence_refs": [
+    "https://agupubs.onlinelibrary.wiley.com/doi/10.1029/2026GL123920?af=R",
+    "https://doi.org/10.24381/cds.bd0915c6"
+  ],
+  "outcome": "supported",
+  "uncertainty_after": 0.5,
+  "learning": "Fait primaire daté : Collingwood et al., Geophysical Research Letters, 22 octobre 2026, analysent 45 hivers complets (1979/80–2024/25) en ERA5 et rapportent une corrélation r=0,53 entre le vent méridien de haute stratosphère d'octobre dans l'hémisphère Sud et le Southern Annular Mode de décembre à février; en contrôlant le SAM d'octobre, r partiel=0,51. Le signal est également examiné dans MERRA-2/JRA-55; les modèles CMIP6 reproduisent généralement mal les téléconnexions analogues des deux hémisphères, principalement sur le chemin stratosphérique vers le vortex. Objections : corrélations rétrospectives sans test opérationnel prospectif préenregistré; choix des indices, différences inter-réanalyses et surreprésentation possible d'une famille de modèles dans l'ensemble. Le signal n'est ni causalement isolé ni une garantie de prévisions météo locales. Conclusion : une lacune de représentation climatologique plausible et documentée, pas une amélioration de SYN. Prochaine lacune : geler une prévision saisonnière 2026/27 avant constat, comparer à la persistance et aux prévisions opérationnelles puis évaluer sur plusieurs années."
+}

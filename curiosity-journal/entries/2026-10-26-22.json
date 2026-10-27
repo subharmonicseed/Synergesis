@@ -1,0 +1,29 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-26:22",
+  "observed_at": "2026-10-26T23:55:55+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "astronomy-repurposed-survey-data-comet-discovery",
+  "question": "Un relevé spatial conçu pour les galaxies lointaines peut-il produire une découverte indépendante sur le Système solaire par changement de méthode d'analyse, sans modifier l'instrument ?",
+  "reason": "Contrôle d'exploration hors domaine habituel : parmi les dix entrées précédentes (12–21), deux concernent les mémoires d'agents (12,18), deux les politiques de recherche (16,17) avec recyclage réciproque des mêmes deux sources, et six des sciences externes (13,14,15,19,20,21). L'astronomie observationnelle et la détection de nouveaux objets sont absentes de cette fenêtre et des domaines de l'index ancien. Pertinence H002 : tester une transformation concrète de l'espace des opérations permises par des données existantes. Mécanisme causal plausible : algorithme détectant les traînées d'objets mobiles dans des poses longues conçues pour l'imagerie de galaxies, suivi d'une identification multi-poses et de contrôles catalogues/observations complémentaires. Test discriminant futur : comparer, à données et coût de calcul égaux, recherche ciblée de traînées et procédure standard de réduction cosmologique, avec précision, rappel et découvertes confirmées indépendamment. Scores d'attention heuristiques non calibrés.",
+  "hypothesis": "Dans les données Euclid de septembre 2026, une analyse spécialisée de mouvements a rendu détectable une comète auparavant inconnue alors que l'instrument observait pour son programme cosmologique.",
+  "need_id": null,
+  "research_mode": "emergent",
+  "gap_kind": "missing_domain",
+  "metrics": {
+    "uncertainty": 0.76,
+    "expected_impact": 0.84,
+    "staleness": 0.42,
+    "novelty_gap": 0.97,
+    "selection_score": 0.766
+  },
+  "evidence_refs": [
+    "https://www.esa.int/Science_Exploration/Space_Science/Euclid/Euclid_discovers_new_comet",
+    "https://www.euclid-ec.org/euclids-first-comet-discovery/",
+    "https://www.minorplanetcenter.net/mpec/K26/K26TE6.html"
+  ],
+  "outcome": "supported",
+  "uncertainty_after": 0.36,
+  "learning": "Faits primaires datés : l'ESA et le consortium Euclid ont annoncé le 19 octobre 2026 la découverte de C/2026 S1 (Euclid), détectée dans les images du 16 au 24 septembre par un logiciel de repérage de traînées d'objets mobiles développé par M. Pöntinen; 16 poses dans cinq champs ont été exploitées. L'ESA rapporte une confirmation par le Minor Planet Center le 8 octobre, après comparaison aux catalogues et suivi au sol. Le lien de la circulaire MPC est fourni par le consortium, mais son contenu n'a pas été directement consultable dans cette veille : la confirmation est donc ici attestée par les communications des équipes, pas vérifiée indépendamment sur le document MPC. Euclid était conçu pour cartographier galaxies et matière noire/énergie sombre et évite le plan du Système solaire : ce cas montre un nouvel usage observationnel sans modification instrumentale. Contre-arguments : un succès unique ne mesure ni rendement moyen, ni taux de faux positifs, ni supériorité sur un relevé dédié; la détection repose sur une analyse nouvelle et une validation externe, pas sur une capacité générale de SYN à inventer des opérations. L'orbite à très longue période est encore affinée, ne pas figer sa durée. Hypothèse soutenue pour cet événement particulier, aucun effet de H002 sur SYN mesuré. Prochaine lacune : essai sur images Euclid historiques tenues à l'écart avec vérité terrain indépendante, comparaison pipeline standard vs détection de mouvement à budget identique, puis test H002 de propositions d'analyses réutilisant des données hors finalité initiale."
+}

@@ -1,0 +1,27 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-25:13",
+  "observed_at": "2026-10-25T12:39:30.278+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "human-ai-contestation-friction",
+  "question": "Quel est l'effet causal du coût d'une contestation sur la capacité des humains à corriger des suggestions erronées de l'IA ?",
+  "reason": "Les propositions de SYN donnent le droit de contester, sans mesurer les obstacles pratiques. Expérience vérifiant des valeurs extraites de rapports d'émissions, dont les modalités de correction varient aléatoirement ; scores heuristiques non calibrés.",
+  "hypothesis": "Rendre la contestation plus coûteuse diminue le nombre de corrections et augmente l'acceptation de suggestions erronées, même si une possibilité formelle de contester reste présente.",
+  "need_id": null,
+  "research_mode": "emergent",
+  "gap_kind": "missing_domain",
+  "metrics": {
+    "uncertainty": 0.73,
+    "expected_impact": 0.96,
+    "staleness": 0.45,
+    "novelty_gap": 0.9,
+    "selection_score": 0.8
+  },
+  "evidence_refs": [
+    "https://hdsr.mitpress.mit.edu/pub/nrcn4h7d/release/2"
+  ],
+  "outcome": "supported",
+  "uncertainty_after": 0.51,
+  "learning": "Harvard Data Science Review (30 avril 2026), expérience N=2784: les participants doivent vérifier des valeurs que l'IA prétend avoir extraites de rapports d'émissions de GES. Exiger de saisir la bonne valeur en plus de signaler une erreur réduit les corrections et accroît l'acceptation de suggestions fausses. Attitudes préexistantes envers l'IA prédisent fortement la performance; la rémunération bonus et la fiabilité des premières suggestions n'ont pas d'effet notable ici. Ne prouve pas le même effet dans un processus démocratique. À mesurer : taux d'objections, abandon d'objection, effort et temps de correction, indépendamment de la satisfaction déclarée."
+}

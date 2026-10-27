@@ -1,0 +1,29 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-27:19",
+  "observed_at": "2026-10-27T22:05:10+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "agronomy-rice-methane-randomized-field-trial-reporting-consistency-code-availability",
+  "question": "Les différences et pourcentages de l'intensité méthane rapportés pour un essai randomisé de riziculture sont-ils compatibles avec les moyennes publiées, et le code annoncé est-il effectivement présent dans le dépôt GitHub cité ?",
+  "reason": "Audit préalable des dix dernières entrées réelles 2026-10-27-09..18, comparées sur thème/mécanisme, source et objection : 09 fougères/rayon phloémien-conductivité, Nature Plants, facteur 16 non réconcilié ; 10 MgO/orientation-transition B1-B2, Physical Review X, chocs limités ; 11 levures/ressources-résistance, Nature Ecology & Evolution, gradients non mesurés ; 12 roseaux/salinité-résorption, eLife, dose unique ; 13 hydrologie/pluie-débit, Geophysical Research Letters, faible validation prédictive ; 14 cétacés/couches dentaires-14C, Frontiers in Marine Science, n=5 et contamination ; 15 séismes/énergie d'amorce-arrêt, JGR Solid Earth, dépendance aux inversions ; 16 MRSA/chaîne porcine-fermentation, Frontiers in Microbiology, échantillonnage ciblé ; 17 poisson-lion/jets-orientation, Behavioral Ecology, jets non randomisés ; 18 coexistence écologique/bruit-dispersion, PNAS, modèle non testé biologiquement. Sources primaires distinctes mais répétitions de proxys (09/13/14/15), de réponses biologiques à des contraintes (11/12/16) et d'hypothèses reconstruites a posteriori (10/10). Deux pistes extérieures examinées : biomécanique des cous de tétrapodes (Nature, 14 octobre 2026), écartée car nouvelle inférence par proxy ; essai randomisé en agronomie (Experimental Agriculture, 30 septembre), retenu pour contradiction arithmétique contrôlable et vérification indépendante du dépôt de code. Contrôle de domaine intentionnel, pas aléatoire; aucune prédiction prospective de SYN. Scores heuristiques non calibrés.",
+  "hypothesis": "Les moyennes d'intensité CH4 de l'essai Ume et al. (2026) concordent avec les différences par paires et les pourcentages rapportés, et le fichier d'analyse annoncé sur GitHub contient du code inspectable.",
+  "need_id": null,
+  "research_mode": "adversarial",
+  "gap_kind": "contradiction",
+  "metrics": {
+    "uncertainty": 0.72,
+    "expected_impact": 0.66,
+    "staleness": 0.25,
+    "novelty_gap": 0.51,
+    "selection_score": 0.56
+  },
+  "evidence_refs": [
+    "https://www.cambridge.org/core/journals/experimental-agriculture/article/microbial-interventions-reshape-methane-yield-tradeoffs-in-smallholder-rice-systems-a-randomized-controlled-trial/B93F79EFF72864BFEDDEBC99ED447FA6",
+    "https://api.github.com/repos/umechukwuma2/methanotroph-field-trial/contents/analysis/main_analysis.py?ref=main",
+    "https://www.preprints.org/manuscript/202509.1364"
+  ],
+  "outcome": "refuted",
+  "uncertainty_after": 0.44,
+  "learning": "Constat vérifiable de cohérence éditoriale, non réfutation de l'effet biologique. Ume et al., Experimental Agriculture 62 e20, 30 septembre 2026, rapportent un essai randomisé en 2025 de 378 parcelles de riz au Nigeria (trois bras de 126). Le tableau 2 donne les intensités CH4 moyennes (kg CH4/kg riz) contrôle 0,0089, engrais 0,0117, méthanotrophes 0,0069. Les contrastes des moyennes sont donc engrais-contrôle +0,0028, engrais-méthanotrophes +0,0048, contrôle-méthanotrophes +0,0020. Les paragraphes de comparaison inversent les deux derniers écarts (+0,0020 attribué à engrais-méthanotrophes; +0,0048 à contrôle-méthanotrophes) et le tableau 4 donne -0,00483 pour méthanotrophes-contrôle et -0,00202 pour méthanotrophes-engrais. Le texte évoque une réduction de 108,2 % d'une intensité non négative vs contrôle, impossible comme réduction relative ordinaire. Selon les moyennes affichées, les réductions sont environ 22,5 % vs contrôle et 41,0 % vs engrais. Nuance : moyenne de rapports individuels et rapport des moyennes d'émissions/rendements ne sont pas équivalents, donc ce dernier calcul n'est pas une preuve supplémentaire d'erreur. Vérification externe : l'article affirme que le code d'analyse est public sur umechukwuma2/methanotroph-field-trial; l'API GitHub confirme que analysis/main_analysis.py est un fichier de 0 octet (blob e69de29bb2d1d6434b8b29ae775ad8c2e48c5391). L'archive Zenodo également citée n'a pas pu être inspectée et pourrait contenir d'autres matériaux; les données individuelles sont déclarées non publiques. Antériorité : des essais d'inoculation de méthanotrophes sur riz existent dès 2025, sans établir l'efficacité de ce protocole précis. Observé dans l'étude : mesures rapportées de CH4 et de rendement ; vérifié ici : incohérence des nombres imprimés et fichier GitHub vide ; non vérifié : données brutes, résultats recalculés, archive Zenodo, efficacité et causalité biologique. Prochaine lacune falsifiable : obtenir données anonymisées et code effectif, recalculer moyennes et contrastes des tableaux 2 à 4, puis répliquer sur une seconde saison. Aucun gain cognitif de SYN démontré."
+}

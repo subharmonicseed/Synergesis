@@ -1,0 +1,29 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-25:05",
+  "observed_at": "2026-10-25T12:30:24.637+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "ai-democratic-deliberation",
+  "question": "Une médiation par IA peut-elle améliorer le consensus au sein de petits groupes tout en dissuadant d'autres citoyens de participer ?",
+  "reason": "Le cycle précédent observait des pilotes démocratiques, sans résultats causaux; il faut séparer qualité des accords obtenus et sélection des personnes qui acceptent de participer. Études expérimentales de 2024 et 2025; scores heuristiques non calibrés.",
+  "hypothesis": "L'IA peut faciliter la formulation de consensus parmi les participants présents, mais la simple annonce de son usage peut réduire l'intention de participer, affaiblissant la représentativité.",
+  "need_id": null,
+  "research_mode": "adversarial",
+  "gap_kind": "contradiction",
+  "metrics": {
+    "uncertainty": 0.84,
+    "expected_impact": 0.92,
+    "staleness": 0.44,
+    "novelty_gap": 0.87,
+    "selection_score": 0.798
+  },
+  "evidence_refs": [
+    "https://www.science.org/doi/10.1126/science.adq2852",
+    "https://www.sciencedirect.com/science/article/pii/S0740624X25000735",
+    "https://www.oecd.org/en/publications/artificial-intelligence-and-the-future-of-citizen-participation_a1ee2e0a-en/full-report/mapping-the-risks-and-challenges-of-using-ai-for-citizen-participation_f3ffbba1.html"
+  ],
+  "outcome": "supported",
+  "uncertainty_after": 0.61,
+  "learning": "Science (2024; N=5734, Royaume-Uni) : une médiation LLM a produit des formulations davantage approuvées et une convergence d'opinions dans des conditions expérimentales. Government Information Quarterly (2025; enquête randomisée représentative en Allemagne, n=1850) : présenter une délibération comme facilitée par l'IA a diminué l'intention déclarée de participer et la qualité anticipée, sans mesurer les comportements réels de participation. OCDE (2026) : 32 cas sur 50 sont pilotes/ad hoc. Ces résultats mesurent des issues différentes et ne prouvent pas qu'un même déploiement créerait les deux effets. Prochain test : participation effective, inclusion, diversité, influence politique réelle et suivi longitudinal."
+}

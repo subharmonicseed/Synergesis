@@ -1,0 +1,29 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-25:04",
+  "observed_at": "2026-10-25T12:30:22.048+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "ai-metacognition",
+  "question": "Les modèles de langage peuvent-ils utiliser des signaux de confiance pour choisir de s'abstenir et détecter une erreur, sans que leur confiance verbalisée soit nécessairement bien calibrée ?",
+  "reason": "Le journal initial de SYN mesure l'incertitude par des scores heuristiques, mais n'a pas vérifié si l'auto-estimation d'un modèle prédit ses erreurs. Rechercher une expérience causale et un benchmark externe. Scores heuristiques non calibrés.",
+  "hypothesis": "Certains LLM utilisent causalement des signaux de confiance pour réguler l'abstention, tandis que la qualité de leur calibration verbalisée varie fortement selon modèle et tâche.",
+  "need_id": null,
+  "research_mode": "adversarial",
+  "gap_kind": "unverified",
+  "metrics": {
+    "uncertainty": 0.79,
+    "expected_impact": 0.9,
+    "staleness": 0.56,
+    "novelty_gap": 0.92,
+    "selection_score": 0.814
+  },
+  "evidence_refs": [
+    "https://www.nature.com/articles/s42256-026-01293-x",
+    "https://arxiv.org/abs/2607.20526",
+    "https://research.google/pubs/metafaith-faithful-natural-language-uncertainty-expression-in-llms/"
+  ],
+  "outcome": "supported",
+  "uncertainty_after": 0.56,
+  "learning": "Nature Machine Intelligence (7 sept. 2026) : perturbations expérimentales des représentations de confiance modifient les taux d'abstention de modèles testés; c'est un contrôle métacognitif opérationnel, pas une preuve de conscience ou de fiabilité universelle. ConfidenceBench (juil. 2026) : 15 LLM, 200 questions privées, écarts importants entre précision et calibration de la confiance verbalisée. SYN doit enregistrer prédictions probabilistes préalables, résultats vérifiés, Brier et taux d'abstention; ne pas confondre baisse déclarée d'incertitude et calibration mesurée. Reste à valider hors de ces tâches."
+}

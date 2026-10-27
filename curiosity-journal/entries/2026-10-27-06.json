@@ -1,0 +1,27 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-27:06",
+  "observed_at": "2026-10-27T04:54:41+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "ecology-observation-channel-bias-fruiting-versus-environmental-dna",
+  "question": "Un inventaire de biodiversité fondé sur les fructifications visibles représente-t-il adéquatement la diversité des myxomycètes nivicoles que détecte aussi l'ADN environnemental des sols ?",
+  "reason": "Contrôle de dépaysement hors IA et H001/H002 : l'écologie des myxomycètes nivicoles est absente des dix dernières entrées et de l'index ancien. Mécanisme causal distinct : une méthode observe un état transitoire de fructification lié au climat et au substrat, l'autre une présence moléculaire hétérogène dans le sol; les deux canaux peuvent se manquer réciproquement. Comparaison explicite des dix dernières : 17/22/04 partagent le cadrage 'possibilité/usage nouveau'; 18 traite de mémoire; 19/20/21/01/02/03 explorent climat, sommeil, mousse, glaciologie, chimie et archées, sans source dupliquée dans cette fenêtre sauf les références 17 à 16 antérieure. Pouvoir discriminant : échantillonnage apparié par site, saison et profondeur, double inventaire avec validation taxonomique, puis test de détection sur échantillons réservés; conserver la distinction variants de séquence/espèces. La découverte n'est pas une prédiction préalable de SYN. Scores heuristiques non calibrés.",
+  "hypothesis": "Un relevé unique de fructifications nivicoles suffit à représenter la plupart des variantes de code-barres détectables par métabarcoding du sol dans les mêmes régions.",
+  "need_id": null,
+  "research_mode": "emergent",
+  "gap_kind": "missing_domain",
+  "metrics": {
+    "uncertainty": 0.73,
+    "expected_impact": 0.77,
+    "staleness": 0.42,
+    "novelty_gap": 0.96,
+    "selection_score": 0.73
+  },
+  "evidence_refs": [
+    "https://www.nature.com/articles/s41598-026-75852-y"
+  ],
+  "outcome": "refuted",
+  "uncertainty_after": 0.35,
+  "learning": "Fait primaire daté : Shchepin et al., Scientific Reports, 26 octobre 2026, comparent 172 collections de fructifications (48 ribotypes) et 187 échantillons de sol analysés par métabarcoding 18S (730 ASV de myxomycètes, dont 115 classés nivicoles) dans deux parcs du Kazakhstan. Seuls 7,2 % des variants de code-barres nivicoles sont communs aux deux approches; 90,4 % des ASV nivicoles du sol et 77,1 % des ribotypes des fructifications n'apparaissent que dans un canal. Deux relevés de fructifications d'une même région espacés de douze ans partagent seulement 26 % de leurs ribotypes, avec différences possibles de sites. L'hypothèse de suffisance d'un inventaire visible unique est réfutée dans cet échantillon. Contre-arguments : 7,2 % concerne des variants moléculaires, PAS la proportion d'espèces partagées (l'accord au niveau taxon est plus élevé); un signal d'ADN n'atteste pas un organisme vivant ou actif; faux négatifs de PCR, biais d'amorces, microhétérogénéité spatiale et désaccord temporel entre relevés; l'inventaire combiné ne garantit pas l'exhaustivité. Aucune extrapolation à tous les écosystèmes ni aux mémoires artificielles n'est prouvée. Prédiction à tester : des échantillonnages appariés répétés, combinant fructifications et ADN, retrouveront davantage de variants validés que chaque canal seul à budget d'effort contrôlé. Prochaine lacune : estimation de sensibilité et faux positifs par canal sur témoins de référence, réplications saisonnières, comparaison au niveau espèce et mesure du coût par variant confirmé."
+}

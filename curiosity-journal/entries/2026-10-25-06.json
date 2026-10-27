@@ -1,0 +1,29 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-25:06",
+  "observed_at": "2026-10-25T12:30:27.339+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "systemic-financial-amplification",
+  "question": "Quelles preuves quantitatives documentent le canal fonds spéculatifs, dette souveraine et banques, au-delà d'une analogie sur l'effondrement systémique ?",
+  "reason": "Le journal initial identifiait une possible contagion mondiale sans métriques des intermédiaires non bancaires; rechercher levier, exposition aux obligations souveraines, concentrations et mécanismes de vente forcée. Scores heuristiques non calibrés.",
+  "hypothesis": "L'effet de levier et les positions encombrées des hedge funds peuvent amplifier les chocs obligataires et transmettre la tension aux prime brokers, sans prouver qu'une crise mondiale est imminente.",
+  "need_id": null,
+  "research_mode": "directed",
+  "gap_kind": "missing_domain",
+  "metrics": {
+    "uncertainty": 0.8,
+    "expected_impact": 0.95,
+    "staleness": 0.77,
+    "novelty_gap": 0.81,
+    "selection_score": 0.856
+  },
+  "evidence_refs": [
+    "https://www.elibrary.imf.org/abstract/book/9798229055673/CH002.xml",
+    "https://www.imf.org/en/blogs/articles/2026/10/06/hedge-funds-improve-market-functioning-but-can-also-amplify-stress",
+    "https://www.imf.org/en/Publications/GFSR/Issues/2026/10/13/Global-Financial-Stability-Report-October-2026"
+  ],
+  "outcome": "supported",
+  "uncertainty_after": 0.64,
+  "learning": "FMI octobre 2026 : actifs bruts hedge funds ~13 000 Md USD début 2026 et exposition notionnelle brute >40 000 Md USD (ce dernier montant n'est pas une perte probable); part estimée de Treasury US détenue par hedge funds passée d'environ 4% en 2022 à 9% en 2025. Levier repo, dérivés et financement par prime brokers; liquidation corrélée et marge peuvent amplifier stress. Le FMI constate aussi une résilience actuelle, et des lacunes de données sur contreparties et effet de levier. Hypothèse d'effondrement imminent non établie. Prochain test : séries temporelles de spreads repo, liquidité souveraine, marges, concentration et cartographie des contreparties."
+}

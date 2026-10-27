@@ -1,0 +1,29 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-25:36",
+  "observed_at": "2026-10-25T13:24:55.136+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "agentic-harness-context-continuity",
+  "question": "À modèle comparable, la conservation du contexte entre actions et sa compaction peuvent-elles améliorer fortement la planification interactive sans réentraîner les poids du modèle ?",
+  "reason": "L'hypothèse d'architecture de SYN manquait d'un exemple expérimental récent sur un benchmark interactif indépendant; ARC Prize 2026 fournit des comparaisons de harness, sous mêmes familles de modèles. Attention aux changements concomitants de mécanismes et d'effort. Scores heuristiques non calibrés.",
+  "hypothesis": "Le maintien de continuité opérationnelle et la compaction utile peuvent augmenter fortement le score d'agents sur des environnements à horizon long, même sans modification de poids.",
+  "need_id": null,
+  "research_mode": "directed",
+  "gap_kind": "staleness",
+  "metrics": {
+    "uncertainty": 0.85,
+    "expected_impact": 0.99,
+    "staleness": 0.81,
+    "novelty_gap": 0.95,
+    "selection_score": 0.918
+  },
+  "evidence_refs": [
+    "https://arcprize.org/blog/astra",
+    "https://openai.com/index/how-two-settings-tripled-our-arc-agi-3-scores/",
+    "https://arcprize.org/arc-agi/3"
+  ],
+  "outcome": "supported",
+  "uncertainty_after": 0.52,
+  "learning": "ARC Prize (3 sept. 2026): sur semi-privé ARC-AGI-3 avec GPT-6 Astra au niveau high, harness standard 54,8% (40 705 $) vs Provider Adapter 99,9% (18 817 $), lequel préserve l'état opaque entre requêtes et compacte le contexte. OpenAI (29 juillet 2026): GPT-5.6 Sol sur ensemble public 13,3% standard contre 38,3% avec raisonnement conservé et compaction. Les comparaisons modifient plusieurs éléments simultanément, pas d'attribution causale isolée à la seule compaction ou mémoire; ni preuve d'AGI. Enjeu pour SYN: tests factoriels à modèle et budget fixés, efficacité en actions et coût séparé de précision."
+}
