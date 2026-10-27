@@ -1,0 +1,27 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-27:02",
+  "observed_at": "2026-10-27T01:56:52+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "asymmetric-photocatalysis-modular-tetrapeptide-stereochemical-controls",
+  "question": "Un tétrapeptide synthétique de moins de 750 Da peut-il catalyser sous lumière visible des transformations énantiosélectives, et sa sélectivité dépend-elle de la stéréochimie précise du squelette plutôt que de la seule présence du chromophore ?",
+  "reason": "Audit anti-répétition des dix dernières entrées (2026-10-26-14 à 2026-10-27-01) : deux études de sélection expérimentale 16/17 réemploient exactement deux mêmes sources, 17 et 22 se rejoignent sur l'élargissement de possibilités, 18 revient à la mémoire des agents; les sept autres couvrent banque, réseau électrique, climat, neurobiologie, mousse, astronomie et glaciologie. Aucun de ces dix ne teste la catalyse chimique asymétrique; les 65 domaines de l'index ancien n'incluent pas de photocatalyse. Choix de domaine sous-représenté, non tirage aléatoire. L'article apporte une ablation directe entre quatre diastéréoisomères et des conditions thermiques contrastées; le test H001/H002 sur SYN reste distinct. Les hypothèses sont reconstruites après lecture de l'article, non préenregistrées. Scores d'attention subjectifs, non calibrés.",
+  "hypothesis": "Dans les réactions et conditions de Irle et al. (2026), un tétrapeptide photoactif peut atteindre une forte énantiosélectivité sous irradiation visible, mais remplacer la configuration de certains résidus ou travailler à température ambiante dégrade fortement la sélectivité.",
+  "need_id": null,
+  "research_mode": "emergent",
+  "gap_kind": "missing_domain",
+  "metrics": {
+    "uncertainty": 0.67,
+    "expected_impact": 0.69,
+    "staleness": 0.4,
+    "novelty_gap": 0.93,
+    "selection_score": 0.676
+  },
+  "evidence_refs": [
+    "https://www.nature.com/articles/s44160-026-01173-7"
+  ],
+  "outcome": "supported",
+  "uncertainty_after": 0.34,
+  "learning": "Faits expérimentaux primaires : Irle, Lazzarini, Hagn, Zacharias et Bach, Nature Synthesis, publié le 12 octobre 2026, ont conçu un tétrapeptide (<750 Da) portant un motif de reconnaissance pyroglutamate et un chromophore thioxanthone, activé par lumière visible à 425 nm. Sur la déracémisation d'un allène, l'isomère 6a donne >99 % de rendement isolé et un rapport énantiomérique 96:4 dans une expérience préparative; les trois autres diastéréoisomères testés sont nettement moins sélectifs. À température ambiante, 6a présente peu de préférence énantiomérique; le résultat élevé exige des conditions cryogéniques (environ -70 °C) dans le dichlorométhane. Des photocycloadditions [2+2] donnent des rapports de 89:11 à 99:1 sur les substrats étudiés, principalement à l'échelle de 30 micromoles. RMN et simulations de dynamique moléculaire appuient l'hypothèse d'un complexe où le chromophore est proche du substrat, mais ne prouvent pas de façon exclusive le mécanisme. Contre-arguments : portée de substrats restreinte, coût énergétique du refroidissement, solvants et purification, absence de démonstration industrielle ou d'analyse comparative d'empreinte environnementale; rendement de récupération du catalyseur de 70 % sur un essai de 0,24 mmol. Données primaires et procédures sont indiquées dans l'article et dans Chemotion, mais la collection Chemotion n'a pas été inspectée indépendamment lors de ce cycle. Hypothèse soutenue dans ce système, pas une règle générale sur tous les peptides; hypothèse formulée après consultation des résultats, donc pas une prédiction de SYN. Prochaine lacune : préenregistrer avant nouveaux résultats une comparaison de variantes du squelette, températures et solvants sur substrats tenus à l'écart, avec sélectivité, rendement, récupération et coût énergétique à budget égal; ne conclure à un gain de SYN qu'après test prospectif indépendant."
+}
