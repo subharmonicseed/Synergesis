@@ -1,0 +1,8 @@
+const {test}=require('node:test');const a=require('node:assert/strict');const C=require('../extension/core.js');
+const v={id:'abcdefghijk',title:'Les phonons et le métal',channel:'Science',url:'https://www.youtube.com/watch?v=abcdefghijk'};
+test('video IDs reject unrelated sites and malformed IDs',()=>{a.equal(C.idOf(v.url),v.id);a.equal(C.idOf('https://evil.test/watch?v=abcdefghijk'),null);a.equal(C.idOf('/watch?v=bad'),null);a.equal(C.idOf('/shorts/abcdefghijk'),v.id);});
+test('topic tuning changes order; scores are not truth ratings',()=>{const b={...v,id:'12345678901',title:'Guitare classique'};let p={...C.defaults,topics:'guitare',exploration:0};a.equal(C.rank([v,b],p,[],{})[0].id,b.id);p.topics='phonons';a.equal(C.rank([v,b],p,[],{})[0].id,v.id);a.match(C.score(v,p).reason,/phonons/);});
+test('explicit feedback is reversible',()=>{a.ok(C.score(v,C.defaults,[],{[v.id]:-1}).value<C.score(v,C.defaults).value);a.equal(C.score(v,C.defaults,[],{[v.id]:0}).value,C.score(v,C.defaults).value);});
+test('discovery preference promotes a locally new channel',()=>{const old=[{...v,id:'12345678901'}];a.ok(C.score({...v,channel:'New'},C.defaults,old).value>C.score(v,C.defaults,old).value);});
+test('history is bounded and stale entries excluded',()=>{const now=Date.now();a.equal(C.prune([{at:now-31*86400000},{at:now}],now).length,1);a.equal(C.prune(Array.from({length:1000},()=>({at:now})),now).length,800);});
+test('unknown channels remain explicitly unknown and counts have denominator',()=>{const s=C.summarize([{channel:''},{channel:'Science'},{channel:'Science'}]);a.equal(s.n,3);a.equal(s.topShare,67);a.ok(s.channels.some(x=>x[0]==='Chaîne non identifiée'));});
