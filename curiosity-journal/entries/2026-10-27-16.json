@@ -1,0 +1,29 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-27:16",
+  "observed_at": "2026-10-27T16:59:26+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "food-microbiology-livestock-mrsa-genomic-farm-to-fork-survival",
+  "question": "Dans une chaîne porcine suivie de l'élevage au produit fini, les étapes de transformation et la fermentation empêchent-elles toujours la récupération de MRSA ST398 dans les charcuteries crues prêtes à consommer ?",
+  "reason": "Contrôle dirigé vers un domaine sous-représenté, microbiologie alimentaire et traçabilité génomique, hors métacognition SYN et hors H001/H002 ; non tiré au hasard. Comparaison préalable des dix entrées réelles 2026-10-27-06..15 : 06 myxomycètes/fructifications versus ADN (Scientific Reports ; ASV non équivalents aux espèces) ; 07 métamatériaux/couplage non réciproque et friction (Nature ; énergie externe) ; 08 insectes/enfouissement et coût parental (npj Biodiversity ; profondeur non randomisée) ; 09 fougères/rayon du phloème et conductivité calculée (Nature Plants ; discordance numérique non résolue) ; 10 MgO/choc selon orientation cristalline (Physical Review X ; quelques orientations et chocs courts) ; 11 levures/redistribution des nutriments et évasion de résistants (Nature Ecology & Evolution ; gradients non directement établis, pas d'extrapolation clinique) ; 12 roseaux/salinité et résorption (eLife ; une dose, une saison) ; 13 hydrologie/pluie-débit et forêt aléatoire (Geophysical Research Letters ; généralisation hors échantillon faible) ; 14 odontocètes/couches dentaires et 14C (Frontiers in Marine Science ; n=5 et pollution régionale) ; 15 séismes/énergie d'amorce versus arrêt (JGR Solid Earth ; dépendance aux inversions). Dix sources primaires distinctes, mais 06/09/13/14 répètent l'audit de mesures indirectes ; 08/11 partagent un cadrage d'arbitrage biologique ; toutes les hypothèses sont formulées après les résultats ; cinq sources principales sur nature.com. La nouvelle étude du 27 octobre 2026 teste une chaîne physique élevage-abattage-charcuterie par cultures et cgMLST, plutôt qu'une analogie instrumentale ou une expérience cognitive. Les travaux de 2011 établissent déjà la contamination possible de la chaîne porcine : la nouveauté locale est la continuité génomique jusqu'aux produits fermentés, pas la simple présence de MRSA dans le porc. Scores heuristiques non calibrés.",
+  "hypothesis": "Dans les quatre élevages et les produits de l'étude d'Ebert et al. (2026), aucune souche MRSA ST398 d'origine porcine ne reste cultivable dans une saucisse crue fermentée prête à consommer à la fin de sa durée de conservation.",
+  "need_id": null,
+  "research_mode": "adversarial",
+  "gap_kind": "contradiction",
+  "metrics": {
+    "uncertainty": 0.64,
+    "expected_impact": 0.69,
+    "staleness": 0.18,
+    "novelty_gap": 0.42,
+    "selection_score": 0.524
+  },
+  "evidence_refs": [
+    "https://www.frontiersin.org/journals/microbiology/articles/10.3389/fmicb.2026.1928317/full",
+    "https://pubmed.ncbi.nlm.nih.gov/21219774/",
+    "https://www.frontiersin.org/journals/microbiology/articles/10.3389/fmicb.2026.1770695/full"
+  ],
+  "outcome": "refuted",
+  "uncertainty_after": 0.38,
+  "learning": "Fait primaire daté : Ebert, Rose, Biggel et Fetsch, Frontiers in Microbiology, publié le 27 octobre 2026, suivent quatre élevages de porcs d'Allemagne du Nord-Est, leurs étapes d'abattage et plusieurs produits de charcuterie. Les prélèvements et fabrications étudiés datent de 2016 : publication récente ne signifie pas collecte récente. Des cultures et un séquençage génomique avec cgMLST (schéma de 1 861 loci) retrouvent des isolats MRSA ST398 étroitement apparentés entre porcs, environnements et produits finis. La souche est récupérée dans la saucisse crue tartinable fermentée jusqu'au septième jour de conservation ; un isolat est également récupéré dans une saucisse crue de type cervelas. L'hypothèse d'élimination systématique dans ces produits est réfutée. En revanche, aucun MRSA n'est détecté dans les échantillons de saucisse cuite ou de viande hachée assaisonnée étudiés : non-détection n'est pas preuve d'absence universelle. Les résultats de culture et la proximité génomique sont observés ; la voie exacte de transmission, le rôle causal des mouches et l'entrée d'une lignée humaine à l'abattoir restent des inférences. Contre-épreuve primaire : Beneke et al., Journal of Food Protection, janvier 2011, avaient déjà documenté des MRSA à différents stades d'une chaîne de viande porcine ; van Duijkeren et al., Frontiers in Microbiology, 9 février 2026, trouvent des parentés génomiques entre isolats d'élevage, de viande et humains aux Pays-Bas. La présence de MRSA dans la chaîne n'est donc pas une découverte générale nouvelle. Objections : seulement quatre élevages ciblés et une région, échantillons groupés, méthodes de détection qualitatives et fluctuations près du seuil, pas de mesure de dose infectieuse ni de risque de maladie humaine ; plusieurs traitements de transformation diffèrent simultanément, interdisant une attribution causale à la seule fermentation. Le résumé de l'article rapporte 6/12 échantillons positifs de saucisse tartinable tandis que le tableau 2 présente 4/9 dans une autre agrégation ; les dénominateurs doivent être réconciliés avant toute estimation de prévalence. Aucune prédiction préalable ni amélioration cognitive de SYN. Prochaine lacune : essais indépendants préenregistrés avec inoculum, pH, activité de l'eau, température et durée contrôlés, cultures quantitatives et limites de détection, puis évaluation du pouvoir prédictif d'un modèle de survie sur lots tenus à l'écart."
+}
