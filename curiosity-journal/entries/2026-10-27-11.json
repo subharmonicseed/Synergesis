@@ -1,0 +1,29 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-27:11",
+  "observed_at": "2026-10-27T11:57:04+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "spatial-evolution-therapy-pulse-resource-mediated-resistance-escape",
+  "question": "Dans une colonie cellulaire spatialement structurée, un traitement plus prolongé contrôle-t-il toujours mieux la population, ou peut-il libérer des mutants résistants jusque-là confinés en modifiant les zones de croissance ?",
+  "reason": "Audit préalable des dix dernières entrées réelles 2026-10-27-01 à 10 : glaciologie (amincissement géométrique; extrêmes rares; Science/WHOI), photocatalyse (stéréochimie/froid; cryogénie; Nature Synthesis), archées (méthanogenèse autonome; prévalence inconnue; Nature), méthane satellitaire (faux positifs/instruments; missions différentes; Nature/Stanford), IA au travail (performance versus apprentissage; transfert différé absent; Nature Human Behaviour), myxomycètes (canaux moléculaire/visible; ASV ≠ espèces; Scientific Reports), métamatériaux (non-réciprocité/friction; énergie externe; Nature/Zenodo), insectes (coût de protection parentale; causalité partielle; npj Biodiversity/Insects), fougères (rayon/conductivité; calcul et flux non mesuré; Nature Plants), MgO (orientation du choc/cinétique; géométries limitées; Physical Review X/Science Advances). Aucun URL primaire identique dans cette fenêtre; les cadrages 04/05 et, en amont, 26-22 restent proches de H002, et les dix hypothèses sont rétrospectives. Domaine témoin intentionnellement éloigné de l'IA et de H001/H002, non sélection aléatoire. Cette étude du 28 septembre 2026 examine une manipulation causale de la durée des impulsions, suit des lignées fluorescentes et confronte une prédiction de simulation à des expériences; elle n'établit pas une capacité prédictive de SYN. Scores subjectifs non calibrés; novelty_gap modéré pour éviter la prime automatique à la nouveauté.",
+  "hypothesis": "Dans des colonies de levure à mutants thermorésistants traçables, la suppression prolongée de la croissance sensible peut faciliter l'évasion de mutants initialement confinés; des impulsions assez courtes restaurent leur confinement, sans garantir une diminution monotone de la croissance totale.",
+  "need_id": null,
+  "research_mode": "emergent",
+  "gap_kind": "missing_domain",
+  "metrics": {
+    "uncertainty": 0.68,
+    "expected_impact": 0.76,
+    "staleness": 0.28,
+    "novelty_gap": 0.64,
+    "selection_score": 0.624
+  },
+  "evidence_refs": [
+    "https://www.nature.com/articles/s41559-026-03178-z",
+    "https://pubmed.ncbi.nlm.nih.gov/42806026/",
+    "https://github.com/KayserLab/Appold_Citak_2026"
+  ],
+  "outcome": "supported",
+  "uncertainty_after": 0.38,
+  "learning": "Faits primaires datés : Appold, Citak, Palm et Kayser, Nature Ecology & Evolution, 28 septembre 2026, ont créé des colonies de Saccharomyces cerevisiae à mutation synthétique irréversible couplant thermorésistance et changement de fluorescence. Les cellules sensibles prolifèrent à 30 °C et sont arrêtées à 35 °C; des mutants résistants continuent à croître. Sous traitement thermique continu, des lignées résistantes auparavant confinées à l'intérieur atteignent progressivement le bord. Après une impulsion de 14 h, plusieurs lignées redeviennent confinées, mais certaines peuvent encore s'échapper pendant le retard de reprise des cellules sensibles. Pour des impulsions inférieures à 6 h dans le protocole étudié, l'évasion est presque entièrement supprimée. Une simulation spatiale explicitant consommation et diffusion des nutriments reproduit qualitativement ces dynamiques et propose une frontière de régimes dans l'espace des durées traitement/pause; les auteurs ont testé expérimentalement des programmes issus de la simulation. Le rôle précis des gradients de nutriments est une interprétation mécanistique soutenue par le modèle et les trajectoires, mais les gradients n'ont pas été mesurés directement avec résolution spatiotemporelle; les seuils horaires ne sont pas universels. Objection décisive : traitement par température et levures génétiquement modifiées, non médicament administré à un patient, ni tumeur ni biofilm clinique; aucune recommandation thérapeutique n'en découle. La source de code publique des auteurs a été vérifiée, mais les données et simulations n'ont pas été réexécutées ici. Hypothèse locale soutenue rétrospectivement; aucune prédiction de SYN n'a précédé la publication. Prochaine lacune : préenregistrer sur des colonies 3D ou des biofilms indépendants une comparaison à budget et charge totale appariés des schémas courts versus longs, avec mesures directes des gradients nutritifs, taux d'évasion, charge cellulaire et coûts, puis tester si le modèle prédit mieux que des baselines sans spatialisation."
+}
