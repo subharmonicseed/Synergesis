@@ -1,6 +1,6 @@
 {
   "schema": "syn-chatgpt-context-v1",
-  "generated_at": "2026-10-26T16:59:44.647481+00:00",
+  "generated_at": "2026-10-27T19:53:41.347917+00:00",
   "scope": "public_documentary_projection_only",
   "sources": {
     "glyph-protocol": {
@@ -25,8 +25,8 @@
     },
     "continuity": {
       "path": "docs/SYN_AGENT_CONTINUITY.md",
-      "sha256": "3fce2e579f0475d39c30f1242ddf5f7a5cc1c89a5da4dd60ebe834185642afe0",
-      "git_blob_sha": "8c436688fe986598e93a02ca303ac80580834f35"
+      "sha256": "9f47b1e0337bb94ab841204685e36a93d6777c113b9845242a26be847c50a536",
+      "git_blob_sha": "cdb8a895730787bc9c47f7f93c743878602bdafb"
     },
     "chatgpt-engine": {
       "path": "docs/SYN_CHATGPT_ENGINE_V1.md",
@@ -35,16 +35,16 @@
     },
     "chatgpt-state": {
       "path": "docs/chatgpt/STATE.md",
-      "sha256": "93f1fb4e11ee75a44be3bb98dd0b04f6b558846174a9604d17af9229d21e62d0",
-      "git_blob_sha": "f9f0a38b89ae31a5d2fcb479e2ef9cb8ee78d41f"
+      "sha256": "e388f811658fbfaac49d6ce47cee97f372b02dd46d30e42454e158c7ab292bc3",
+      "git_blob_sha": "c34188a84a286670689e48b2d20357590dfd3e0d"
     }
   },
   "glyphs": [
     {
-      "glyph_id": "g:17e850a7c84ee59cc8f60767d18b7112",
+      "glyph_id": "g:04b6766fdf38e145be53c0639fe842ce",
       "glyph_type": "concept",
       "schema_version": "synergesis.glyph.v1",
-      "created_at": "2026-10-26T16:59:44.637122+00:00",
+      "created_at": "2026-10-27T19:53:41.341857+00:00",
       "actor": "SYN-SCENE-BRIDGE",
       "content": {
         "description": "Actual typed glyph ledger and relationship API",
@@ -62,10 +62,10 @@
       "metadata": {}
     },
     {
-      "glyph_id": "g:de3b59783bea57ac1c1b56591a73ff33",
+      "glyph_id": "g:cc53515d9f1eabed0f6467bfc2c0fc2b",
       "glyph_type": "decision",
       "schema_version": "synergesis.glyph.v1",
-      "created_at": "2026-10-26T16:59:44.638001+00:00",
+      "created_at": "2026-10-27T19:53:41.342239+00:00",
       "actor": "SYN-SCENE-BRIDGE",
       "content": {
         "description": "SYN is the whole cooperation; Synergesis is a technical instrument",
@@ -83,10 +83,10 @@
       "metadata": {}
     },
     {
-      "glyph_id": "g:3e68fed865ff66f59754fd348012927d",
+      "glyph_id": "g:690431035d5328730686b3ddf8c16da6",
       "glyph_type": "concept",
       "schema_version": "synergesis.glyph.v1",
-      "created_at": "2026-10-26T16:59:44.638735+00:00",
+      "created_at": "2026-10-27T19:53:41.342578+00:00",
       "actor": "SYN-SCENE-BRIDGE",
       "content": {
         "description": "Orient, estrange, test and inherit without equating agreement and truth",
@@ -104,10 +104,10 @@
       "metadata": {}
     },
     {
-      "glyph_id": "g:78ab0dadba0a2ce43dab542fed1a7e9c",
+      "glyph_id": "g:e6af7b1c85c8ff388ded1b88b3efa7a2",
       "glyph_type": "hypothesis",
       "schema_version": "synergesis.glyph.v1",
-      "created_at": "2026-10-26T16:59:44.639419+00:00",
+      "created_at": "2026-10-27T19:53:41.342864+00:00",
       "actor": "SYN-SCENE-BRIDGE",
       "content": {
         "description": "Transformation of possible actions is an untested hypothesis",
@@ -125,10 +125,10 @@
       "metadata": {}
     },
     {
-      "glyph_id": "g:00d7639284ebbda8257d9db9499ba265",
+      "glyph_id": "g:a26897ee85764dfb9dae567bf6236a7c",
       "glyph_type": "decision",
       "schema_version": "synergesis.glyph.v1",
-      "created_at": "2026-10-26T16:59:44.640163+00:00",
+      "created_at": "2026-10-27T19:53:41.343124+00:00",
       "actor": "SYN-SCENE-BRIDGE",
       "content": {
         "description": "Explicit decisions, objections, open hypotheses and status",
@@ -136,20 +136,20 @@
         "kind": "curated_git_scene_reference",
         "scene_key": "continuity",
         "source_path": "docs/SYN_AGENT_CONTINUITY.md",
-        "source_sha256": "3fce2e579f0475d39c30f1242ddf5f7a5cc1c89a5da4dd60ebe834185642afe0"
+        "source_sha256": "9f47b1e0337bb94ab841204685e36a93d6777c113b9845242a26be847c50a536"
       },
       "external_refs": [
         "syn-scene:continuity",
-        "syn-scene:continuity:sha256:3fce2e579f0475d39c30f1242ddf5f7a5cc1c89a5da4dd60ebe834185642afe0"
+        "syn-scene:continuity:sha256:9f47b1e0337bb94ab841204685e36a93d6777c113b9845242a26be847c50a536"
       ],
       "confidence": null,
       "metadata": {}
     },
     {
-      "glyph_id": "g:b8b7ceb1c58f88052b497124e1f1c21e",
+      "glyph_id": "g:294b2133888d250c186122e451d54e4f",
       "glyph_type": "decision",
       "schema_version": "synergesis.glyph.v1",
-      "created_at": "2026-10-26T16:59:44.644750+00:00",
+      "created_at": "2026-10-27T19:53:41.346156+00:00",
       "actor": "SYN-CHATGPT-PUBLIC-CONTEXT",
       "content": {
         "description": "ChatGPT is the selected reasoning engine; dialogue is the default mode",
@@ -166,10 +166,10 @@
       "metadata": {}
     },
     {
-      "glyph_id": "g:9c255e3daacbdb4da24fae66a7ce56be",
+      "glyph_id": "g:7b6322d4814b80b4b32e712caf6ce93a",
       "glyph_type": "decision",
       "schema_version": "synergesis.glyph.v1",
-      "created_at": "2026-10-26T16:59:44.645191+00:00",
+      "created_at": "2026-10-27T19:53:41.346534+00:00",
       "actor": "SYN-CHATGPT-PUBLIC-CONTEXT",
       "content": {
         "description": "Compact current decisions, negative results and unresolved objections",
@@ -177,7 +177,7 @@
         "kind": "curated_git_scene_reference",
         "scene_key": "chatgpt-state",
         "source_path": "docs/chatgpt/STATE.md",
-        "source_sha256": "93f1fb4e11ee75a44be3bb98dd0b04f6b558846174a9604d17af9229d21e62d0"
+        "source_sha256": "e388f811658fbfaac49d6ce47cee97f372b02dd46d30e42454e158c7ab292bc3"
       },
       "external_refs": [
         "syn-scene:chatgpt-state"
@@ -188,99 +188,99 @@
   ],
   "edges": [
     {
-      "edge_id": "e:6fbcc8bb01743fd9e6c3c195fd26743a",
-      "source": "g:3e68fed865ff66f59754fd348012927d",
-      "target": "g:de3b59783bea57ac1c1b56591a73ff33",
+      "edge_id": "e:3eabef75335189d69b168a97b55d24fe",
+      "source": "g:690431035d5328730686b3ddf8c16da6",
+      "target": "g:cc53515d9f1eabed0f6467bfc2c0fc2b",
       "relation": "derived_from",
-      "created_at": "2026-10-26T16:59:44.640749+00:00",
+      "created_at": "2026-10-27T19:53:41.343311+00:00",
       "actor": "SYN-SCENE-BRIDGE",
       "metadata": {
         "scope": "curated_scene_link_not_proof"
       }
     },
     {
-      "edge_id": "e:56efd6767ec5d4f155dde1cde2b2c407",
-      "source": "g:78ab0dadba0a2ce43dab542fed1a7e9c",
-      "target": "g:3e68fed865ff66f59754fd348012927d",
+      "edge_id": "e:4f61b8d8d29d788426a55e508eb4ddc7",
+      "source": "g:e6af7b1c85c8ff388ded1b88b3efa7a2",
+      "target": "g:690431035d5328730686b3ddf8c16da6",
       "relation": "derived_from",
-      "created_at": "2026-10-26T16:59:44.641247+00:00",
+      "created_at": "2026-10-27T19:53:41.343999+00:00",
       "actor": "SYN-SCENE-BRIDGE",
       "metadata": {
         "scope": "curated_scene_link_not_proof"
       }
     },
     {
-      "edge_id": "e:7469973fd617290b951137890efb9338",
-      "source": "g:00d7639284ebbda8257d9db9499ba265",
-      "target": "g:de3b59783bea57ac1c1b56591a73ff33",
+      "edge_id": "e:a1b38b8c272f0a3a3ff3c37e65d468f3",
+      "source": "g:a26897ee85764dfb9dae567bf6236a7c",
+      "target": "g:cc53515d9f1eabed0f6467bfc2c0fc2b",
       "relation": "derived_from",
-      "created_at": "2026-10-26T16:59:44.641688+00:00",
+      "created_at": "2026-10-27T19:53:41.344224+00:00",
       "actor": "SYN-SCENE-BRIDGE",
       "metadata": {
         "scope": "curated_scene_link_not_proof"
       }
     },
     {
-      "edge_id": "e:2c658eeeaa09b004d1a45426f1604994",
-      "source": "g:00d7639284ebbda8257d9db9499ba265",
-      "target": "g:3e68fed865ff66f59754fd348012927d",
+      "edge_id": "e:f80d0fe2549832c0fd44d0c8961e1518",
+      "source": "g:a26897ee85764dfb9dae567bf6236a7c",
+      "target": "g:690431035d5328730686b3ddf8c16da6",
       "relation": "derived_from",
-      "created_at": "2026-10-26T16:59:44.642163+00:00",
+      "created_at": "2026-10-27T19:53:41.344391+00:00",
       "actor": "SYN-SCENE-BRIDGE",
       "metadata": {
         "scope": "curated_scene_link_not_proof"
       }
     },
     {
-      "edge_id": "e:14204596e8d71821799668748a57844b",
-      "source": "g:00d7639284ebbda8257d9db9499ba265",
-      "target": "g:78ab0dadba0a2ce43dab542fed1a7e9c",
+      "edge_id": "e:e6e1c61aea97f612deb4dff18c8696f8",
+      "source": "g:a26897ee85764dfb9dae567bf6236a7c",
+      "target": "g:e6af7b1c85c8ff388ded1b88b3efa7a2",
       "relation": "derived_from",
-      "created_at": "2026-10-26T16:59:44.642622+00:00",
+      "created_at": "2026-10-27T19:53:41.344730+00:00",
       "actor": "SYN-SCENE-BRIDGE",
       "metadata": {
         "scope": "curated_scene_link_not_proof"
       }
     },
     {
-      "edge_id": "e:e3fb33d8e07401d1142ca7e3dd2c55c9",
-      "source": "g:00d7639284ebbda8257d9db9499ba265",
-      "target": "g:17e850a7c84ee59cc8f60767d18b7112",
+      "edge_id": "e:f7ae90e7a735510ee93201309e09b066",
+      "source": "g:a26897ee85764dfb9dae567bf6236a7c",
+      "target": "g:04b6766fdf38e145be53c0639fe842ce",
       "relation": "derived_from",
-      "created_at": "2026-10-26T16:59:44.643057+00:00",
+      "created_at": "2026-10-27T19:53:41.344987+00:00",
       "actor": "SYN-SCENE-BRIDGE",
       "metadata": {
         "scope": "curated_scene_link_not_proof"
       }
     },
     {
-      "edge_id": "e:2e1b0244f06f9698464d5942d1a6678a",
-      "source": "g:b8b7ceb1c58f88052b497124e1f1c21e",
-      "target": "g:00d7639284ebbda8257d9db9499ba265",
+      "edge_id": "e:631669de687c39632f03b0983ef5b54f",
+      "source": "g:294b2133888d250c186122e451d54e4f",
+      "target": "g:a26897ee85764dfb9dae567bf6236a7c",
       "relation": "derived_from",
-      "created_at": "2026-10-26T16:59:44.645655+00:00",
+      "created_at": "2026-10-27T19:53:41.346737+00:00",
       "actor": "SYN-CHATGPT-PUBLIC-CONTEXT",
       "metadata": {
         "scope": "editorial_dependency_not_empirical_proof"
       }
     },
     {
-      "edge_id": "e:b9e6d31454269ecab62d3fc081d43d60",
-      "source": "g:b8b7ceb1c58f88052b497124e1f1c21e",
-      "target": "g:17e850a7c84ee59cc8f60767d18b7112",
+      "edge_id": "e:536ee3f0b83ffb547a07b0dfc78d46a1",
+      "source": "g:294b2133888d250c186122e451d54e4f",
+      "target": "g:04b6766fdf38e145be53c0639fe842ce",
       "relation": "derived_from",
-      "created_at": "2026-10-26T16:59:44.646134+00:00",
+      "created_at": "2026-10-27T19:53:41.346900+00:00",
       "actor": "SYN-CHATGPT-PUBLIC-CONTEXT",
       "metadata": {
         "scope": "editorial_dependency_not_empirical_proof"
       }
     },
     {
-      "edge_id": "e:2d15c917a41bb5103c0f8a7e0e3efb9e",
-      "source": "g:9c255e3daacbdb4da24fae66a7ce56be",
-      "target": "g:b8b7ceb1c58f88052b497124e1f1c21e",
+      "edge_id": "e:479c4180a4237a08792e1f466c70fd07",
+      "source": "g:7b6322d4814b80b4b32e712caf6ce93a",
+      "target": "g:294b2133888d250c186122e451d54e4f",
       "relation": "derived_from",
-      "created_at": "2026-10-26T16:59:44.646570+00:00",
+      "created_at": "2026-10-27T19:53:41.347058+00:00",
       "actor": "SYN-CHATGPT-PUBLIC-CONTEXT",
       "metadata": {
         "scope": "editorial_dependency_not_empirical_proof"

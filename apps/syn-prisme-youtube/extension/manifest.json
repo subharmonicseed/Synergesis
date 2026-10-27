@@ -1,0 +1,10 @@
+{
+  "manifest_version":3,"name":"SYN — Prisme YouTube","version":"0.1.0",
+  "description":"Un regard réglable sur votre fil : pertinence locale, diversité et analyse IA facultative.",
+  "permissions":["storage"],
+  "host_permissions":["http://127.0.0.1:8765/*"],
+  "background":{"service_worker":"background.js"},
+  "content_scripts":[{"matches":["https://www.youtube.com/*"],"js":["core.js","content.js"],"run_at":"document_idle"}],
+  "action":{"default_title":"Réglages SYN","default_popup":"options.html"},
+  "options_page":"options.html"
+}

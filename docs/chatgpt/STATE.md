@@ -43,3 +43,12 @@ Sources : [continuité](../SYN_AGENT_CONTINUITY.md),
 [frontière du possible](../SYN_FRONTIERE_DU_POSSIBLE_V1.md),
 [essai des quatre prompts](../SYN_FOUR_ARM_PC_TRIAL_2026-10-25.md),
 [essais de routage](../SYN_RECURSIVE_RESULTS_2026-10-25.md).
+
+## Module navigateur Prisme — 27 octobre 2026
+
+Un prototype isolé est ajouté dans `apps/syn-prisme-youtube/` sur
+`feat/syn-prisme-youtube-v0`. Il compare lexicalement les cartes YouTube visibles,
+conserve des traces locales bornées et propose un relais IA facultatif désactivé
+par défaut. Aucun accès au poste personnel ni raccordement automatique à une
+conversation ChatGPT n’est établi. Installation du navigateur et appels réels IA
+restent à vérifier. Voir [entrée dédiée](../continuity/2026-10-27-005.md).
