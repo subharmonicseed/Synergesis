@@ -1,0 +1,30 @@
+{
+  "schema": "syn-curiosity-v1",
+  "entry_id": "chatgpt:2026-10-27:15",
+  "observed_at": "2026-10-27T16:04:49+01:00",
+  "producer": "chatgpt",
+  "stage": "assessed",
+  "domain": "seismology-earthquake-rupture-scaled-energy-onset-versus-arrest-dataset-dependence",
+  "question": "Le regain d'énergie sismique normalisée à la fin d'une rupture est-il une signature universelle et détectable dans tous les catalogues, au même titre que l'amorce énergique, ou dépend-il du mode de rupture et de la méthode d'inversion ?",
+  "reason": "Audit préalable des dix entrées réelles 2026-10-27-05..14, avec thème/mécanisme, source et objection : 05 consultants/IA et compétence sans outil (Nature Human Behaviour; transfert différé absent); 06 myxomycètes/fructifications versus ADN (Scientific Reports; ASV non équivalents aux espèces); 07 métamatériaux/non-réciprocité et friction (Nature; apport énergétique externe); 08 coléoptères/protection thermique versus coût parental (npj Biodiversity; profondeur non assignée); 09 fougères/rayon de phloème et débit inféré (Nature Plants; facteur 16 non réconcilié); 10 MgO/orientation du choc et cinétique (Physical Review X; conditions de choc limitées); 11 levures/résistance spatiale et nutriments (Nature Ecology & Evolution; non clinique et gradients non mesurés directement); 12 roseaux/salinité et résorption (eLife; dose unique et écotypes confondus); 13 hydrologie/pluie versus débit et forêt aléatoire (Geophysical Research Letters; généralisation et causalité faibles); 14 odontocètes/couches dentaires versus 14C (Frontiers in Marine Science; cinq animaux et signal régional). Dix mécanismes biologiques/physiques distincts et aucune référence primaire exactement dupliquée, mais 06/09/13/14 répètent la critique d'un indicateur indirect, 05 revient à H002, 6/10 sources primaires relèvent de nature.com et toutes les hypothèses sont rétrospectives. Contrôle anti-biais intentionnel, non aléatoire : sismologie des ruptures, domaine absent des 86 entrées inspectées par domaines indexés et des ajouts récents, revue AGU hors Nature. Différence vérifiable : l'article de Wang et Houston (2026) compare quatre catalogues indépendamment construits, la mesure incrémentale e(t), les simulations et des observations de proximité; Denolle (2019) avait déjà établi l'amorce énergique, donc ne pas revendiquer cette partie comme découverte nouvelle. Hypothèse ci-dessous formulée après lecture, sans anticipation de SYN. Scores heuristiques non calibrés.",
+  "hypothesis": "Le regain terminal de l'énergie radiée normalisée par le moment sismique est détecté de manière robuste dans tous les catalogues et profondeurs de séismes analysés par Wang et Houston (2026), indépendamment de la méthode d'inversion et du style de rupture.",
+  "need_id": null,
+  "research_mode": "adversarial",
+  "gap_kind": "contradiction",
+  "metrics": {
+    "uncertainty": 0.66,
+    "expected_impact": 0.76,
+    "staleness": 0.28,
+    "novelty_gap": 0.62,
+    "selection_score": 0.616
+  },
+  "evidence_refs": [
+    "https://agupubs.onlinelibrary.wiley.com/doi/10.1029/2026JB034166",
+    "https://agupubs.onlinelibrary.wiley.com/doi/10.1029/2018GL080687",
+    "https://doi.org/10.1126/science.aef3733",
+    "https://zenodo.org/records/20575598"
+  ],
+  "outcome": "refuted",
+  "uncertainty_after": 0.41,
+  "learning": "Source primaire : Wang et Houston, Journal of Geophysical Research: Solid Earth, première publication le 4 octobre 2026. Sur plus de 1 500 séismes et quatre ensembles de fonctions de taux de moment (SCARDEC, Ye16, YK23, Tocheport07), ils calculent l'énergie radiée par unité de moment sismique dans des fenêtres temporelles successives. L'amorce est plus énergique dans tous les ensembles : pour les séismes superficiels SCARDEC, la médiane initiale décroît vers un plateau environ six fois plus faible. Ce constat prolonge explicitement Denolle (Geophysical Research Letters, 20 février 2019), qui avait déjà trouvé un début énergique durant les premiers 10 à 30 % de la rupture. La nouveauté documentaire est la comparaison entre catalogues et l'examen incrémental de l'arrêt : un regain terminal est détecté dans SCARDEC et YK23, mais pas dans Ye16 (grands séismes de subduction), ni dans les deux catalogues de séismes profonds. L'hypothèse de détection universelle est donc réfutée, sans démontrer que l'arrêt brutal n'existe jamais lorsque le pic est absent. Une contre-épreuve indépendante, Kearse et Kaneko (Science, publication en ligne le 23 avril 2026), identifie dans les enregistrements proches de 12 grands séismes décrochants des phases d'arrêt et des dépassements transitoires compatibles avec des arrêts brusques. Les simulations de Wang et Houston montrent qu'un arrêt brusque de ruptures en impulsion peut produire le regain terminal, tandis que des ruptures plus progressives peuvent ne pas le produire; plusieurs mécanismes peuvent toutefois conduire à un arrêt rapide. Faits mesurés/inférés : les sismogrammes sont observés, les fonctions de taux de moment sont reconstruites, e(t) est calculé à partir d'elles, les modèles dynamiques sont simulés; le type précis de frottement sur les failles naturelles n'est pas identifié directement. Objections : le regain final dépend de la régularisation et du traitement des fonctions source, des fréquences résolues, de la composition des catalogues et du style des ruptures; la comparaison n'est pas une randomisation des mécanismes et ne suffit pas à attribuer causalement la différence aux seules lois de frottement. Les auteurs diffusent simulations et code sur Zenodo, consultés comme inventaire, sans exécution ni reproduction indépendante ici. Aucun gain cognitif ou prédiction prospective de SYN. Prochaine lacune : préenregistrer un test aveugle sur des séismes non utilisés, appariés par magnitude, profondeur, style et qualité d'inversion; comparer le pouvoir prédictif de modèles à arrêt abrupt et progressif sur e(t) terminal et signaux proches de faille, en mesurant sensibilité, faux négatifs et coût de reconstruction."
+}
